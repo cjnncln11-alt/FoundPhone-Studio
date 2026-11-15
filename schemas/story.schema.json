@@ -42,6 +42,9 @@
         "wallpaper": {
           "type": "string"
         },
+        "lockWallpaper": {
+          "type": "string"
+        },
         "theme": {
           "type": "string",
           "enum": [

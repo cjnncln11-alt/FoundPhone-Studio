@@ -128,6 +128,16 @@ export function compileStory(raw: unknown): { story: Story; work: Work } {
   );
   if (new Set(configuredIds).size !== s.installedApps.length)
     fail("installedApps", "App 重复");
+  for (const [k, v] of [
+    ["wallpaper", s.phone.wallpaper],
+    ["lockWallpaper", s.phone.lockWallpaper],
+  ] as const)
+    if (
+      v &&
+      v.startsWith("data:") &&
+      !/^data:image\/(png|jpeg|webp|gif);base64,/.test(v)
+    )
+      fail(`phone.${k}`, "壁纸 data URL 仅支持 png/jpeg/webp/gif 图片");
   s.installedApps.forEach((a, i) => {
     if (!registry.some((r) => r.id === (typeof a === "string" ? a : a.id)))
       fail(`installedApps.${i}`, "未注册的 App");
