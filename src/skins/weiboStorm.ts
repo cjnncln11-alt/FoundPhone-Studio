@@ -15,6 +15,8 @@ let inWeibo = true;
 let exitAt = 0;
 /** 用户上滑/点击关掉弹窗后，在此时间点之前一律静默 */
 let silencedUntil = 0;
+/** 上滑关掉弹窗后：本次离开微博期间不再弹任何微博消息，直到重新进入微博 */
+let muted = false;
 /** 退出微博后的静默冷却（30 秒内不弹任何微博消息） */
 const EXIT_COOLDOWN = 30000;
 const listeners = new Set<() => void>();
@@ -23,16 +25,23 @@ const listeners = new Set<() => void>();
 export function setStormInWeibo(v: boolean) {
   if (inWeibo && !v) exitAt = performance.now();
   // 回到微博：解除上滑静默
-  if (v) silencedUntil = 0;
+  if (v) {
+    silencedUntil = 0;
+    muted = false;
+  }
   inWeibo = v;
 }
 export const isInWeibo = () => inWeibo;
-/** 用户上滑/点击关掉弹窗：从这里开始静默一段时间，风暴也暂停 */
-export function silenceWeiboNotifs(ms = EXIT_COOLDOWN) {
-  silencedUntil = Math.max(silencedUntil, performance.now() + ms);
+/** 用户上滑/点击关掉弹窗：本次离开微博期间不再弹任何微博消息 */
+export function silenceWeiboNotifs() {
+  silencedUntil = performance.now() + EXIT_COOLDOWN;
+  muted = true;
 }
+/** 是否已被用户上滑静音（微博外有效） */
+export const isWeiboMuted = () => muted && !inWeibo;
 /** 还需静默多久（毫秒），0 表示可以弹窗 */
 export function weiboCooldownRemaining() {
+  if (muted && !inWeibo) return EXIT_COOLDOWN;
   const silenced = Math.max(0, silencedUntil - performance.now());
   if (silenced > 0) return silenced;
   // 微博内、或点赞风暴进行中：照常弹，退出微博也不打断风暴
