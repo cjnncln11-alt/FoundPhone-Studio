@@ -16,6 +16,8 @@
 }
 .ios18 .weibo-notif {
   pointer-events: auto;
+  touch-action: none;
+  will-change: transform, opacity;
   display: block;
   width: 100%;
   text-align: left;

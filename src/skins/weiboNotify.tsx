@@ -22,7 +22,14 @@ export function pushWeiboNotif(p: Omit<WeiboPush, "id">) {
 
 export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
   const [current, setCurrent] = useState<WeiboPush | null>(null);
+  const [dy, setDy] = useState(0);
+  const drag = useRef<{ y: number; id: number } | null>(null);
   const timer = useRef<number | undefined>(undefined);
+  const close = (id: number) => {
+    visible.delete(id);
+    setCurrent((c) => (c?.id === id ? null : c));
+    setDy(0);
+  };
   useEffect(() => {
     const fn = (n: WeiboPush) => {
       if (!visible.has(n.id)) {
@@ -42,15 +49,46 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
       window.clearTimeout(timer.current);
     };
   }, []);
+  // 新弹窗替换旧弹窗时复位拖拽位移
+  useEffect(() => {
+    setDy(0);
+  }, [current?.id]);
   if (!current) return null;
+  const dismiss = () => {
+    window.clearTimeout(timer.current);
+    close(current.id);
+  };
   return (
     <div className="weibo-notif-stack is-global" aria-live="polite">
       <button
         key={current.id}
         className="weibo-notif"
-        onClick={() => {
-          visible.delete(current.id);
-          setCurrent(null);
+        style={{
+          transform: dy ? `translateY(${dy}px)` : undefined,
+          opacity: dy ? Math.max(0.25, 1 + dy / 130) : undefined,
+          transition: drag.current ? "none" : "transform 0.18s ease, opacity 0.18s ease",
+        }}
+        onClick={dismiss}
+        onPointerDown={(e) => {
+          drag.current = { y: e.clientY, id: e.pointerId };
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          if (!drag.current || drag.current.id !== e.pointerId) return;
+          const d = Math.min(0, e.clientY - drag.current.y);
+          setDy(d);
+        }}
+        onPointerUp={(e) => {
+          if (!drag.current || drag.current.id !== e.pointerId) return;
+          const d = e.clientY - drag.current.y;
+          drag.current = null;
+          // 上滑超过 26px 即消失
+          if (d < -26) dismiss();
+          else setDy(0);
+        }}
+        onPointerCancel={() => {
+          drag.current = null;
+          setDy(0);
         }}
       >
         <div className="weibo-notif-head">
