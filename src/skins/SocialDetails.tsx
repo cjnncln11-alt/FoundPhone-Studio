@@ -104,7 +104,8 @@ export function SocialDetail(p: {
     [menu, setMenu] = useState(false),
     [sort, setSort] = useState(false),
     [copied, setCopied] = useState(false),
-    [viewer, setViewer] = useState<number | null>(null);
+    [viewer, setViewer] = useState<number | null>(null),
+    [commentMenu, setCommentMenu] = useState<string | null>(null);
   const [notifs, setNotifs] = useState<
     { id: number; name: string; text: string }[]
   >([]);
@@ -154,8 +155,9 @@ export function SocialDetail(p: {
     return { to, text };
   };
   const nestedReplies = extra
-    .filter(isNestedReply)
-    .map(parseNestedReply);
+    .map((c, i) => ({ c, i }))
+    .filter(({ c }) => isNestedReply(c))
+    .map(({ c, i }) => ({ ...parseNestedReply(c), i }));
   const ownerTopReplies = new Set(extra.filter((c) => !isNestedReply(c)));
   // 粉丝评论中"回复 @某人："开头的也归入楼中楼
   const fanReplyRe = /^回复\s*@(.+?)[：:]/;
@@ -173,14 +175,32 @@ export function SocialDetail(p: {
     ...extra.filter((c) => !isNestedReply(c)),
   ];
   const ownerBadge = p.owner ? <NameBadges /> : null;
+  const removeExtraAt = (idx: number) => {
+    setExtra(extra.filter((_, i) => i !== idx));
+    setCommentMenu(null);
+  };
+  const removeOwnerTop = (idx: number) => {
+    const ownerName = p.owner || "机主";
+    setExtra(
+      extra.filter(
+        (c, i) =>
+          i !== idx &&
+          !(isNestedReply(c) && parseNestedReply(c).to === ownerName),
+      ),
+    );
+    setCommentMenu(null);
+  };
   const commentRow = (
     name: string,
     body: string,
     isOwner: boolean,
     index: number | string,
     nested: boolean,
-  ): ReactElement => (
-    <>        <article
+    onDelete?: () => void,
+  ): ReactElement => {
+    const menuKey = "menu-" + String(index);
+    return (
+      <>        <article
         key={index}
         className={
           "post-detail-comment" + (nested ? " weibo-nested-reply" : "")
@@ -218,15 +238,42 @@ export function SocialDetail(p: {
             </button>
           </div>
         </div>
-        <MoreHorizontal size={17} />
+        {onDelete ? (
+          <div className="comment-more-wrap">
+            <button
+              className="comment-more"
+              aria-label={"更多操作" + name}
+              aria-expanded={commentMenu === menuKey}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCommentMenu(commentMenu === menuKey ? null : menuKey);
+              }}
+            >
+              <MoreHorizontal size={17} />
+            </button>
+            {commentMenu === menuKey && (
+              <div className="comment-delete-menu">
+                <button onClick={onDelete}>删除</button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <MoreHorizontal size={17} />
+        )}
       </article>
       {!nested &&
         tab !== "转发" &&
         nestedReplies
-          .map((r, i) => ({ r, i }))
-          .filter(({ r }) => r.to === name)
-          .map(({ r, i }) =>
-            commentRow(p.owner || "机主", r.text, true, "n" + index + "-" + i, true),
+          .filter((r) => r.to === name)
+          .map((r) =>
+            commentRow(
+              p.owner || "机主",
+              r.text,
+              true,
+              "n" + index + "-" + r.i,
+              true,
+              () => removeExtraAt(r.i),
+            ),
           )}
       {!nested &&
         tab !== "转发" &&
@@ -242,6 +289,7 @@ export function SocialDetail(p: {
           })}
     </>
   );
+  };
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(item.body);
@@ -308,6 +356,12 @@ export function SocialDetail(p: {
             (p.ui?.["x-dark"] !== false ? " x-reference-dark" : ""))
       }
     >
+      {commentMenu && (
+        <div
+          className="comment-menu-backdrop"
+          onClick={() => setCommentMenu(null)}
+        />
+      )}
       {notifs.length > 0 && (
         <div className="weibo-notif-stack" aria-live="polite">
           {notifs.map((n) => (
@@ -481,7 +535,16 @@ export function SocialDetail(p: {
                     ? c.slice(0, split)
                     : "用户",
                 body = hasName ? c.slice(split + 1) : c;
-              return commentRow(name, body, isOwner, index, false);
+              return commentRow(
+                name,
+                body,
+                isOwner,
+                index,
+                false,
+                isOwner
+                  ? () => removeOwnerTop(extra.indexOf(c))
+                  : undefined,
+              );
             })}
             {(tab === "转发" ? !item.reposts.length : !comments.length) && (
               <p className="post-comments-empty">

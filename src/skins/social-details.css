@@ -149,6 +149,7 @@
   gap: 10px;
   padding: 13px 14px;
   border-bottom: 0.5px solid #eff0f2;
+  position: relative;
 }
 .ios18 .post-detail-comment > .catalog-avatar {
   width: 37px;
@@ -202,6 +203,61 @@
 .ios18 .post-detail-comment.weibo-nested-reply p {
   font-size: 14px;
   margin: 2px 0;
+}
+.ios18 .comment-more-wrap {
+  position: relative;
+  flex: none;
+}
+.ios18 .comment-more {
+  border: 0;
+  background: none;
+  padding: 2px 0 4px 6px;
+  color: #a7aeb5;
+  justify-content: flex-end;
+}
+.ios18 .comment-delete-menu {
+  position: absolute;
+  right: 0;
+  top: 24px;
+  z-index: 51;
+  min-width: 92px;
+  padding: 4px 0;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow:
+    0 8px 26px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  animation: commentMenuIn 0.16s ease-out;
+}
+.ios18 .comment-delete-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: 0;
+  background: none;
+  color: #e02118;
+  font-size: 15px;
+  font-family: inherit;
+  text-align: center;
+}
+.ios18 .comment-delete-menu button:active {
+  background: #f6f6f8;
+}
+.ios18 .comment-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: transparent;
+}
+@keyframes commentMenuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 .ios18 .weibo-notif-stack {
   position: absolute;
