@@ -199,7 +199,9 @@ export function advance(
     s.scheduled.sort((a, b) => a.due - b.due);
     const due =
       w.mode !== "explore" && resumes < 200 ? s.scheduled[0] : undefined;
-    const clockAt = s.elapsedMs + 60000 - s.clockRemainderMs;
+    const clockAt = w.phone.freezeTime
+      ? Infinity
+      : s.elapsedMs + 60000 - s.clockRemainderMs;
     const next = Math.min(
       end,
       clockAt,

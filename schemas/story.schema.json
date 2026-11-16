@@ -45,6 +45,9 @@
         "lockWallpaper": {
           "type": "string"
         },
+        "freezeTime": {
+          "type": "boolean"
+        },
         "theme": {
           "type": "string",
           "enum": [
