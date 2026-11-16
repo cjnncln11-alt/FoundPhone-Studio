@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import {
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
 import {
   ChevronLeft,
   MoreHorizontal,
@@ -29,14 +35,13 @@ import {
   VAvatar,
   wanCount,
 } from "./shared";
+import { ownerLikeStore, runtimeCommentStore } from "./weiboData";
 import {
-  fanNormalTexts,
-  fanNotifNames,
-  fanNotifTexts,
-  ownerLikeStore,
-  runtimeCommentStore,
-} from "./weiboData";
-import { pushWeiboNotif } from "./weiboNotify";
+  ensureFiveDigitLikes,
+  startOwnerLikeStorm,
+  stopOwnerLikeStorm,
+  subscribeOwnerData,
+} from "./weiboStorm";
 import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
 import "./social-details.css";
@@ -105,97 +110,11 @@ export function SocialDetail(p: {
     [viewer, setViewer] = useState<number | null>(null),
     [commentMenu, setCommentMenu] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [ownerLikes, setOwnerLikes] = useState<Record<string, number>>(
-    () => ({ ...ownerLikeStore }),
-  );
-  const [runtimeComments, setRuntimeComments] = useState(
-    () => [...(runtimeCommentStore[item.id] ?? [])],
-  );
-  const rcSeq = useRef(0);
-  const addRuntimeComment = (name: string, text: string) => {
-    const list =
-      runtimeCommentStore[item.id] || (runtimeCommentStore[item.id] = []);
-    list.push({ id: ++rcSeq.current, name, text });
-    if (list.length > 40) list.splice(0, list.length - 40);
-    setRuntimeComments([...list]);
-  };
-  const likeTimers = useRef<number[]>([]);
-  const stopLikeStorm = () => {
-    likeTimers.current.forEach((t) => clearTimeout(t));
-    likeTimers.current = [];
-  };
-  const bumpOwnerLikes = (seed: string, delta: number) => {
-    ownerLikeStore[seed] = (ownerLikeStore[seed] ?? 0) + delta;
-    setOwnerLikes({ ...ownerLikeStore });
-  };
-  // 发布评论/回复后，粉丝陆续点赞：10 秒内冲到 2000+，之后逐渐放缓；
-  // 弹窗内容为"赞了你的评论"与求翻牌评论混排
-  const startLikeStorm = (
-    seed: string,
-    preview: string,
-    allowBeg: boolean,
-  ) => {
-    stopLikeStorm();
-    ownerLikeStore[seed] = 0;
-    setOwnerLikes({ ...ownerLikeStore });
-    const startedAt = performance.now();
-    // 一轮内文案不重复（用尽后重新洗牌）
-    let commentPool: string[] = [];
-    const nextCommentText = () => {
-      if (!commentPool.length) {
-        commentPool = [...fanNormalTexts, ...(allowBeg ? fanNotifTexts : [])]
-          .map((t) => ({ t, k: Math.random() }))
-          .sort((a, b) => a.k - b.k)
-          .map((e) => e.t);
-      }
-      return commentPool.pop() ?? "";
-    };
-    let lastCommentAt = -1000,
-      added = 0;
-    const rand = (a: number, b: number) =>
-      a + Math.floor(Math.random() * (b - a + 1));
-    const tick = () => {
-      const elapsed = performance.now() - startedAt;
-      if (elapsed > 55000) return;
-      const name =
-        fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)];
-      const bump =
-        elapsed < 10000
-          ? rand(45, 125)
-          : elapsed < 22000
-            ? rand(25, 60)
-            : elapsed < 38000
-              ? rand(10, 25)
-              : rand(2, 8);
-      bumpOwnerLikes(seed, bump);
-      // 一半是"赞了你的评论"，另一半是粉丝评论：只有回复别人时才可能出现求翻牌文案
-      const isLike = Math.random() < 0.5;
-      const text = isLike
-        ? "赞了你的评论：" + preview.slice(0, 26)
-        : nextCommentText();
-      pushWeiboNotif({ name, text, photos: item.mediaList });
-      // 弹窗里的评论同步出现在评论区（节流 + 上限，避免刷爆）
-      if (!isLike && elapsed - lastCommentAt > 650 && added < 14) {
-        addRuntimeComment(name, text);
-        lastCommentAt = elapsed;
-        added += 1;
-      }
-      const gap =
-        elapsed < 10000
-          ? 300
-          : elapsed < 22000
-            ? 650 + ((elapsed - 10000) / 12000) * 400
-            : elapsed < 38000
-              ? 1500 + ((elapsed - 22000) / 16000) * 600
-              : 2400 + ((elapsed - 38000) / 17000) * 800;
-      likeTimers.current.push(window.setTimeout(tick, gap));
-    };
-    likeTimers.current.push(window.setTimeout(tick, 500));
-  };
+  // 赞数与新增评论由全局模块维护，离开微博也会继续增长
+  const [, forceRender] = useReducer((n: number) => n + 1, 0);
   useEffect(() => {
-    return () => {
-      stopLikeStorm();
-    };
+    ensureFiveDigitLikes();
+    return subscribeOwnerData(forceRender);
   }, []);
   const viewerImages = item.mediaList.length
     ? item.mediaList
@@ -230,7 +149,7 @@ export function SocialDetail(p: {
     .filter((c) => !isNestedReply(c))
     .slice()
     .reverse();
-  const runtimeCommentsAsText = [...runtimeComments]
+  const runtimeCommentsAsText = [...(runtimeCommentStore[item.id] ?? [])]
     .reverse()
     .map((r) => r.name + "：" + r.text);
   const comments = [
@@ -299,10 +218,10 @@ export function SocialDetail(p: {
     const target = extra[idx] || "";
     const split = target.search(/[：:]/),
       body = split > 0 ? target.slice(split + 1) : "";
-    stopLikeStorm();
     if (body) {
+      stopOwnerLikeStorm();
       delete ownerLikeStore[ownerName + "|" + body];
-      setOwnerLikes({ ...ownerLikeStore });
+      forceRender();
     }
     setExtra(
       extra.filter(
@@ -330,7 +249,7 @@ export function SocialDetail(p: {
           : info.time,
       metaProvince = isOwner ? postProvince : info.province,
       likes = isOwner
-        ? (ownerLikes[seed] ?? 0)
+        ? (ownerLikeStore[seed] ?? 0)
         : commentLikes(index, seed);
     return (
       <>        <article
@@ -451,7 +370,13 @@ export function SocialDetail(p: {
     setDraft("");
     setTarget("");
     setTab("评论");
-    startLikeStorm((p.owner || "机主") + "|" + text, text, !!target);
+    startOwnerLikeStorm({
+      seed: (p.owner || "机主") + "|" + text,
+      preview: text,
+      allowBeg: !!target,
+      postId: item.id,
+      photos: item.mediaList,
+    });
     if (!target)
       window.requestAnimationFrame(() => {
         const box = scrollRef.current,

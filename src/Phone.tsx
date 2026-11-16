@@ -1,6 +1,7 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
 import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
+import { isStormRunning } from "./skins/weiboStorm";
 import { fanNormalTexts, fanNotifNames, clipText } from "./skins/weiboData";
 import { NativeCalculator } from "./ios/Calculator";
 import { HomeLauncher } from "./launcher/HomeLauncher";
@@ -349,7 +350,8 @@ function PhoneRuntime({
     const schedule = () => {
       timer = window.setTimeout(
         () => {
-          if (appRef.current !== "weibo") {
+          // 涨赞风暴进行中时，由风暴自己推送评论/点赞消息，避免互相顶掉
+          if (appRef.current !== "weibo" && !isStormRunning()) {
             if (!weiboNotifDeck.current.length)
               weiboNotifDeck.current = buildDeck();
             const next = weiboNotifDeck.current.pop();
