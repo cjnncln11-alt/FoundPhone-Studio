@@ -14,8 +14,8 @@ let rcSeq = 0;
 let inWeibo = true;
 let lastPushAt = 0;
 let exitAt = 0;
-/** 退出微博后的静默冷却（40 秒内不弹任何微博消息） */
-const EXIT_COOLDOWN = 40000;
+/** 退出微博后的静默冷却（30 秒内不弹任何微博消息） */
+const EXIT_COOLDOWN = 30000;
 /** 微博外的推送间隔：20~30 秒一条 */
 const outerGap = () => 20000 + Math.random() * 10000;
 let nextOuterGap = outerGap();
@@ -88,13 +88,24 @@ export function startOwnerLikeStorm(opts: {
   };
   let lastCommentAt = -1000,
     added = 0;
+  // 最近用过的昵称不再重复出现，避免弹窗里同一个人反复刷屏
+  const recentNames: string[] = [];
+  const pickName = () => {
+    let name = fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)];
+    for (let guard = 0; guard < 12 && recentNames.includes(name); guard++) {
+      name = fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)];
+    }
+    recentNames.unshift(name);
+    if (recentNames.length > 10) recentNames.pop();
+    return name;
+  };
   const tick = () => {
     const elapsed = performance.now() - startedAt;
     if (elapsed > 60000) {
       stormRunning = false;
       return;
     }
-    const name = fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)];
+    const name = pickName();
     // 前 10 秒直接冲到五位数，之后逐步放缓
     const bump =
       elapsed < 10000

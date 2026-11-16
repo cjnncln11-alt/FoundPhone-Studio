@@ -244,7 +244,8 @@ export function SocialDetail(p: {
     const h = hashStr("like|" + item.id + "|" + seed);
     if (typeof index !== "number") return 1 + (h % 60);
     if (index < 5) return 1200 + (h % 8600);
-    const base = 960 * Math.pow(0.74, index - 5);
+    // 前排之后缓慢递减，保证 40 条评论也有像样的赞数
+    const base = 900 * Math.pow(0.9, index - 5);
     return Math.max(1, Math.round(base * (0.75 + (h % 50) / 100)));
   };
   const removeExtraAt = (idx: number) => {
