@@ -29,7 +29,7 @@ import {
   VAvatar,
   wanCount,
 } from "./shared";
-import { fanNotifNames, fanNotifTexts } from "./weiboData";
+import { fanNotifNames, fanNotifTexts, ownerLikeStore } from "./weiboData";
 import { pushWeiboNotif } from "./weiboNotify";
 import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
@@ -98,66 +98,67 @@ export function SocialDetail(p: {
     [copied, setCopied] = useState(false),
     [viewer, setViewer] = useState<number | null>(null),
     [commentMenu, setCommentMenu] = useState<string | null>(null);
-  const notifTimers = useRef<number[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [ownerLikes, setOwnerLikes] = useState<Record<string, number>>({});
+  const [ownerLikes, setOwnerLikes] = useState<Record<string, number>>(
+    () => ({ ...ownerLikeStore }),
+  );
   const likeTimers = useRef<number[]>([]);
   const stopLikeStorm = () => {
     likeTimers.current.forEach((t) => clearTimeout(t));
     likeTimers.current = [];
   };
-  // 发布评论后，粉丝陆续点赞：频率与求翻牌弹窗一致，赞数从 0 逐步上涨
+  const bumpOwnerLikes = (seed: string, delta: number) => {
+    ownerLikeStore[seed] = (ownerLikeStore[seed] ?? 0) + delta;
+    setOwnerLikes({ ...ownerLikeStore });
+  };
+  // 发布评论/回复后，粉丝陆续点赞：10 秒内冲到 2000+，之后逐渐放缓；
+  // 弹窗内容为"赞了你的评论"与求翻牌评论混排
   const startLikeStorm = (seed: string, preview: string) => {
     stopLikeStorm();
-    setOwnerLikes((m) => ({ ...m, [seed]: 0 }));
+    ownerLikeStore[seed] = 0;
+    setOwnerLikes({ ...ownerLikeStore });
     const startedAt = performance.now();
+    const rand = (a: number, b: number) =>
+      a + Math.floor(Math.random() * (b - a + 1));
     const tick = () => {
       const elapsed = performance.now() - startedAt;
-      if (elapsed > 50000) return;
+      if (elapsed > 55000) return;
       const name =
-          fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
-        bump = Math.random() < 0.15 ? 2 : 1;
-      setOwnerLikes((m) => ({ ...m, [seed]: (m[seed] ?? 0) + bump }));
+        fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)];
+      const bump =
+        elapsed < 10000
+          ? rand(45, 125)
+          : elapsed < 22000
+            ? rand(25, 60)
+            : elapsed < 38000
+              ? rand(10, 25)
+              : rand(2, 8);
+      bumpOwnerLikes(seed, bump);
       pushWeiboNotif({
         name,
-        text: "赞了你的评论：" + preview.slice(0, 26),
+        text:
+          Math.random() < 0.5
+            ? "赞了你的评论：" + preview.slice(0, 26)
+            : fanNotifTexts[Math.floor(Math.random() * fanNotifTexts.length)],
         photos: item.mediaList,
       });
       const gap =
-        elapsed < 9000
-          ? 260
-          : elapsed < 24000
-            ? 420 + ((elapsed - 9000) / 15000) * 900
-            : 1400 + ((elapsed - 24000) / 26000) * 2100;
+        elapsed < 10000
+          ? 300
+          : elapsed < 22000
+            ? 650 + ((elapsed - 10000) / 12000) * 400
+            : elapsed < 38000
+              ? 1500 + ((elapsed - 22000) / 16000) * 600
+              : 2400 + ((elapsed - 38000) / 17000) * 800;
       likeTimers.current.push(window.setTimeout(tick, gap));
     };
-    likeTimers.current.push(window.setTimeout(tick, 800));
+    likeTimers.current.push(window.setTimeout(tick, 500));
   };
   useEffect(() => {
     return () => {
       stopLikeStorm();
-      notifTimers.current.forEach((t) => clearTimeout(t));
-      notifTimers.current = [];
     };
   }, []);
-  const startNotifStorm = () => {
-    const startedAt = performance.now();
-    const loop = () => {
-      const elapsed = performance.now() - startedAt;
-      if (elapsed > 50000) return;
-      const name = fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
-        text = fanNotifTexts[Math.floor(Math.random() * fanNotifTexts.length)];
-      pushWeiboNotif({ name, text, photos: item.mediaList });
-      const gap =
-        elapsed < 9000
-          ? 260
-          : elapsed < 24000
-            ? 420 + ((elapsed - 9000) / 15000) * 900
-            : 1400 + ((elapsed - 24000) / 26000) * 2100;
-      notifTimers.current.push(window.setTimeout(loop, gap));
-    };
-    notifTimers.current.push(window.setTimeout(loop, 700));
-  };
   const viewerImages = item.mediaList.length
     ? item.mediaList
     : item.media
@@ -248,12 +249,10 @@ export function SocialDetail(p: {
     const split = target.search(/[：:]/),
       body = split > 0 ? target.slice(split + 1) : "";
     stopLikeStorm();
-    if (body)
-      setOwnerLikes((m) => {
-        const next = { ...m };
-        delete next[ownerName + "|" + body];
-        return next;
-      });
+    if (body) {
+      delete ownerLikeStore[ownerName + "|" + body];
+      setOwnerLikes({ ...ownerLikeStore });
+    }
     setExtra(
       extra.filter(
         (c, i) =>
@@ -401,9 +400,8 @@ export function SocialDetail(p: {
     setDraft("");
     setTarget("");
     setTab("评论");
-    if (target) startNotifStorm();
-    else {
-      startLikeStorm((p.owner || "机主") + "|" + text, text);
+    startLikeStorm((p.owner || "机主") + "|" + text, text);
+    if (!target)
       window.requestAnimationFrame(() => {
         const box = scrollRef.current,
           first = box?.querySelector(".post-detail-comments");
@@ -415,7 +413,6 @@ export function SocialDetail(p: {
           behavior: "smooth",
         });
       });
-    }
   };
   const actions = (
     <div className="post-detail-actions">

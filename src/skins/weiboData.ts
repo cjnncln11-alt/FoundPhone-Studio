@@ -55,3 +55,6 @@ export const fanNotifHue = (name: string) =>
 
 export const clipText = (text: string, max = 18) =>
   text.length > max ? text.slice(0, max) + "…" : text;
+
+// 机主评论赞数跨页面持久化（退出微博再进来不丢失）
+export const ownerLikeStore: Record<string, number> = {};
