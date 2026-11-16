@@ -108,9 +108,11 @@ export const wanCount = (n: number) =>
 export function Media({
   item,
   className = "",
+  onImage,
 }: {
   item: Item;
   className?: string;
+  onImage?: (index: number, images: string[]) => void;
 }) {
   const src = safeMedia(item.media);
   const list = item.mediaList
@@ -137,13 +139,25 @@ export function Media({
             loading="lazy"
             alt={`${item.title} ${i + 1}`}
             src={s}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onImage?.(i, list);
+            }}
           />
         ))}
       </div>
     );
   return src ? (
-    <img className={className} loading="lazy" alt={item.title} src={src} />
+    <img
+      className={className}
+      loading="lazy"
+      alt={item.title}
+      src={src}
+      onClick={(e) => {
+        e.stopPropagation();
+        onImage?.(0, [src]);
+      }}
+    />
   ) : (
     <div className={`catalog-art ${className}`}>
       <span>{item.title}</span>

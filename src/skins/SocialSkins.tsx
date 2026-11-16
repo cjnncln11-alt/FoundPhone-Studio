@@ -32,6 +32,7 @@ import {
   wanCount,
   type Props,
 } from "./shared";
+import { ImageViewer } from "./ImageViewer";
 function Actions({ p, item }: { p: Props; item: Item }) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false),
     [saved, setSaved] = useSkinState<boolean>(p, `saved-${item.id}`, false);
@@ -92,6 +93,9 @@ function WeiboActions({ p, item }: { p: Props; item: Item }) {
 export function WeiboSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "关注");
   const [feed, setFeed] = useState("全部");
+  const [viewer, setViewer] = useState<{ item: Item; index: number } | null>(
+    null,
+  );
   const list = feed === "全部" ? items : items.filter((i) => i.folder === feed);
   return (
     <div className="catalog-skin weibo-ui">
@@ -168,13 +172,40 @@ export function WeiboSkin(p: Props) {
             <PostHeader p={p} item={i} />
             <button className="social-body" onClick={() => p.onItem(i)}>
               <p>{i.body}</p>
-              {(i.media || i.mediaList.length > 0) && <Media item={i} />}
+              {(i.media || i.mediaList.length > 0) && (
+                <Media
+                  item={i}
+                  onImage={(index) => setViewer({ item: i, index })}
+                />
+              )}
             </button>
             <WeiboActions p={p} item={i} />
           </article>
         ))}
         <Empty items={list} />
       </div>
+      {viewer && (
+        <ImageViewer
+          images={
+            viewer.item.mediaList.length
+              ? viewer.item.mediaList
+              : viewer.item.media
+                ? [viewer.item.media]
+                : []
+          }
+          index={viewer.index}
+          setIndex={(n) => setViewer({ ...viewer, index: n })}
+          sender={viewer.item.sender}
+          avatar={viewer.item.avatar}
+          reposts={meta(viewer.item, "reposts", "转发")}
+          comments={
+            meta(viewer.item, "commentsCount") ||
+            String(viewer.item.comments.length)
+          }
+          likes={wanCount(viewer.item.likes)}
+          onClose={() => setViewer(null)}
+        />
+      )}
     </div>
   );
 }

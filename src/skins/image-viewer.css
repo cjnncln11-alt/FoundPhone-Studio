@@ -1,0 +1,128 @@
+.image-viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+}
+.image-viewer-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 46px 14px 10px;
+  background: linear-gradient(#000c, transparent);
+}
+.image-viewer-index {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.image-viewer-author {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.image-viewer-author .catalog-avatar {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+.image-viewer-author strong {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.image-viewer-badge {
+  flex: none;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: #f59e0b;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-viewer-top-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+.image-viewer-top-actions button {
+  color: #fff;
+  padding: 2px;
+}
+.image-viewer-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  touch-action: pan-y;
+}
+.image-viewer-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.image-viewer-pill {
+  position: absolute;
+  bottom: 74px;
+  left: 14px;
+  z-index: 2;
+  background: #ffffff2b;
+  color: #fff;
+  font-size: 11px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.image-viewer-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px 22px;
+  background: linear-gradient(transparent, #000c);
+}
+.image-viewer-collapse {
+  color: #fff;
+  background: #ffffff2b;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-viewer-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 22px;
+}
+.image-viewer-actions button {
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}

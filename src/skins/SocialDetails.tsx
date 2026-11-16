@@ -21,6 +21,7 @@ import {
 import { useSkinState } from "../skinState";
 import { RichText } from "../RichText";
 import { Avatar, Media, meta, wanCount } from "./shared";
+import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
 import "./social-details.css";
 export const socialDetailApps = new Set(["twitter", "weibo"]);
@@ -50,7 +51,13 @@ export function SocialDetail(p: {
     [target, setTarget] = useState(""),
     [menu, setMenu] = useState(false),
     [sort, setSort] = useState(false),
-    [copied, setCopied] = useState(false);
+    [copied, setCopied] = useState(false),
+    [viewer, setViewer] = useState<number | null>(null);
+  const viewerImages = item.mediaList.length
+    ? item.mediaList
+    : item.media
+      ? [item.media]
+      : [];
   const comments = [...item.comments, ...extra],
     replies = sort ? [...comments].reverse() : comments;
   const copy = async () => {
@@ -153,7 +160,12 @@ export function SocialDetail(p: {
         </div>
         <div className="post-detail-body">
           <RichText value={item.richText} fallback={item.body} />
-          {(item.media || item.mediaList.length > 0) && <Media item={item} />}
+          {(item.media || item.mediaList.length > 0) && (
+            <Media
+              item={item}
+              onImage={(index) => setViewer(index)}
+            />
+          )}
         </div>
         {weibo ? (
           <div className="weibo-share-options">
@@ -307,6 +319,19 @@ export function SocialDetail(p: {
             </button>
           ))}
         </nav>
+      )}
+      {viewer !== null && viewerImages.length > 0 && (
+        <ImageViewer
+          images={viewerImages}
+          index={viewer}
+          setIndex={setViewer}
+          sender={item.sender || "用户"}
+          avatar={item.avatar}
+          reposts={meta(item, "reposts", "转发")}
+          comments={meta(item, "commentsCount") || count(comments.length)}
+          likes={wanCount(item.likes + (liked ? 1 : 0))}
+          onClose={() => setViewer(null)}
+        />
       )}
       {menu && (
         <div className="post-options-menu">
