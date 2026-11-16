@@ -207,9 +207,9 @@ export function advance(
       clockAt,
       due ? Math.max(s.elapsedMs, due.due) : Infinity,
     );
-    s.clockRemainderMs += next - s.elapsedMs;
+    if (!w.phone.freezeTime) s.clockRemainderMs += next - s.elapsedMs;
     s.elapsedMs = next;
-    if (s.clockRemainderMs >= 60000) {
+    if (!w.phone.freezeTime && s.clockRemainderMs >= 60000) {
       s.clockRemainderMs -= 60000;
       const match = s.time.match(/^(\d{1,2}):(\d{2})$/);
       if (match) {

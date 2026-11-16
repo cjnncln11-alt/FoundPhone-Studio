@@ -6,11 +6,20 @@ import {
   testCondition,
   visible,
   validateGraph,
+  advance,
 } from "./engine";
 import { initialRuntime, validateWork, safeMedia } from "./schema";
 import { parseChat, parseCsv } from "./chat";
 import { registry } from "./registry";
 describe("story progression", () => {
+  it("keeps the clock fixed when phone.freezeTime is on", () => {
+    const base = createWork();
+    const w = validateWork({ ...base, phone: { ...base.phone, freezeTime: true } });
+    const s = advance(w, initialRuntime(w), 130000);
+    expect(s.time).toBe(w.phone.time);
+    const normal = advance(createWork(), initialRuntime(createWork()), 130000);
+    expect(normal.time).not.toBe(createWork().phone.time);
+  });
   it("reveals clue, unlocks photo and reaches exactly one selected ending", () => {
     const w = createWork();
     const original = initialRuntime(w);
