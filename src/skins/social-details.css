@@ -185,6 +185,24 @@
 .ios18 .post-comment-actions .liked {
   color: #f91880;
 }
+.ios18 .post-detail-comment.weibo-nested-reply {
+  margin-left: 47px;
+  margin-right: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: none;
+}
+.ios18 .post-detail-comment.weibo-nested-reply > .catalog-avatar {
+  width: 30px;
+  height: 30px;
+}
+.ios18 .post-detail-comment.weibo-nested-reply strong {
+  font-size: 13px;
+}
+.ios18 .post-detail-comment.weibo-nested-reply p {
+  font-size: 14px;
+  margin: 2px 0;
+}
 .ios18 .post-detail-reply {
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import {
   ChevronLeft,
   MoreHorizontal,
@@ -58,8 +58,85 @@ export function SocialDetail(p: {
     : item.media
       ? [item.media]
       : [];
-  const comments = [...item.comments, ...extra],
-    replies = sort ? [...comments].reverse() : comments;
+  const nestedSep = "\u0001";
+  const isNestedReply = (c: string) => c.startsWith(nestedSep);
+  const parseNestedReply = (c: string) => {
+    const [to = "", text = ""] = c.slice(1).split(nestedSep);
+    return { to, text };
+  };
+  const nestedReplies = extra
+    .filter(isNestedReply)
+    .map(parseNestedReply);
+  const ownerTopReplies = new Set(extra.filter((c) => !isNestedReply(c)));
+  const comments = [
+    ...item.comments,
+    ...extra.filter((c) => !isNestedReply(c)),
+  ];
+  const ownerBadge = p.owner ? <NameBadges /> : null;
+  const commentRow = (
+    c: string,
+    index: number | string,
+    nested?: boolean,
+  ): ReactElement => {
+    const isOwnerReply = nested || ownerTopReplies.has(c);
+    const split = c.search(/[：:]/),
+      hasName = split > 0 && split < 24,
+      name = isOwnerReply
+        ? p.owner || "机主"
+        : hasName
+          ? c.slice(0, split)
+          : "用户",
+      body = isOwnerReply ? c.slice(split + 1) : hasName ? c.slice(split + 1) : c;
+    return (
+      <>        <article
+          key={index}
+          className={
+            "post-detail-comment" + (nested ? " weibo-nested-reply" : "")
+          }
+        >
+          {isOwnerReply ? (
+            <Avatar name={name} src={p.ownerAvatar} />
+          ) : (
+            <Avatar name={name} />
+          )}
+          <div>
+            <strong>
+              {name}
+              {isOwnerReply && ownerBadge}
+            </strong>
+            <p>{body}</p>
+            <div className="post-comment-actions">
+              <button
+                aria-label={"转发" + name}
+                onClick={() => setTarget(name)}
+              >
+                {tab === "转发" ? (
+                  <Repeat2 size={16} />
+                ) : (
+                  <MessageCircle size={16} />
+                )}
+              </button>
+              <button
+                aria-label={"喜欢回复" + index}
+                onClick={(e) => {
+                  e.currentTarget.classList.toggle("liked");
+                }}
+              >
+                <Heart size={16} />
+              </button>
+            </div>
+          </div>
+          <MoreHorizontal size={17} />
+        </article>
+        {!nested &&
+          tab !== "转发" &&
+          nestedReplies
+            .map((r, i) => ({ r, i }))
+            .filter(({ r }) => r.to === name)
+            .map(({ r, i }) => commentRow(nestedSep + r.to + nestedSep + r.text, "n" + index + "-" + i, true))}
+      </>
+    );
+  };
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(item.body);
@@ -70,7 +147,13 @@ export function SocialDetail(p: {
   };
   const submit = () => {
     if (!draft.trim()) return;
-    setExtra([...extra, (p.owner || "机主") + "：" + draft.trim()]);
+    const text = draft.trim();
+    setExtra([
+      ...extra,
+      target
+        ? nestedSep + target + nestedSep + text
+        : (p.owner || "机主") + "：" + text,
+    ]);
     setDraft("");
     setTarget("");
     setTab("评论");
@@ -247,44 +330,11 @@ export function SocialDetail(p: {
               ? sort
                 ? [...item.reposts].reverse()
                 : item.reposts
-              : replies
-            ).map((c, index) => {
-              const split = c.search(/[：:]/),
-                hasName = split > 0 && split < 24,
-                name = hasName ? c.slice(0, split) : "用户",
-                body = hasName ? c.slice(split + 1) : c;
-              return (
-                <article key={index} className="post-detail-comment">
-                  <Avatar name={name} />
-                  <div>
-                    <strong>{name}</strong>
-                    <p>{body}</p>
-                    <div className="post-comment-actions">
-                      <button
-                        aria-label={"转发" + name}
-                        onClick={() => setTarget(name)}
-                      >
-                        {tab === "转发" ? (
-                          <Repeat2 size={16} />
-                        ) : (
-                          <MessageCircle size={16} />
-                        )}
-                      </button>
-                      <button
-                        aria-label={"喜欢回复" + index}
-                        onClick={(e) => {
-                          e.currentTarget.classList.toggle("liked");
-                        }}
-                      >
-                        <Heart size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  <MoreHorizontal size={17} />
-                </article>
-              );
-            })}
-            {(tab === "转发" ? !item.reposts.length : !replies.length) && (
+              : sort
+                ? [...comments].reverse()
+                : comments
+            ).map((c, index) => commentRow(c, index))}
+            {(tab === "转发" ? !item.reposts.length : !comments.length) && (
               <p className="post-comments-empty">
                 {tab === "转发" ? "暂无转发" : "暂无评论"}
               </p>
