@@ -7,7 +7,7 @@ import {
   ScanSearch,
   ChevronDown,
 } from "lucide-react";
-import { Avatar, NameBadges, VAvatar, wanCount } from "./shared";
+import { VAvatar, wanCount } from "./shared";
 import "./image-viewer.css";
 
 const parseWan = (s: string) => {
@@ -56,13 +56,8 @@ export function ImageViewer({
           {index + 1} / {images.length}
         </span>
         <span className="image-viewer-author">
-          <VAvatar
-            name={sender}
-            src={avatar}
-            gold={sender === owner}
-          />
+          <VAvatar name={sender} src={avatar} gold={sender === owner} />
           <strong>{sender}</strong>
-          {sender === owner && <NameBadges />}
         </span>
         <span className="image-viewer-top-actions">
           <button aria-label="识别图片">

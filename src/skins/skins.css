@@ -4206,10 +4206,10 @@
   height: 42%;
   min-width: 15px;
   min-height: 15px;
-  background: radial-gradient(circle at 32% 28%, #ffd76e, #ff6a2b 62%, #e33d18 95%);
-  border: 2px solid #fff;
+  background: #e02118;
+  border: 2.5px solid #f2c53d;
   border-radius: 50%;
-  color: #fff;
+  color: #f2c53d;
   font-style: normal;
   font-weight: 800;
   font-size: 9px;
