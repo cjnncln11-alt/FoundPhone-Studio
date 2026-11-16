@@ -16,6 +16,9 @@ let lastPushAt = 0;
 let exitAt = 0;
 /** 退出微博后的静默冷却（40 秒内不弹任何微博消息） */
 const EXIT_COOLDOWN = 40000;
+/** 微博外的推送间隔：20~30 秒一条 */
+const outerGap = () => 20000 + Math.random() * 10000;
+let nextOuterGap = outerGap();
 const listeners = new Set<() => void>();
 
 /** 由 Phone 在切换 App 时同步：当前是否在微博内 */
@@ -107,13 +110,14 @@ export function startOwnerLikeStorm(opts: {
     const text = isLike
       ? "赞了你的评论：" + opts.preview.slice(0, 26)
       : nextCommentText();
-    // 离开微博后弹窗降频：最多约每 4 秒一条，避免挡住其他 App 的操作
+    // 离开微博后弹窗降频：约 20~30 秒一条，避免挡住其他 App 的操作
     const now = performance.now();
     const shouldPush =
       inWeibo ||
-      (now - lastPushAt > 4000 && weiboCooldownRemaining() === 0);
+      (now - lastPushAt > nextOuterGap && weiboCooldownRemaining() === 0);
     if (shouldPush) {
       lastPushAt = now;
+      nextOuterGap = outerGap();
       pushWeiboNotif({ name, text, photos: opts.photos });
     }
     // 弹窗里的评论同步进入评论区（节流 + 上限）

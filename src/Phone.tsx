@@ -334,19 +334,30 @@ function PhoneRuntime({
       .slice(0, 24);
     const buildDeck = () => {
       const deck: { name: string; text: string; photos: string[] }[] = [];
+      // 昵称轮换取用，避免连续两条同名粉丝
+      let nameQueue: string[] = [];
+      const nextName = () => {
+        if (!nameQueue.length) {
+          nameQueue = [...fanNotifNames];
+          for (let i = nameQueue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [nameQueue[i], nameQueue[j]] = [nameQueue[j], nameQueue[i]];
+          }
+        }
+        return nameQueue.pop() ?? fanNotifNames[0];
+      };
       posts.forEach((post) => {
         const photos = (post.mediaList ?? []).length
           ? post.mediaList
           : allPhotos;
         deck.push({
-          name: fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
+          name: nextName(),
           text: "赞了你的微博：" + clipText(post.body, 16),
           photos,
         });
         fanNormalTexts.forEach((text) =>
           deck.push({
-            name:
-              fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
+            name: nextName(),
             text: "评论了你的微博：" + text,
             photos,
           }),
@@ -356,10 +367,22 @@ function PhoneRuntime({
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
       }
+      // 洗牌后再把相邻同名的往后换开
+      for (let i = 1; i < deck.length; i++) {
+        if (deck[i].name !== deck[i - 1].name) continue;
+        const k = deck.findIndex(
+          (d, idx) => idx > i && d.name !== deck[i].name,
+        );
+        if (k > i) [deck[i], deck[k]] = [deck[k], deck[i]];
+      }
       return deck;
     };
     let timer = 0;
-    const baseDelay = () => 12000 + Math.random() * 18000;
+    // 微博内节奏稍快；离开微博后放慢到 20~30 秒一条，只在关键节点提醒
+    const baseDelay = () =>
+      appRef.current === "weibo"
+        ? 12000 + Math.random() * 18000
+        : 20000 + Math.random() * 10000;
     const schedule = (delay: number) => {
       timer = window.setTimeout(
         () => {
