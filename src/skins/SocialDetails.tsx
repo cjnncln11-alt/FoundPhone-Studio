@@ -146,11 +146,58 @@ export function SocialDetail(p: {
   const notifTimers = useRef<number[]>([]);
   const notifSeq = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [ownerLikes, setOwnerLikes] = useState<Record<string, number>>({});
+  const likeTimers = useRef<number[]>([]);
+  const stopLikeStorm = () => {
+    likeTimers.current.forEach((t) => clearTimeout(t));
+    likeTimers.current = [];
+  };
+  // 发布评论后，粉丝陆续点赞：赞数从 0 慢慢增加，并弹出提示
+  const startLikeStorm = (seed: string, preview: string) => {
+    stopLikeStorm();
+    setOwnerLikes((m) => ({ ...m, [seed]: 0 }));
+    const startedAt = performance.now();
+    const tick = () => {
+      const elapsed = performance.now() - startedAt;
+      if (elapsed > 90000) return;
+      const name =
+          fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
+        bump = Math.random() < 0.15 ? 2 : 1,
+        id = ++notifSeq.current;
+      setOwnerLikes((m) => ({ ...m, [seed]: (m[seed] ?? 0) + bump }));
+      setNotifs([
+        {
+          id,
+          name,
+          text: "赞了你的评论：" + preview.slice(0, 26),
+        },
+      ]);
+      notifTimers.current.push(
+        window.setTimeout(
+          () => setNotifs((list) => list.filter((n) => n.id !== id)),
+          3200,
+        ),
+      );
+      const gap =
+        elapsed < 18000
+          ? 1300 + Math.random() * 1700
+          : elapsed < 50000
+            ? 2200 + Math.random() * 3200
+            : 4500 + Math.random() * 4500;
+      likeTimers.current.push(window.setTimeout(tick, gap));
+    };
+    likeTimers.current.push(window.setTimeout(tick, 900));
+  };
   const stopNotifStorm = () => {
     notifTimers.current.forEach((t) => clearTimeout(t));
     notifTimers.current = [];
   };
-  useEffect(() => stopNotifStorm, []);
+  useEffect(() => {
+    return () => {
+      stopNotifStorm();
+      stopLikeStorm();
+    };
+  }, []);
   const startNotifStorm = () => {
     stopNotifStorm();
     setNotifs([]);
@@ -217,6 +264,9 @@ export function SocialDetail(p: {
     : comments;
   const ownerBadge = p.owner ? <NameBadges /> : null;
   // 评论元信息：时间（六成跟随博文发布时间，其余随机）、随机 IP 属地、随机赞数
+  const postProvince =
+    (meta(item, "location", "") || "中国台湾").replace(/^发布于/, "") ||
+    "中国台湾";
   const postClock = item.time.match(
     /(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})/,
   );
@@ -261,6 +311,16 @@ export function SocialDetail(p: {
   };
   const removeOwnerTop = (idx: number) => {
     const ownerName = p.owner || "机主";
+    const target = extra[idx] || "";
+    const split = target.search(/[：:]/),
+      body = split > 0 ? target.slice(split + 1) : "";
+    stopLikeStorm();
+    if (body)
+      setOwnerLikes((m) => {
+        const next = { ...m };
+        delete next[ownerName + "|" + body];
+        return next;
+      });
     setExtra(
       extra.filter(
         (c, i) =>
@@ -279,6 +339,16 @@ export function SocialDetail(p: {
     onDelete?: () => void,
   ): ReactElement => {
     const menuKey = "menu-" + String(index);
+    const seed = name + "|" + body,
+      info = commentMeta(seed),
+      metaTime =
+        isOwner && postDate
+          ? `${postDate.m}-${postDate.d} ${pad2(postDate.h)}:${pad2(postDate.min)}`
+          : info.time,
+      metaProvince = isOwner ? postProvince : info.province,
+      likes = isOwner
+        ? (ownerLikes[seed] ?? 0)
+        : commentLikes(index, seed);
     return (
       <>        <article
         key={index}
@@ -299,8 +369,7 @@ export function SocialDetail(p: {
           <p>{body}</p>
           <div className="comment-meta-row">
             <span className="comment-meta-info">
-              {commentMeta(name + "|" + body).time} 来自{" "}
-              {commentMeta(name + "|" + body).province}
+              {metaTime} 来自 {metaProvince}
             </span>
             <span className="comment-meta-divider" />
             <div className="post-comment-actions">
@@ -320,9 +389,7 @@ export function SocialDetail(p: {
                 }}
               >
                 <Heart size={15} />
-                <span className="comment-like-count">
-                  {commentLikes(index, name + "|" + body)}
-                </span>
+                <span className="comment-like-count">{likes}</span>
               </button>
             </div>
           </div>
@@ -402,7 +469,8 @@ export function SocialDetail(p: {
     setTarget("");
     setTab("评论");
     if (target) startNotifStorm();
-    else
+    else {
+      startLikeStorm((p.owner || "机主") + "|" + text, text);
       window.requestAnimationFrame(() => {
         const box = scrollRef.current,
           first = box?.querySelector(".post-detail-comments");
@@ -414,6 +482,7 @@ export function SocialDetail(p: {
           behavior: "smooth",
         });
       });
+    }
   };
   const actions = (
     <div className="post-detail-actions">
