@@ -2011,15 +2011,12 @@
   padding: 12px 16px 8px;
 }
 .weibo-profile {
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  padding: 0 20px 14px;
   background: #f4ebdf;
 }
 .weibo-profile-cover {
   height: 118px;
-  margin: -20px -20px 14px;
+  margin: 0 -20px 14px;
   background-color: #1a1a1e;
 }
 .weibo-profile-head {
@@ -2057,9 +2054,11 @@
   font-weight: 500;
 }
 .weibo-profile > span:last-child {
+  display: block;
+  text-align: right;
   font-size: 9px;
   color: #999;
-  margin-left: auto;
+  margin-top: 8px;
 }
 .media-grid {
   display: grid;

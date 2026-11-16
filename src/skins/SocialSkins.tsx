@@ -168,7 +168,7 @@ export function WeiboSkin(p: Props) {
             <PostHeader p={p} item={i} />
             <button className="social-body" onClick={() => p.onItem(i)}>
               <p>{i.body}</p>
-              {i.media && <Media item={i} />}
+              {(i.media || i.mediaList.length > 0) && <Media item={i} />}
             </button>
             <WeiboActions p={p} item={i} />
           </article>
@@ -213,7 +213,7 @@ export function XSkin(p: Props) {
                 </button>
                 <button className="social-body" onClick={() => p.onItem(i)}>
                   <p>{i.body}</p>
-                  {i.media && <Media item={i} />}
+                  {(i.media || i.mediaList.length > 0) && <Media item={i} />}
                 </button>
                 <Actions p={p} item={i} />
               </div>
@@ -259,7 +259,7 @@ export function ThreadsSkin(p: Props) {
               </div>
               <button className="social-body" onClick={() => p.onItem(i)}>
                 <p>{i.body}</p>
-                {i.media && <Media item={i} />}
+                {(i.media || i.mediaList.length > 0) && <Media item={i} />}
               </button>
               <Actions p={p} item={i} />
               <button className="thread-replies" onClick={() => p.onItem(i)}>
@@ -318,7 +318,7 @@ export function FacebookSkin(p: Props) {
                   <PostHeader p={p} item={i} />
                   <button className="social-body" onClick={() => p.onItem(i)}>
                     <p>{i.body}</p>
-                    {i.media && <Media item={i} />}
+                    {(i.media || i.mediaList.length > 0) && <Media item={i} />}
                   </button>
                   <Actions p={p} item={i} />
                 </article>
@@ -533,7 +533,7 @@ function RedditPost({ p, item: i }: { p: Props; item: Item }) {
       <button className="social-body" onClick={() => p.onItem(i)}>
         <h3>{i.title}</h3>
         <p>{i.body}</p>
-        {i.media && <Media item={i} />}
+        {(i.media || i.mediaList.length > 0) && <Media item={i} />}
       </button>
       <div className="reddit-actions">
         <button

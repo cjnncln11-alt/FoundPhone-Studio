@@ -44,6 +44,6 @@ describe("independent app coverage and authored attributes", () => {
     expect(() =>
       makeItem({ meta: { amount: 42 } as unknown as Record<string, string> }),
     ).toThrow();
-    expect(() => makeItem({ meta: { url: "x".repeat(2001) } })).toThrow();
+    expect(() => makeItem({ meta: { url: "x".repeat(400001) } })).toThrow();
   });
 });

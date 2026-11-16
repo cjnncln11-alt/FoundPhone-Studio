@@ -152,7 +152,7 @@ export function SocialDetail(p: {
         </div>
         <div className="post-detail-body">
           <RichText value={item.richText} fallback={item.body} />
-          {item.media && <Media item={item} />}
+          {(item.media || item.mediaList.length > 0) && <Media item={item} />}
         </div>
         {weibo ? (
           <div className="weibo-share-options">
