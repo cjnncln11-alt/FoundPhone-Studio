@@ -120,3 +120,7 @@
 .image-viewer-actions button.interacted {
   color: #f91880;
 }
+.image-viewer.is-closing {
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}

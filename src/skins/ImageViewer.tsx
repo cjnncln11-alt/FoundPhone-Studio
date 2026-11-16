@@ -42,6 +42,13 @@ export function ImageViewer({
   const endTouch = () => {
     touch.current = null;
   };
+  const [closing, setClosing] = useState(false);
+  // 延迟卸载：避免 touchend 后的合成 click 穿透到底层图片、又把查看器打开
+  const requestClose = () => {
+    if (closing) return;
+    setClosing(true);
+    window.setTimeout(onClose, 320);
+  };
   const [liked, setLiked] = useState(false),
     [reposted, setReposted] = useState(false),
     [commented, setCommented] = useState(false);
@@ -53,7 +60,15 @@ export function ImageViewer({
     if (n) setIndex((index + d + n) % n);
   };
   return (
-    <div className="image-viewer" role="dialog" aria-label="查看图片">
+    <div
+      className={"image-viewer" + (closing ? " is-closing" : "")}
+      role="dialog"
+      aria-label="查看图片"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+    >
       <header className="image-viewer-top">
         <span className="image-viewer-index">
           {index + 1} / {images.length}
@@ -79,6 +94,10 @@ export function ImageViewer({
         }}
         onPointerCancel={endTouch}
         onPointerLeave={endTouch}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
         onPointerUp={(e) => {
           const start = touch.current;
           touch.current = null;
@@ -90,7 +109,7 @@ export function ImageViewer({
           if (absX > 55 && absX > absY * 1.5) {
             go(dx < 0 ? 1 : -1);
           } else if (absX < 14 && absY < 14) {
-            onClose();
+            requestClose();
           }
         }}
       >
@@ -106,7 +125,7 @@ export function ImageViewer({
         <button
           className="image-viewer-collapse"
           aria-label="收起"
-          onClick={onClose}
+          onClick={requestClose}
         >
           <ChevronDown size={20} />
         </button>
