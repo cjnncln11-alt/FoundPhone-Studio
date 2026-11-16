@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 46px 14px 10px;
+  padding: 62px 14px 12px;
   background: linear-gradient(#000c, transparent);
 }
 .image-viewer-index {
@@ -125,4 +125,12 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
+  transition: transform 0.12s;
+}
+.image-viewer-actions button:active {
+  transform: scale(1.2);
+}
+.image-viewer-actions button.liked,
+.image-viewer-actions button.interacted {
+  color: #f91880;
 }
