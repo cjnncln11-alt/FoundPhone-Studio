@@ -10,9 +10,13 @@
   pointer-events: none;
 }
 .ios18 .weibo-notif-stack.is-global {
-  top: 118px;
+  top: 104px;
   left: 12px;
   right: 12px;
+}
+/* App 内下移一点，避开左上角的返回键与标题栏 */
+.ios18 .in-app .weibo-notif-stack.is-global {
+  top: 156px;
 }
 .ios18 .weibo-notif {
   pointer-events: auto;
