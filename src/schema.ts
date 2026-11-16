@@ -35,6 +35,8 @@ export const itemSchema = z.object({
   read: z.boolean().default(false),
   likes: z.number().default(0),
   comments: z.array(z.string()).default([]),
+  reposts: z.array(z.string()).default([]),
+  likedBy: z.array(z.string()).default([]),
 });
 export type Item = z.infer<typeof itemSchema>;
 export const conditionSchema = z.object({

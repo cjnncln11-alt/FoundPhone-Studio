@@ -31,6 +31,7 @@ export function SocialDetail(p: {
   item: Item;
   back: () => void;
   owner: string;
+  ownerAvatar?: string;
   ui?: Record<string, UiValue>;
   onUi?: (key: string, value: UiValue) => void;
 }) {
@@ -206,9 +207,29 @@ export function SocialDetail(p: {
             {sort ? "按时间" : "按热度"}⌄
           </button>
         )}
-        {tab === "评论" ? (
+        {tab === "赞" ? (
           <div className="post-detail-comments">
-            {replies.map((c, index) => {
+            {item.likedBy.map((name, index) => (
+              <article key={index} className="post-detail-comment weibo-like-row">
+                <Avatar name={name} />
+                <div>
+                  <strong>{name}</strong>
+                </div>
+                <Heart size={16} fill="#f91880" color="#f91880" />
+              </article>
+            ))}
+            {!item.likedBy.length && (
+              <p className="post-comments-empty">暂无更多记录</p>
+            )}
+          </div>
+        ) : (
+          <div className="post-detail-comments">
+            {(tab === "转发"
+              ? sort
+                ? [...item.reposts].reverse()
+                : item.reposts
+              : replies
+            ).map((c, index) => {
               const split = c.search(/[：:]/),
                 hasName = split > 0 && split < 24,
                 name = hasName ? c.slice(0, split) : "用户",
@@ -221,10 +242,14 @@ export function SocialDetail(p: {
                     <p>{body}</p>
                     <div className="post-comment-actions">
                       <button
-                        aria-label={"回复" + name}
+                        aria-label={"转发" + name}
                         onClick={() => setTarget(name)}
                       >
-                        <MessageCircle size={16} />
+                        {tab === "转发" ? (
+                          <Repeat2 size={16} />
+                        ) : (
+                          <MessageCircle size={16} />
+                        )}
                       </button>
                       <button
                         aria-label={"喜欢回复" + index}
@@ -240,12 +265,12 @@ export function SocialDetail(p: {
                 </article>
               );
             })}
-            {!replies.length && <p className="post-comments-empty">暂无评论</p>}
+            {(tab === "转发" ? !item.reposts.length : !replies.length) && (
+              <p className="post-comments-empty">
+                {tab === "转发" ? "暂无转发" : "暂无评论"}
+              </p>
+            )}
           </div>
-        ) : (
-          <p className="post-comments-empty">
-            {tab === "转发" ? "暂无可展开的转发记录" : "暂无更多记录"}
-          </p>
         )}
       </div>
       <form
@@ -255,7 +280,7 @@ export function SocialDetail(p: {
           submit();
         }}
       >
-        <Avatar name={p.owner || "机主"} />
+        <Avatar name={p.owner || "机主"} src={p.ownerAvatar} />
         <input
           aria-label="回复帖子"
           placeholder={

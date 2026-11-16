@@ -349,3 +349,14 @@
   font-size: inherit;
   line-height: inherit;
 }
+
+.weibo-post-detail .weibo-like-row {
+  align-items: center;
+}
+.weibo-post-detail .weibo-like-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.weibo-post-detail .weibo-like-row svg {
+  flex: none;
+}

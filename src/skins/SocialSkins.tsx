@@ -128,14 +128,14 @@ export function WeiboSkin(p: Props) {
                   meta(items[0], "profileFollowing") ||
                   meta(items[0], "profileInteractions")) && (
                   <div className="weibo-profile-stats">
-                    {meta(items[0], "profileFollowing") && (
-                      <span>
-                        <b>{meta(items[0], "profileFollowing")}</b> 关注
-                      </span>
-                    )}
                     {meta(items[0], "profileFans") && (
                       <span>
                         <b>{meta(items[0], "profileFans")}</b> 粉丝
+                      </span>
+                    )}
+                    {meta(items[0], "profileFollowing") && (
+                      <span>
+                        <b>{meta(items[0], "profileFollowing")}</b> 关注
                       </span>
                     )}
                     {meta(items[0], "profileInteractions") && (

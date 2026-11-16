@@ -2060,6 +2060,14 @@
   color: #999;
   margin-top: 8px;
 }
+.weibo-profile .social-author {
+  justify-content: flex-start;
+  text-align: left;
+}
+.weibo-profile .social-author strong,
+.weibo-profile .social-author small {
+  text-align: left;
+}
 .media-grid.media-grid {
   display: grid;
   gap: 5px;

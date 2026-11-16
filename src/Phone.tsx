@@ -1021,6 +1021,11 @@ function AppContent({
               item={detail}
               back={back}
               owner={work.phone.owner}
+              ownerAvatar={
+                (work.data?.[app.id] ?? []).find(
+                  (i) => i.sender === work.phone.owner && i.avatar,
+                )?.avatar ?? ""
+              }
               ui={state.ui?.[app.id]}
               onUi={onUi}
             />
