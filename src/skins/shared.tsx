@@ -261,3 +261,114 @@ export function useContent(p: Props, first: string) {
 export function groupItems(items: Item[], fallback = "未分类") {
   return [...new Set(items.map((i) => i.folder || fallback))];
 }
+
+const fanPinks = [
+  ["#ffd9ea", "#ffb4d3"],
+  ["#ffe4f0", "#ffc0dd"],
+  ["#ffd2e7", "#ffa6ca"],
+  ["#ffeaf5", "#ffcde4"],
+  ["#ffdfef", "#f9b5d8"],
+];
+const fanHash = (s: string) => {
+  let a = 5381;
+  for (const ch of s) a = ((a * 33) ^ ch.charCodeAt(0)) >>> 0;
+  return a;
+};
+const fanShapes = [
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <ellipse cx="8.2" cy="7.5" rx="2.7" ry="5.2" fill="#fff" />
+    <ellipse cx="15.8" cy="7.5" rx="2.7" ry="5.2" fill="#fff" />
+    <ellipse cx="8.2" cy="7.5" rx="1.2" ry="3" fill="#f9b7d4" />
+    <ellipse cx="15.8" cy="7.5" rx="1.2" ry="3" fill="#f9b7d4" />
+    <circle cx="12" cy="15.5" r="6.2" fill="#fff" />
+    <circle cx="9.8" cy="14.6" r="0.9" fill="#e2689a" />
+    <circle cx="14.2" cy="14.6" r="0.9" fill="#e2689a" />
+    <ellipse cx="12" cy="16.8" rx="1.2" ry="0.9" fill="#e2689a" />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M5 12 L8.2 8.6 L8.2 15.4 Z" fill="#fff" />
+    <path d="M19 12 L15.8 8.6 L15.8 15.4 Z" fill="#fff" />
+    <circle cx="12" cy="12" r="4.8" fill="#fff" />
+    <path d="M12 7.2 C14.2 10 14.2 14 12 16.8 C9.8 14 9.8 10 12 7.2 Z" fill="#f9b7d4" />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="7.4" r="3.4" fill="#fff" />
+    <circle cx="16.4" cy="10.8" r="3.4" fill="#fff" />
+    <circle cx="14.7" cy="16" r="3.4" fill="#fff" />
+    <circle cx="9.3" cy="16" r="3.4" fill="#fff" />
+    <circle cx="7.6" cy="10.8" r="3.4" fill="#fff" />
+    <circle cx="12" cy="12" r="2.6" fill="#f9b7d4" />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M12 20 C4 14 4 8.5 8 7 C10.2 6.2 12 7.6 12 9 C12 7.6 13.8 6.2 16 7 C20 8.5 20 14 12 20 Z"
+      fill="#fff"
+    />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 12 L5 7.5 L5 16.5 Z" fill="#fff" />
+    <path d="M12 12 L19 7.5 L19 16.5 Z" fill="#fff" />
+    <circle cx="12" cy="12" r="2.4" fill="#f9b7d4" />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 4.5 L16.2 7.2 L7.8 7.2 Z" fill="#fff" />
+    <path d="M12 6.5 C17 8.5 17 14 12 19 C7 14 7 8.5 12 6.5 Z" fill="#fff" />
+    <circle cx="10.5" cy="11" r="0.7" fill="#f9b7d4" />
+    <circle cx="13.5" cy="12.5" r="0.7" fill="#f9b7d4" />
+    <circle cx="11.5" cy="14.5" r="0.7" fill="#f9b7d4" />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <ellipse cx="12" cy="15.5" rx="6.5" ry="5" fill="#fff" />
+    <path d="M6.5 11 C8 7.5 16 7.5 17.5 11 Z" fill="#fff" />
+    <ellipse cx="12" cy="10" rx="1.6" ry="2" fill="#f9b7d4" />
+    <circle cx="9.6" cy="13.6" r="0.9" fill="#e2689a" />
+    <circle cx="14.4" cy="13.6" r="0.9" fill="#e2689a" />
+  </svg>,
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="8" fill="#fff" />
+    <path d="M6 12 A6 6 0 0 1 18 12 Z" fill="#f9b7d4" />
+    <circle cx="9.6" cy="14" r="0.9" fill="#e2689a" />
+    <circle cx="14.4" cy="14" r="0.9" fill="#e2689a" />
+    <path d="M10.6 16.4 Q12 18 13.4 16.4" stroke="#e2689a" strokeWidth="0.9" fill="none" strokeLinecap="round" />
+  </svg>,
+];
+export function FanAvatar({
+  name,
+  size = 37,
+  photos = [],
+  className = "",
+}: {
+  name: string;
+  size?: number;
+  photos?: string[];
+  className?: string;
+}) {
+  const h = fanHash(name + "|avatar"),
+    photo =
+      photos.length && h % 100 < 24
+        ? safeMedia(photos[h % photos.length])
+        : "",
+    shape = fanShapes[h % fanShapes.length],
+    pink = fanPinks[h % fanPinks.length];
+  return (
+    <span
+      className={`catalog-avatar round fan-avatar ${className}`}
+      style={{
+        width: size,
+        height: size,
+        background: `linear-gradient(140deg, ${pink[0]}, ${pink[1]})`,
+      }}
+    >
+      {photo ? (
+        <img src={photo} alt="" />
+      ) : (
+        <span
+          className="fan-avatar-shape"
+          style={{ width: Math.round(size * 0.64), height: Math.round(size * 0.64) }}
+        >
+          {shape}
+        </span>
+      )}
+    </span>
+  );
+}

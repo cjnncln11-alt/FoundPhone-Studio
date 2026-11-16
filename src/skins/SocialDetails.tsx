@@ -20,65 +20,23 @@ import {
 } from "lucide-react";
 import { useSkinState } from "../skinState";
 import { RichText } from "../RichText";
-import { Avatar, Media, meta, NameBadges, VAvatar, wanCount } from "./shared";
+import {
+  Avatar,
+  FanAvatar,
+  Media,
+  meta,
+  NameBadges,
+  VAvatar,
+  wanCount,
+} from "./shared";
+import { fanNotifNames, fanNotifTexts } from "./weiboData";
+import { pushWeiboNotif } from "./weiboNotify";
 import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
 import "./social-details.css";
 export const socialDetailApps = new Set(["twitter", "weibo"]);
 const count = (n: number) =>
   n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "w" : String(n);
-const fanNotifNames = [
-  "农糖小甜",
-  "NLNG_0713",
-  "农哥的小饼干",
-  "今天也要吃糖",
-  "糖渍小圆子",
-  "月亮邮递员",
-  "农糖电台",
-  "一颗农糖",
-  "糖分超标",
-  "橘子汽水农",
-  "深夜刷博选手",
-  "等翻牌的阿糖",
-  "奶茶三分甜",
-  "糖罐子打翻了",
-  "微博冲浪选手",
-  "农农的第五个季节",
-  "甜度满分",
-  "蹲守评论区的人",
-  "小农包",
-  "血肠汤饭研究员",
-];
-const fanNotifTexts = [
-  "我去买肉夹馍，让老板多放点辣，刚吃了一口就掉到了地上沾了泥，我哭了，原来这叫辣馍喜欢泥。",
-  "哥，我在评论区蹲了一天了，就等你翻我一次牌。",
-  "陈立农你看到我了吗？看到请回 1，看不到请回 2。",
-  "血肠汤饭到底啥味儿啊，哥你倒是说说，我馋得睡不着。",
-  "我朋友说你要是回我，她就倒立洗头，哥你成全她吧。",
-  "翻我翻我翻我！重要的事情说三遍。",
-  "我今天生日，能不能得到一句生日快乐（不是生日也行）。",
-  "我妈问我为什么对着手机傻笑，我说我在等一个台湾来的男人回我消息。",
-  "刚称了体重发现自己轻了，原来是忘了带手机——手机里全是你。",
-  "医生说我低血糖，要听点甜的话，哥你懂我意思吧。",
-  "今天上班摸鱼被抓，老板问我鱼呢，我说鱼在陈立农的评论区。",
-  "如果我有罪，法律会制裁我，而不是让我在评论区等到花儿都谢了。",
-  "我这个人没什么优点，就是有耐心，比如等你翻牌。",
-  "别人追星花钱，我追星掉头发，哥你赔我。",
-  "风里雨里，评论区等你。",
-  "刚做了个梦，梦见你回复我了，醒来一看，果然是个梦。",
-  "哥你要是回我，我立刻把手机壁纸换成你——哦已经是了。",
-  "请问这里是陈立农的评论区吗？我来领号码牌的，前面还有三万多人。",
-  "血肠汤饭我都学会做了，就等你来验收。",
-  "我买了跟你同款的格子衫，穿上像桌布，但我很开心。",
-  "评论区这么多人，我就占一个位置，行不行。",
-  "要不你随便回我一个字也行，'嗯'都可以。",
-  "我发誓，只要你回我，我这周就不熬夜了（大概率做不到）。",
-  "今天也是想让农农回复我的一天。",
-  "哥，我排队排到腿软，能不能给个优先通道。",
-  "你好，我是你未来的粉丝代表，请问可以握个手吗（隔着屏幕）。",
-];
-const fanNotifHue = (name: string) =>
-  [...name].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 360;
 const commentProvinces = [
   "北京",
   "上海",
@@ -140,11 +98,7 @@ export function SocialDetail(p: {
     [copied, setCopied] = useState(false),
     [viewer, setViewer] = useState<number | null>(null),
     [commentMenu, setCommentMenu] = useState<string | null>(null);
-  const [notifs, setNotifs] = useState<
-    { id: number; name: string; text: string }[]
-  >([]);
   const notifTimers = useRef<number[]>([]);
-  const notifSeq = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [ownerLikes, setOwnerLikes] = useState<Record<string, number>>({});
   const likeTimers = useRef<number[]>([]);
@@ -152,69 +106,48 @@ export function SocialDetail(p: {
     likeTimers.current.forEach((t) => clearTimeout(t));
     likeTimers.current = [];
   };
-  // 发布评论后，粉丝陆续点赞：赞数从 0 慢慢增加，并弹出提示
+  // 发布评论后，粉丝陆续点赞：频率与求翻牌弹窗一致，赞数从 0 逐步上涨
   const startLikeStorm = (seed: string, preview: string) => {
     stopLikeStorm();
     setOwnerLikes((m) => ({ ...m, [seed]: 0 }));
     const startedAt = performance.now();
     const tick = () => {
       const elapsed = performance.now() - startedAt;
-      if (elapsed > 90000) return;
+      if (elapsed > 50000) return;
       const name =
           fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
-        bump = Math.random() < 0.15 ? 2 : 1,
-        id = ++notifSeq.current;
+        bump = Math.random() < 0.15 ? 2 : 1;
       setOwnerLikes((m) => ({ ...m, [seed]: (m[seed] ?? 0) + bump }));
-      setNotifs([
-        {
-          id,
-          name,
-          text: "赞了你的评论：" + preview.slice(0, 26),
-        },
-      ]);
-      notifTimers.current.push(
-        window.setTimeout(
-          () => setNotifs((list) => list.filter((n) => n.id !== id)),
-          3200,
-        ),
-      );
+      pushWeiboNotif({
+        name,
+        text: "赞了你的评论：" + preview.slice(0, 26),
+        photos: item.mediaList,
+      });
       const gap =
-        elapsed < 18000
-          ? 1300 + Math.random() * 1700
-          : elapsed < 50000
-            ? 2200 + Math.random() * 3200
-            : 4500 + Math.random() * 4500;
+        elapsed < 9000
+          ? 260
+          : elapsed < 24000
+            ? 420 + ((elapsed - 9000) / 15000) * 900
+            : 1400 + ((elapsed - 24000) / 26000) * 2100;
       likeTimers.current.push(window.setTimeout(tick, gap));
     };
-    likeTimers.current.push(window.setTimeout(tick, 900));
-  };
-  const stopNotifStorm = () => {
-    notifTimers.current.forEach((t) => clearTimeout(t));
-    notifTimers.current = [];
+    likeTimers.current.push(window.setTimeout(tick, 800));
   };
   useEffect(() => {
     return () => {
-      stopNotifStorm();
       stopLikeStorm();
+      notifTimers.current.forEach((t) => clearTimeout(t));
+      notifTimers.current = [];
     };
   }, []);
   const startNotifStorm = () => {
-    stopNotifStorm();
-    setNotifs([]);
     const startedAt = performance.now();
     const loop = () => {
       const elapsed = performance.now() - startedAt;
       if (elapsed > 50000) return;
       const name = fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
-        text = fanNotifTexts[Math.floor(Math.random() * fanNotifTexts.length)],
-        id = ++notifSeq.current;
-      setNotifs([{ id, name, text }]);
-      notifTimers.current.push(
-        window.setTimeout(
-          () => setNotifs((list) => list.filter((n) => n.id !== id)),
-          3400,
-        ),
-      );
+        text = fanNotifTexts[Math.floor(Math.random() * fanNotifTexts.length)];
+      pushWeiboNotif({ name, text, photos: item.mediaList });
       const gap =
         elapsed < 9000
           ? 260
@@ -359,7 +292,7 @@ export function SocialDetail(p: {
         {isOwner ? (
           <Avatar name={name} src={p.ownerAvatar} />
         ) : (
-          <Avatar name={name} />
+          <FanAvatar name={name} photos={item.mediaList} />
         )}
         <div>
           <strong>
@@ -534,38 +467,6 @@ export function SocialDetail(p: {
           onClick={() => setCommentMenu(null)}
         />
       )}
-      {notifs.length > 0 && (
-        <div className="weibo-notif-stack" aria-live="polite">
-          {notifs.map((n) => (
-            <button
-              key={n.id}
-              className="weibo-notif"
-              onClick={() =>
-                setNotifs((list) => list.filter((x) => x.id !== n.id))
-              }
-            >
-              <div className="weibo-notif-head">
-                <span className="weibo-notif-logo">微博</span>
-                <small>现在</small>
-              </div>
-              <div className="weibo-notif-main">
-                <span
-                  className="weibo-notif-avatar"
-                  style={{
-                    background: `hsl(${fanNotifHue(n.name)} 62% 68%)`,
-                  }}
-                >
-                  {n.name.slice(0, 1)}
-                </span>
-                <div>
-                  <strong>{n.name}</strong>
-                  <p>{n.text}</p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
       <header className="post-detail-nav">
         <button aria-label="返回帖子列表" onClick={p.back}>
           <ChevronLeft size={27} />
@@ -677,7 +578,7 @@ export function SocialDetail(p: {
           <div className="post-detail-comments">
             {item.likedBy.map((name, index) => (
               <article key={index} className="post-detail-comment weibo-like-row">
-                <Avatar name={name} />
+                <FanAvatar name={name} photos={item.mediaList} />
                 <div>
                   <strong>{name}</strong>
                 </div>

@@ -1,5 +1,7 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
+import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
+import { fanNotifNames, fanNotifTexts, clipText } from "./skins/weiboData";
 import { NativeCalculator } from "./ios/Calculator";
 import { HomeLauncher } from "./launcher/HomeLauncher";
 import { useDeviceLayout } from "./launcher/layout";
@@ -302,6 +304,61 @@ function PhoneRuntime({
     }
     noticesSeen.current = count;
   }, [s.notifications.length, locked, work.phone.notifications]);
+  const weiboNotifDeck = useRef<
+    { name: string; text: string; photos: string[] }[]
+  >([]);
+  useEffect(() => {
+    if (creator || locked) return;
+    const posts = work.data.weibo ?? [];
+    if (!posts.length) return;
+    const allPhotos = posts
+      .flatMap((p) => p.mediaList ?? [])
+      .filter(Boolean)
+      .slice(0, 24);
+    const buildDeck = () => {
+      const deck: { name: string; text: string; photos: string[] }[] = [];
+      posts.forEach((post) => {
+        const photos = (post.mediaList ?? []).length
+          ? post.mediaList
+          : allPhotos;
+        deck.push({
+          name: fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
+          text: "赞了你的微博：" + clipText(post.body, 16),
+          photos,
+        });
+        fanNotifTexts.forEach((text) =>
+          deck.push({
+            name:
+              fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
+            text: "评论了你的微博：" + text,
+            photos,
+          }),
+        );
+      });
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      return deck;
+    };
+    let timer = 0;
+    const schedule = () => {
+      timer = window.setTimeout(
+        () => {
+          if (app && app !== "weibo") {
+            if (!weiboNotifDeck.current.length)
+              weiboNotifDeck.current = buildDeck();
+            const next = weiboNotifDeck.current.pop();
+            if (next) pushWeiboNotif(next);
+          }
+          schedule();
+        },
+        14000 + Math.random() * 26000,
+      );
+    };
+    schedule();
+    return () => window.clearTimeout(timer);
+  }, [creator, locked, app, work]);
   const dismissNotice = (index: number) =>
     update({
       ...runtimeRef.current,
@@ -799,6 +856,14 @@ function PhoneRuntime({
               setPanel("");
             }}
           />
+          {!locked && (
+            <WeiboNotifLayer
+              photos={(work.data.weibo ?? [])
+                .flatMap((i) => i.mediaList ?? [])
+                .filter(Boolean)
+                .slice(0, 24)}
+            />
+          )}
           <div className="screen-dimmer" />
           <div className="hardware-reflection" />
         </div>
