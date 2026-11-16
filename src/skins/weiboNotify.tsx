@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FanAvatar } from "./shared";
-import { isInWeibo, releaseExitHold } from "./weiboStorm";
+import { isInWeibo, silenceWeiboNotifs } from "./weiboStorm";
 import "./weibo-notify.css";
 
 export type WeiboPush = {
@@ -14,24 +14,10 @@ let seq = 0;
 const listeners = new Set<(n: WeiboPush) => void>();
 const visible = new Set<number>();
 const clearers = new Set<() => void>();
-const holders = new Set<(on: boolean) => void>();
-/** 当前屏幕上那条弹窗的 id（没有则为 null） */
-let currentId: number | null = null;
 
 /** 立即清掉当前显示的弹窗 */
 export function clearWeiboNotif() {
   clearers.forEach((fn) => fn());
-}
-
-/** 屏幕上是否还挂着一条弹窗 */
-export const hasWeiboNotif = () => currentId !== null;
-
-/**
- * 托管开关：on=true 时弹窗常驻不自动消失（退出微博后保留，等用户上滑）；
- * on=false 时恢复 3.4 秒后自动消失（重新进入微博时用）。
- */
-export function setWeiboNotifHold(on: boolean) {
-  holders.forEach((fn) => fn(on));
 }
 
 export function pushWeiboNotif(p: Omit<WeiboPush, "id">) {
@@ -47,7 +33,6 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
   const timer = useRef<number | undefined>(undefined);
   const close = (id: number) => {
     visible.delete(id);
-    if (currentId === id) currentId = null;
     setCurrent((c) => (c?.id === id ? null : c));
     setDy(0);
   };
@@ -57,38 +42,22 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
         setCurrent((c) => (c?.id === n.id ? null : c));
         return;
       }
-      currentId = n.id;
       setCurrent(n);
       window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => {
         visible.delete(n.id);
-        if (currentId === n.id) currentId = null;
         setCurrent((c) => (c?.id === n.id ? null : c));
       }, isInWeibo() ? 3400 : 2800);
     };
     listeners.add(fn);
     const clear = () => {
       window.clearTimeout(timer.current);
-      currentId = null;
       setCurrent(null);
     };
     clearers.add(clear);
-    const hold = (on: boolean) => {
-      window.clearTimeout(timer.current);
-      if (on) return;
-      const id = currentId;
-      if (id == null) return;
-      timer.current = window.setTimeout(() => {
-        visible.delete(id);
-        if (currentId === id) currentId = null;
-        setCurrent((c) => (c?.id === id ? null : c));
-      }, 3400);
-    };
-    holders.add(hold);
     return () => {
       listeners.delete(fn);
       clearers.delete(clear);
-      holders.delete(hold);
       window.clearTimeout(timer.current);
     };
   }, []);
@@ -100,8 +69,8 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
   const dismiss = () => {
     window.clearTimeout(timer.current);
     close(current.id);
-    // 用户主动上滑/点击关掉：从这一刻开始静默
-    releaseExitHold();
+    // 用户上滑/点击关掉弹窗：从这里开始静默，风暴也暂停
+    silenceWeiboNotifs();
   };
   return (
     <div className="weibo-notif-stack is-global" aria-live="polite">

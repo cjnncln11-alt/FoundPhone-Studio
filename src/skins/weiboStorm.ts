@@ -12,38 +12,31 @@ let timers: number[] = [];
 let stormRunning = false;
 let rcSeq = 0;
 let inWeibo = true;
-let lastPushAt = 0;
 let exitAt = 0;
-/** 退出微博后屏幕上留着弹窗、等用户上滑的"托管"状态：期间不推新消息，也不开始计时 */
-let holdActive = false;
+/** 用户上滑/点击关掉弹窗后，在此时间点之前一律静默 */
+let silencedUntil = 0;
 /** 退出微博后的静默冷却（30 秒内不弹任何微博消息） */
 const EXIT_COOLDOWN = 30000;
-/** 微博外的推送间隔：20~30 秒一条 */
-const outerGap = () => 20000 + Math.random() * 10000;
-let nextOuterGap = outerGap();
 const listeners = new Set<() => void>();
 
 /** 由 Phone 在切换 App 时同步：当前是否在微博内 */
 export function setStormInWeibo(v: boolean) {
   if (inWeibo && !v) exitAt = performance.now();
-  if (v) holdActive = false;
+  // 回到微博：解除上滑静默
+  if (v) silencedUntil = 0;
   inWeibo = v;
 }
 export const isInWeibo = () => inWeibo;
-/** 退出微博时屏幕上还留着一条弹窗：先不开始计时，等用户上滑关掉 */
-export function startExitHold() {
-  if (!inWeibo) holdActive = true;
+/** 用户上滑/点击关掉弹窗：从这里开始静默一段时间，风暴也暂停 */
+export function silenceWeiboNotifs(ms = EXIT_COOLDOWN) {
+  silencedUntil = Math.max(silencedUntil, performance.now() + ms);
 }
-/** 用户上滑/点击关掉那条弹窗：从这一刻开始 30 秒静默 */
-export function releaseExitHold() {
-  if (!holdActive) return;
-  holdActive = false;
-  exitAt = performance.now();
-}
-/** 退出微博后还需静默多久（毫秒），0 表示可以弹窗 */
+/** 还需静默多久（毫秒），0 表示可以弹窗 */
 export function weiboCooldownRemaining() {
-  if (inWeibo) return 0;
-  if (holdActive) return EXIT_COOLDOWN;
+  const silenced = Math.max(0, silencedUntil - performance.now());
+  if (silenced > 0) return silenced;
+  // 微博内、或点赞风暴进行中：照常弹，退出微博也不打断风暴
+  if (inWeibo || stormRunning) return 0;
   return Math.max(0, EXIT_COOLDOWN - (performance.now() - exitAt));
 }
 
@@ -135,14 +128,9 @@ export function startOwnerLikeStorm(opts: {
     const text = isLike
       ? "赞了你的评论：" + opts.preview.slice(0, 26)
       : nextCommentText();
-    // 离开微博后弹窗降频：约 20~30 秒一条，避免挡住其他 App 的操作
-    const now = performance.now();
-    const shouldPush =
-      inWeibo ||
-      (now - lastPushAt > nextOuterGap && weiboCooldownRemaining() === 0);
+    // 风暴期间不中断：退出微博也继续按风暴节奏弹，只有用户上滑关掉才暂停
+    const shouldPush = weiboCooldownRemaining() === 0;
     if (shouldPush) {
-      lastPushAt = now;
-      nextOuterGap = outerGap();
       pushWeiboNotif({ name, text, photos: opts.photos });
     }
     // 弹窗里的评论同步进入评论区（节流 + 上限）
