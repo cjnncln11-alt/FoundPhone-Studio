@@ -131,7 +131,6 @@ export function SocialDetail(p: {
     .map((c, i) => ({ c, i }))
     .filter(({ c }) => isNestedReply(c))
     .map(({ c, i }) => ({ ...parseNestedReply(c), i }));
-  const ownerTopReplies = new Set(extra.filter((c) => !isNestedReply(c)));
   // 粉丝评论中"回复 @某人："开头的也归入楼中楼
   const fanReplyRe = /^回复\s*@(.+?)[：:]/;
   const fanReplyTarget = (c: string) => {
@@ -143,27 +142,66 @@ export function SocialDetail(p: {
   const fanNestedReplies = item.comments
     .map((c) => ({ c, to: fanReplyTarget(c) }))
     .filter((e) => e.to);
-  const fanTopComments = item.comments.filter((c) => !fanReplyTarget(c));
+  const parseTopText = (c: string) => {
+    const split = c.search(/[：:]/),
+      hasName = split > 0 && split < 24;
+    return {
+      name: hasName ? c.slice(0, split) : "用户",
+      body: hasName ? c.slice(split + 1) : c,
+    };
+  };
+  type RowData = {
+    key: string;
+    name: string;
+    body: string;
+    owner: boolean;
+    rc: boolean;
+    fanIndex: number;
+    raw: string;
+  };
+  const emptyRow: RowData = {
+    key: "",
+    name: "",
+    body: "",
+    owner: false,
+    rc: false,
+    fanIndex: -1,
+    raw: "",
+  };
   // 自己发布的评论始终置顶，最新的排第一条
-  const ownerTopComments = extra
+  const ownerRows: RowData[] = extra
     .filter((c) => !isNestedReply(c))
     .slice()
-    .reverse();
-  const runtimeCommentsAsText = [...(runtimeCommentStore[item.id] ?? [])]
     .reverse()
-    .map((r) => r.name + "：" + r.text);
-  const comments = [
-    ...ownerTopComments,
-    ...runtimeCommentsAsText,
-    ...fanTopComments,
+    .map((c, i) => {
+      const { name, body } = parseTopText(c);
+      return { ...emptyRow, key: "ow" + i, name, body, owner: true, raw: c };
+    });
+  // 静态粉丝评论：赞数按它在原始评论列表中的固定序号计算，不被新增评论挤动
+  const fanRows: RowData[] = item.comments
+    .map((c, i) => ({ c, i }))
+    .filter(({ c }) => !fanReplyTarget(c))
+    .map(({ c, i }) => {
+      const { name, body } = parseTopText(c);
+      return { ...emptyRow, key: "fn" + i, name, body, fanIndex: i, raw: c };
+    });
+  // 运行时新增的粉丝评论（弹窗同步进来的）：排在后面，赞数从 0 开始
+  const runtimeRows: RowData[] = [...(runtimeCommentStore[item.id] ?? [])]
+    .slice()
+    .reverse()
+    .map((r) => ({
+      ...emptyRow,
+      key: "rc" + r.id,
+      name: r.name,
+      body: r.text,
+      rc: true,
+      raw: r.name + "：" + r.text,
+    }));
+  const rows: RowData[] = [
+    ...ownerRows,
+    ...(sort ? [...fanRows].reverse() : fanRows),
+    ...runtimeRows,
   ];
-  const displayComments = sort
-    ? [
-        ...ownerTopComments,
-        ...runtimeCommentsAsText,
-        ...[...fanTopComments].reverse(),
-      ]
-    : comments;
   const ownerBadge = p.owner ? <NameBadges /> : null;
   // 评论元信息：时间（六成跟随博文发布时间，其余随机）、随机 IP 属地、随机赞数
   const postProvince =
@@ -239,8 +277,11 @@ export function SocialDetail(p: {
     index: number | string,
     nested: boolean,
     onDelete?: () => void,
+    rowKey?: string,
+    showNested?: boolean,
   ): ReactElement => {
-    const menuKey = "menu-" + String(index);
+    const menuKey = "menu-" + (rowKey ?? String(index));
+    const articleKey = rowKey ?? String(index);
     const seed = name + "|" + body,
       info = commentMeta(seed),
       metaTime =
@@ -253,7 +294,7 @@ export function SocialDetail(p: {
         : commentLikes(index, seed);
     return (
       <>        <article
-        key={index}
+        key={articleKey}
         className={
           "post-detail-comment" + (nested ? " weibo-nested-reply" : "")
         }
@@ -322,6 +363,7 @@ export function SocialDetail(p: {
         </div>
       </article>
       {!nested &&
+        showNested !== false &&
         tab !== "转发" &&
         nestedReplies
           .filter((r) => r.to === name)
@@ -330,12 +372,14 @@ export function SocialDetail(p: {
               p.owner || "机主",
               r.text,
               true,
-              "n" + index + "-" + r.i,
+              "n" + articleKey + "-" + r.i,
               true,
               () => removeExtraAt(r.i),
+              articleKey + "n" + r.i,
             ),
           )}
       {!nested &&
+        showNested !== false &&
         tab !== "转发" &&
         fanNestedReplies
           .map((e, i) => ({ e, i }))
@@ -345,7 +389,15 @@ export function SocialDetail(p: {
               hasName = split > 0 && split < 24,
               fName = hasName ? e.c.slice(0, split) : "用户",
               fBody = hasName ? e.c.slice(split + 1) : e.c;
-            return commentRow(fName, fBody, false, "f" + index + "-" + i, true);
+            return commentRow(
+              fName,
+              fBody,
+              false,
+              "f" + articleKey + "-" + i,
+              true,
+              undefined,
+              articleKey + "f" + i,
+            );
           })}
     </>
   );
@@ -394,7 +446,7 @@ export function SocialDetail(p: {
     <div className="post-detail-actions">
       <button aria-label="查看评论" onClick={() => setTab("评论")}>
         <MessageCircle />
-        {count(comments.length)}
+        {count(rows.length)}
       </button>
       <button aria-label="查看转发" onClick={() => setTab("转发")}>
         <Repeat2 />
@@ -525,7 +577,7 @@ export function SocialDetail(p: {
               >
                 {name}{" "}
                 {name === "评论"
-                  ? meta(item, "commentsCount") || count(comments.length)
+                  ? meta(item, "commentsCount") || count(rows.length)
                   : name === "赞"
                     ? wanCount(item.likes + (liked ? 1 : 0))
                     : meta(item, "reposts", "0")}
@@ -565,34 +617,32 @@ export function SocialDetail(p: {
         ) : (
           <div className="post-detail-comments">
             {(tab === "转发"
-              ? sort
-                ? [...item.reposts].reverse()
-                : item.reposts
-              : displayComments
-            ).map((c, index) => {
-              const isOwner = ownerTopReplies.has(c),
-                split = c.search(/[：:]/),
-                hasName = split > 0 && split < 24,
-                name = isOwner
-                  ? p.owner || "机主"
-                  : hasName
-                    ? c.slice(0, split)
-                    : "用户",
-                body = hasName ? c.slice(split + 1) : c;
+              ? (sort
+                  ? [...item.reposts].reverse()
+                  : item.reposts
+                ).map((c, i) => {
+                  const { name, body } = parseTopText(c);
+                  return { ...emptyRow, key: "rp" + i, name, body, raw: c };
+                })
+              : rows
+            ).map((row, index) => {
+              // 同名评论只由首次出现的那一行渲染楼中楼，避免回复重复挂靠
+              const firstOfName =
+                rows.findIndex((r) => r.name === row.name) === index;
               return commentRow(
-                name,
-                body,
-                isOwner,
-                !isOwner && runtimeCommentsAsText.includes(c)
-                  ? "rc" + index
-                  : index,
+                row.name,
+                row.body,
+                row.owner,
+                row.rc ? row.key : row.fanIndex,
                 false,
-                isOwner
-                  ? () => removeOwnerTop(extra.indexOf(c))
+                row.owner
+                  ? () => removeOwnerTop(extra.indexOf(row.raw))
                   : undefined,
+                row.key,
+                firstOfName,
               );
             })}
-            {(tab === "转发" ? !item.reposts.length : !comments.length) && (
+            {(tab === "转发" ? !item.reposts.length : !rows.length) && (
               <p className="post-comments-empty">
                 {tab === "转发" ? "暂无转发" : "暂无评论"}
               </p>
@@ -644,7 +694,7 @@ export function SocialDetail(p: {
           avatar={item.avatar}
           owner={p.owner}
           reposts={meta(item, "reposts", "转发")}
-          comments={meta(item, "commentsCount") || count(comments.length)}
+          comments={meta(item, "commentsCount") || count(rows.length)}
           likes={wanCount(item.likes + (liked ? 1 : 0))}
           onClose={() => setViewer(null)}
         />
