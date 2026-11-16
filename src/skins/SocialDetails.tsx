@@ -79,6 +79,40 @@ const fanNotifTexts = [
 ];
 const fanNotifHue = (name: string) =>
   [...name].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 360;
+const commentProvinces = [
+  "北京",
+  "上海",
+  "广东",
+  "江苏",
+  "浙江",
+  "四川",
+  "湖南",
+  "湖北",
+  "山东",
+  "河南",
+  "福建",
+  "陕西",
+  "重庆",
+  "辽宁",
+  "云南",
+  "广西",
+  "安徽",
+  "河北",
+  "江西",
+  "贵州",
+  "山西",
+  "吉林",
+  "黑龙江",
+  "内蒙古",
+  "甘肃",
+  "海南",
+];
+const hashStr = (s: string) => {
+  let a = 5381;
+  for (const ch of s) a = ((a * 33) ^ ch.charCodeAt(0)) >>> 0;
+  return a;
+};
+const pad2 = (n: number) => String(n).padStart(2, "0");
 export function SocialDetail(p: {
   app: string;
   item: Item;
@@ -182,6 +216,45 @@ export function SocialDetail(p: {
     ? [...ownerTopComments, ...[...fanTopComments].reverse()]
     : comments;
   const ownerBadge = p.owner ? <NameBadges /> : null;
+  // 评论元信息：时间（六成跟随博文发布时间，其余随机）、随机 IP 属地、随机赞数
+  const postClock = item.time.match(
+    /(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})/,
+  );
+  const postDate = postClock
+    ? {
+        m: +postClock[2],
+        d: +postClock[3],
+        h: +postClock[4],
+        min: +postClock[5],
+      }
+    : null;
+  const commentMeta = (seed: string) => {
+    const h = hashStr(item.id + "|" + seed);
+    let time = "11-3 19:18";
+    if (postDate) {
+      if (h % 100 < 60) {
+        time = `${postDate.m}-${postDate.d} ${pad2(postDate.h)}:${pad2(postDate.min)}`;
+      } else {
+        const nextDay = h % 3 === 0;
+        const hh = nextDay
+          ? 8 + ((h >>> 6) % 14)
+          : postDate.h + ((h >>> 6) % (24 - postDate.h));
+        const mm = (h >>> 12) % 60;
+        time = `${postDate.m}-${postDate.d + (nextDay ? 1 : 0)} ${pad2(hh)}:${pad2(mm)}`;
+      }
+    }
+    return {
+      time,
+      province: commentProvinces[(h >>> 4) % commentProvinces.length],
+    };
+  };
+  const commentLikes = (index: number | string, seed: string) => {
+    const h = hashStr("like|" + item.id + "|" + seed);
+    if (typeof index !== "number") return 1 + (h % 60);
+    if (index < 5) return 1200 + (h % 8600);
+    const base = 960 * Math.pow(0.74, index - 5);
+    return Math.max(1, Math.round(base * (0.75 + (h % 50) / 100)));
+  };
   const removeExtraAt = (idx: number) => {
     setExtra(extra.filter((_, i) => i !== idx));
     setCommentMenu(null);
@@ -224,25 +297,34 @@ export function SocialDetail(p: {
             {isOwner && ownerBadge}
           </strong>
           <p>{body}</p>
-          <div className="post-comment-actions">
-            <button
-              aria-label={"转发" + name}
-              onClick={() => setTarget(name)}
-            >
-              {tab === "转发" ? (
-                <Repeat2 size={16} />
-              ) : (
-                <MessageCircle size={16} />
-              )}
-            </button>
-            <button
-              aria-label={"喜欢回复" + index}
-              onClick={(e) => {
-                e.currentTarget.classList.toggle("liked");
-              }}
-            >
-              <Heart size={16} />
-            </button>
+          <div className="comment-meta-row">
+            <span className="comment-meta-info">
+              {commentMeta(name + "|" + body).time} 来自{" "}
+              {commentMeta(name + "|" + body).province}
+            </span>
+            <span className="comment-meta-divider" />
+            <div className="post-comment-actions">
+              <button
+                aria-label={"转发" + name}
+                onClick={() => setTarget(name)}
+              >
+                <Repeat2 size={15} />
+              </button>
+              <button aria-label={"回复" + name} onClick={() => setTarget(name)}>
+                <MessageCircle size={15} />
+              </button>
+              <button
+                aria-label={"喜欢回复" + index}
+                onClick={(e) => {
+                  e.currentTarget.classList.toggle("liked");
+                }}
+              >
+                <Heart size={15} />
+                <span className="comment-like-count">
+                  {commentLikes(index, name + "|" + body)}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
         <div className="comment-more-wrap">

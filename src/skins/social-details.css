@@ -177,6 +177,55 @@
   color: #81909a;
   margin-top: 9px;
 }
+.ios18 .comment-meta-row {
+  display: flex;
+  align-items: center;
+  margin-top: 9px;
+}
+.ios18 .comment-meta-info {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #8590a0;
+  font-size: 12.5px;
+}
+.ios18 .comment-meta-divider {
+  flex: none;
+  width: 0.5px;
+  height: 13px;
+  background: #dcdfe4;
+  margin: 0 12px;
+}
+.ios18 .comment-meta-row .post-comment-actions {
+  flex: none;
+  margin-top: 0;
+  gap: 22px;
+  align-items: center;
+}
+.ios18 .comment-meta-row .post-comment-actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ios18 .comment-like-count {
+  font-size: 13px;
+  line-height: 1;
+}
+.ios18 .post-comment-actions .liked,
+.ios18 .post-comment-actions .liked .comment-like-count {
+  color: #f91880;
+}
+.ios18 .weibo-nested-reply .comment-meta-info {
+  font-size: 11px;
+}
+.ios18 .weibo-nested-reply .comment-meta-row .post-comment-actions {
+  gap: 16px;
+}
+.ios18 .weibo-nested-reply .comment-like-count {
+  font-size: 12px;
+}
 .ios18 .post-comment-actions button {
   border: 0;
   background: none;
