@@ -7,7 +7,7 @@ import {
   ScanSearch,
   ChevronDown,
 } from "lucide-react";
-import { Avatar } from "./shared";
+import { Avatar, wanCount } from "./shared";
 import "./image-viewer.css";
 
 const parseWan = (s: string) => {
@@ -107,7 +107,7 @@ export function ImageViewer({
             onClick={() => setReposted(true)}
           >
             <Repeat2 size={22} />
-            {reposted ? repostBase + 1 : reposts}
+            {reposted ? wanCount(repostBase + 1) : reposts}
           </button>
           <button
             aria-label="评论图片"
@@ -116,7 +116,7 @@ export function ImageViewer({
             onClick={() => setCommented(true)}
           >
             <MessageCircle size={22} />
-            {commented ? commentBase + 1 : comments}
+            {commented ? wanCount(commentBase + 1) : comments}
           </button>
           <button
             aria-label="赞图片"
@@ -125,7 +125,7 @@ export function ImageViewer({
             onClick={() => setLiked(!liked)}
           >
             <ThumbsUp size={22} fill={liked ? "currentColor" : "none"} />
-            {liked ? likeBase + 1 : likes}
+            {liked ? wanCount(likeBase + 1) : likes}
           </button>
         </div>
       </footer>
