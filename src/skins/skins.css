@@ -4192,3 +4192,61 @@
 .catalog-slot[hidden] {
   display: none;
 }
+
+.avatar-v-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+.v-badge-gold {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 42%;
+  height: 42%;
+  min-width: 15px;
+  min-height: 15px;
+  background: radial-gradient(circle at 32% 28%, #ffe08a, #ff9d1c 72%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 9px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px #0004;
+}
+.name-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 7px;
+  vertical-align: -2px;
+}
+.gender-badge {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4da6f5;
+  color: #fff;
+  font-style: normal;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.svip-badge {
+  background: linear-gradient(90deg, #f9de7f, #eab13e);
+  color: #5d3f00;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  padding: 2px 7px;
+  border-radius: 9px 3px 9px 3px;
+  border: 1px solid #ffffff88;
+  white-space: nowrap;
+}

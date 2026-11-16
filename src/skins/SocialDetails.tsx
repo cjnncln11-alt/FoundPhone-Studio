@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useSkinState } from "../skinState";
 import { RichText } from "../RichText";
-import { Avatar, Media, meta, wanCount } from "./shared";
+import { Avatar, Media, meta, NameBadges, VAvatar, wanCount } from "./shared";
 import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
 import "./social-details.css";
@@ -133,9 +133,16 @@ export function SocialDetail(p: {
       </header>
       <div className="post-detail-scroll">
         <div className="post-detail-author">
-          <Avatar name={item.sender} src={item.avatar} />
+          <VAvatar
+            name={item.sender || "用户"}
+            src={item.avatar}
+            gold={item.sender === p.owner}
+          />
           <div>
-            <strong>{item.sender || "用户"}</strong>
+            <strong>
+              {item.sender || "用户"}
+              {item.sender === p.owner && <NameBadges />}
+            </strong>
             <small>
               {weibo
                 ? item.time + " " + meta(item, "location")
@@ -327,6 +334,7 @@ export function SocialDetail(p: {
           setIndex={setViewer}
           sender={item.sender || "用户"}
           avatar={item.avatar}
+          owner={p.owner}
           reposts={meta(item, "reposts", "转发")}
           comments={meta(item, "commentsCount") || count(comments.length)}
           likes={wanCount(item.likes + (liked ? 1 : 0))}

@@ -26,9 +26,11 @@ import {
   Header,
   Media,
   meta,
+  NameBadges,
   SearchBox,
   Tabs,
   useContent,
+  VAvatar,
   wanCount,
   type Props,
 } from "./shared";
@@ -57,11 +59,15 @@ function Actions({ p, item }: { p: Props; item: Item }) {
   );
 }
 function PostHeader({ item, p }: { item: Item; p: Props }) {
+  const gold = item.sender === p.owner;
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
-      <Avatar name={item.sender} src={item.avatar} />
+      <VAvatar name={item.sender} src={item.avatar} gold={gold} />
       <span>
-        <strong>{item.sender}</strong>
+        <strong>
+          {item.sender}
+          {gold && <NameBadges />}
+        </strong>
         <small>{meta(item, "handle", item.time)}</small>
       </span>
     </button>
@@ -125,9 +131,12 @@ export function WeiboSkin(p: Props) {
               />
             )}
             <div className="weibo-profile-head">
-              <Avatar name={p.owner ?? "我"} src={items[0]?.avatar} />
+              <VAvatar name={p.owner ?? "我"} src={items[0]?.avatar} gold />
               <div className="weibo-profile-name">
-                <h2>{p.owner ?? "我"}</h2>
+                <h2>
+                  {p.owner ?? "我"}
+                  <NameBadges />
+                </h2>
                 {(meta(items[0], "profileFans") ||
                   meta(items[0], "profileFollowing") ||
                   meta(items[0], "profileInteractions")) && (
@@ -197,6 +206,7 @@ export function WeiboSkin(p: Props) {
           setIndex={(n) => setViewer({ ...viewer, index: n })}
           sender={viewer.item.sender}
           avatar={viewer.item.avatar}
+          owner={p.owner}
           reposts={meta(viewer.item, "reposts", "转发")}
           comments={
             meta(viewer.item, "commentsCount") ||

@@ -43,20 +43,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.image-viewer-badge {
-  flex: none;
-  font-style: normal;
-  font-size: 9px;
-  font-weight: 700;
-  color: #fff;
-  background: #f59e0b;
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
 .image-viewer-top-actions {
   margin-left: auto;
   display: flex;

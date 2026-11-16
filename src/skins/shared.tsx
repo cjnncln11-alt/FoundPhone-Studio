@@ -103,6 +103,39 @@ export function Avatar({
     </span>
   );
 }
+export function VAvatar({
+  name,
+  src = "",
+  gold = false,
+}: {
+  name: string;
+  src?: string;
+  gold?: boolean;
+}) {
+  const a = <Avatar name={name} src={src} />;
+  return gold ? (
+    <span className="avatar-v-wrap">
+      {a}
+      <i className="v-badge-gold" aria-label="金V认证">
+        V
+      </i>
+    </span>
+  ) : (
+    a
+  );
+}
+export function NameBadges() {
+  return (
+    <span className="name-badges">
+      <i className="gender-badge" aria-label="性别">
+        ♂
+      </i>
+      <i className="svip-badge" aria-label="会员等级">
+        👑SVIP9
+      </i>
+    </span>
+  );
+}
 export const wanCount = (n: number) =>
   n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n);
 export function Media({
