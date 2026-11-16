@@ -2023,12 +2023,12 @@
 .weibo-profile-head {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
 }
 .weibo-profile-head .catalog-avatar {
-  width: 52px;
-  height: 52px;
+  width: 38px;
+  height: 38px;
   flex: none;
   border: 2px solid #fff;
   box-shadow: 0 1px 4px #0003;
@@ -2041,8 +2041,8 @@
 }
 .weibo-profile-stats {
   display: flex;
-  gap: 10px;
-  font-size: 10px;
+  gap: 8px;
+  font-size: 9px;
   color: #666;
   flex-wrap: wrap;
 }
@@ -2051,8 +2051,10 @@
   font-weight: 600;
 }
 .weibo-profile h2 {
-  font-size: 17px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 .weibo-profile > span:last-child {
   display: block;
@@ -4222,18 +4224,18 @@
 .name-badges {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-left: 7px;
-  vertical-align: -2px;
+  gap: 4px;
+  margin-left: 5px;
+  vertical-align: -1px;
 }
 .gender-badge {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #4da6f5;
   color: #fff;
   font-style: normal;
-  font-size: 10px;
+  font-size: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4243,10 +4245,10 @@
   color: #5d3f00;
   font-style: normal;
   font-weight: 800;
-  font-size: 9px;
+  font-size: 8px;
   letter-spacing: 0.3px;
-  padding: 2px 7px;
-  border-radius: 9px 3px 9px 3px;
+  padding: 1px 5px;
+  border-radius: 8px 3px 8px 3px;
   border: 1px solid #ffffff88;
   white-space: nowrap;
 }
