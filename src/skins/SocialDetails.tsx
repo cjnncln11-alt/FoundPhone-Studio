@@ -125,7 +125,7 @@ export function SocialDetail(p: {
       const name = fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
         text = fanNotifTexts[Math.floor(Math.random() * fanNotifTexts.length)],
         id = ++notifSeq.current;
-      setNotifs((list) => [...list.slice(-2), { id, name, text }]);
+      setNotifs([{ id, name, text }]);
       notifTimers.current.push(
         window.setTimeout(
           () => setNotifs((list) => list.filter((n) => n.id !== id)),
