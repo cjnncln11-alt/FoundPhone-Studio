@@ -307,6 +307,10 @@ function PhoneRuntime({
   const weiboNotifDeck = useRef<
     { name: string; text: string; photos: string[] }[]
   >([]);
+  const appRef = useRef(app);
+  useEffect(() => {
+    appRef.current = app;
+  }, [app]);
   useEffect(() => {
     if (creator || locked) return;
     const posts = work.data.weibo ?? [];
@@ -345,7 +349,7 @@ function PhoneRuntime({
     const schedule = () => {
       timer = window.setTimeout(
         () => {
-          if (app && app !== "weibo") {
+          if (appRef.current !== "weibo") {
             if (!weiboNotifDeck.current.length)
               weiboNotifDeck.current = buildDeck();
             const next = weiboNotifDeck.current.pop();
@@ -353,12 +357,12 @@ function PhoneRuntime({
           }
           schedule();
         },
-        14000 + Math.random() * 26000,
+        12000 + Math.random() * 18000,
       );
     };
     schedule();
     return () => window.clearTimeout(timer);
-  }, [creator, locked, app, work]);
+  }, [creator, locked, work]);
   const dismissNotice = (index: number) =>
     update({
       ...runtimeRef.current,
