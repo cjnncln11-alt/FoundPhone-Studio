@@ -1906,6 +1906,7 @@
 }
 .social-author {
   display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: 9px;
   padding: 12px 13px;
@@ -2059,14 +2060,6 @@
   font-size: 9px;
   color: #999;
   margin-top: 8px;
-}
-.weibo-profile .social-author {
-  justify-content: flex-start;
-  text-align: left;
-}
-.weibo-profile .social-author strong,
-.weibo-profile .social-author small {
-  text-align: left;
 }
 .media-grid.media-grid {
   display: grid;
