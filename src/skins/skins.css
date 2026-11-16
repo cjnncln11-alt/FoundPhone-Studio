@@ -2041,8 +2041,8 @@
 }
 .weibo-profile-stats {
   display: flex;
-  gap: 8px;
-  font-size: 9px;
+  gap: 9px;
+  font-size: 10.5px;
   color: #666;
   flex-wrap: wrap;
 }
@@ -2051,7 +2051,7 @@
   font-weight: 600;
 }
 .weibo-profile h2 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -4229,8 +4229,8 @@
   vertical-align: -1px;
 }
 .gender-badge {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #4da6f5;
   color: #fff;
@@ -4245,9 +4245,9 @@
   color: #5d3f00;
   font-style: normal;
   font-weight: 800;
-  font-size: 8px;
+  font-size: 8.5px;
   letter-spacing: 0.3px;
-  padding: 1px 5px;
+  padding: 1.5px 6px;
   border-radius: 8px 3px 8px 3px;
   border: 1px solid #ffffff88;
   white-space: nowrap;
