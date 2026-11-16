@@ -68,79 +68,91 @@ export function SocialDetail(p: {
     .filter(isNestedReply)
     .map(parseNestedReply);
   const ownerTopReplies = new Set(extra.filter((c) => !isNestedReply(c)));
+  // 粉丝评论中"回复 @某人："开头的也归入楼中楼
+  const fanReplyRe = /^回复\s*@(.+?)[：:]/;
+  const fanReplyTarget = (c: string) => {
+    const split = c.search(/[：:]/),
+      hasName = split > 0 && split < 24,
+      body = hasName ? c.slice(split + 1) : c;
+    return body.match(fanReplyRe)?.[1] || "";
+  };
+  const fanNestedReplies = item.comments
+    .map((c) => ({ c, to: fanReplyTarget(c) }))
+    .filter((e) => e.to);
   const comments = [
-    ...item.comments,
+    ...item.comments.filter((c) => !fanReplyTarget(c)),
     ...extra.filter((c) => !isNestedReply(c)),
   ];
   const ownerBadge = p.owner ? <NameBadges /> : null;
   const commentRow = (
-    c: string,
+    name: string,
+    body: string,
+    isOwner: boolean,
     index: number | string,
-    nested?: boolean,
-  ): ReactElement => {
-    const isOwnerReply = nested || ownerTopReplies.has(c);
-    const split = c.search(/[：:]/),
-      hasName = split > 0 && split < 24,
-      name = isOwnerReply
-        ? p.owner || "机主"
-        : hasName
-          ? c.slice(0, split)
-          : "用户",
-      body = nested
-        ? c.slice(c.indexOf(nestedSep, 1) + 1)
-        : hasName
-          ? c.slice(split + 1)
-          : c;
-    return (
-      <>        <article
-          key={index}
-          className={
-            "post-detail-comment" + (nested ? " weibo-nested-reply" : "")
-          }
-        >
-          {isOwnerReply ? (
-            <Avatar name={name} src={p.ownerAvatar} />
-          ) : (
-            <Avatar name={name} />
-          )}
-          <div>
-            <strong>
-              {name}
-              {isOwnerReply && ownerBadge}
-            </strong>
-            <p>{body}</p>
-            <div className="post-comment-actions">
-              <button
-                aria-label={"转发" + name}
-                onClick={() => setTarget(name)}
-              >
-                {tab === "转发" ? (
-                  <Repeat2 size={16} />
-                ) : (
-                  <MessageCircle size={16} />
-                )}
-              </button>
-              <button
-                aria-label={"喜欢回复" + index}
-                onClick={(e) => {
-                  e.currentTarget.classList.toggle("liked");
-                }}
-              >
-                <Heart size={16} />
-              </button>
-            </div>
+    nested: boolean,
+  ): ReactElement => (
+    <>        <article
+        key={index}
+        className={
+          "post-detail-comment" + (nested ? " weibo-nested-reply" : "")
+        }
+      >
+        {isOwner ? (
+          <Avatar name={name} src={p.ownerAvatar} />
+        ) : (
+          <Avatar name={name} />
+        )}
+        <div>
+          <strong>
+            {name}
+            {isOwner && ownerBadge}
+          </strong>
+          <p>{body}</p>
+          <div className="post-comment-actions">
+            <button
+              aria-label={"转发" + name}
+              onClick={() => setTarget(name)}
+            >
+              {tab === "转发" ? (
+                <Repeat2 size={16} />
+              ) : (
+                <MessageCircle size={16} />
+              )}
+            </button>
+            <button
+              aria-label={"喜欢回复" + index}
+              onClick={(e) => {
+                e.currentTarget.classList.toggle("liked");
+              }}
+            >
+              <Heart size={16} />
+            </button>
           </div>
-          <MoreHorizontal size={17} />
-        </article>
-        {!nested &&
-          tab !== "转发" &&
-          nestedReplies
-            .map((r, i) => ({ r, i }))
-            .filter(({ r }) => r.to === name)
-            .map(({ r, i }) => commentRow(nestedSep + r.to + nestedSep + r.text, "n" + index + "-" + i, true))}
-      </>
-    );
-  };
+        </div>
+        <MoreHorizontal size={17} />
+      </article>
+      {!nested &&
+        tab !== "转发" &&
+        nestedReplies
+          .map((r, i) => ({ r, i }))
+          .filter(({ r }) => r.to === name)
+          .map(({ r, i }) =>
+            commentRow(p.owner || "机主", r.text, true, "n" + index + "-" + i, true),
+          )}
+      {!nested &&
+        tab !== "转发" &&
+        fanNestedReplies
+          .map((e, i) => ({ e, i }))
+          .filter(({ e }) => e.to === name)
+          .map(({ e, i }) => {
+            const split = e.c.search(/[：:]/),
+              hasName = split > 0 && split < 24,
+              fName = hasName ? e.c.slice(0, split) : "用户",
+              fBody = hasName ? e.c.slice(split + 1) : e.c;
+            return commentRow(fName, fBody, false, "f" + index + "-" + i, true);
+          })}
+    </>
+  );
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(item.body);
@@ -337,7 +349,18 @@ export function SocialDetail(p: {
               : sort
                 ? [...comments].reverse()
                 : comments
-            ).map((c, index) => commentRow(c, index))}
+            ).map((c, index) => {
+              const isOwner = ownerTopReplies.has(c),
+                split = c.search(/[：:]/),
+                hasName = split > 0 && split < 24,
+                name = isOwner
+                  ? p.owner || "机主"
+                  : hasName
+                    ? c.slice(0, split)
+                    : "用户",
+                body = hasName ? c.slice(split + 1) : c;
+              return commentRow(name, body, isOwner, index, false);
+            })}
             {(tab === "转发" ? !item.reposts.length : !comments.length) && (
               <p className="post-comments-empty">
                 {tab === "转发" ? "暂无转发" : "暂无评论"}
