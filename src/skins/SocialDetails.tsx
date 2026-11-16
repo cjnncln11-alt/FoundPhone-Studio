@@ -86,7 +86,11 @@ export function SocialDetail(p: {
         : hasName
           ? c.slice(0, split)
           : "用户",
-      body = isOwnerReply ? c.slice(split + 1) : hasName ? c.slice(split + 1) : c;
+      body = nested
+        ? c.slice(c.indexOf(nestedSep, 1) + 1)
+        : hasName
+          ? c.slice(split + 1)
+          : c;
     return (
       <>        <article
           key={index}
