@@ -1,9 +1,15 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
-import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
+import {
+  WeiboNotifLayer,
+  hasWeiboNotif,
+  pushWeiboNotif,
+  setWeiboNotifHold,
+} from "./skins/weiboNotify";
 import {
   isStormRunning,
   setStormInWeibo,
+  startExitHold,
   weiboCooldownRemaining,
 } from "./skins/weiboStorm";
 import { fanNormalTexts, fanNotifNames, clipText } from "./skins/weiboData";
@@ -314,9 +320,17 @@ function PhoneRuntime({
   >([]);
   const appRef = useRef(app);
   useEffect(() => {
+    const leavingWeibo = appRef.current === "weibo" && app !== "weibo";
     appRef.current = app;
     setStormInWeibo(app === "weibo");
-    // 退出微博时不清屏：屏幕上的那一条弹窗保留，自然消失后再进入 30 秒静默
+    if (leavingWeibo && hasWeiboNotif()) {
+      // 退出时屏幕上还留着一条弹窗：让它常驻等用户上滑，滑掉后开始 30 秒静默
+      setWeiboNotifHold(true);
+      startExitHold();
+    } else if (!leavingWeibo && app === "weibo") {
+      // 回到微博：恢复自动消失，风暴弹窗照常刷新
+      setWeiboNotifHold(false);
+    }
   }, [app]);
   useEffect(() => {
     if (creator || locked) return;

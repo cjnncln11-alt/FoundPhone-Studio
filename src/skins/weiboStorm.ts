@@ -14,6 +14,8 @@ let rcSeq = 0;
 let inWeibo = true;
 let lastPushAt = 0;
 let exitAt = 0;
+/** 退出微博后屏幕上留着弹窗、等用户上滑的"托管"状态：期间不推新消息，也不开始计时 */
+let holdActive = false;
 /** 退出微博后的静默冷却（30 秒内不弹任何微博消息） */
 const EXIT_COOLDOWN = 30000;
 /** 微博外的推送间隔：20~30 秒一条 */
@@ -24,12 +26,24 @@ const listeners = new Set<() => void>();
 /** 由 Phone 在切换 App 时同步：当前是否在微博内 */
 export function setStormInWeibo(v: boolean) {
   if (inWeibo && !v) exitAt = performance.now();
+  if (v) holdActive = false;
   inWeibo = v;
 }
 export const isInWeibo = () => inWeibo;
+/** 退出微博时屏幕上还留着一条弹窗：先不开始计时，等用户上滑关掉 */
+export function startExitHold() {
+  if (!inWeibo) holdActive = true;
+}
+/** 用户上滑/点击关掉那条弹窗：从这一刻开始 30 秒静默 */
+export function releaseExitHold() {
+  if (!holdActive) return;
+  holdActive = false;
+  exitAt = performance.now();
+}
 /** 退出微博后还需静默多久（毫秒），0 表示可以弹窗 */
 export function weiboCooldownRemaining() {
   if (inWeibo) return 0;
+  if (holdActive) return EXIT_COOLDOWN;
   return Math.max(0, EXIT_COOLDOWN - (performance.now() - exitAt));
 }
 
