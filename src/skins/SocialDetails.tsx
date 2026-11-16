@@ -139,7 +139,17 @@ export function SocialDetail(p: {
     ownerLikeStore[seed] = 0;
     setOwnerLikes({ ...ownerLikeStore });
     const startedAt = performance.now();
-    const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+    // 一轮内文案不重复（用尽后重新洗牌）
+    let commentPool: string[] = [];
+    const nextCommentText = () => {
+      if (!commentPool.length) {
+        commentPool = [...fanNormalTexts, ...(allowBeg ? fanNotifTexts : [])]
+          .map((t) => ({ t, k: Math.random() }))
+          .sort((a, b) => a.k - b.k)
+          .map((e) => e.t);
+      }
+      return commentPool.pop() ?? "";
+    };
     let lastCommentAt = -1000,
       added = 0;
     const rand = (a: number, b: number) =>
@@ -162,9 +172,7 @@ export function SocialDetail(p: {
       const isLike = Math.random() < 0.5;
       const text = isLike
         ? "赞了你的评论：" + preview.slice(0, 26)
-        : allowBeg && Math.random() < 0.55
-          ? pick(fanNotifTexts)
-          : pick(fanNormalTexts);
+        : nextCommentText();
       pushWeiboNotif({ name, text, photos: item.mediaList });
       // 弹窗里的评论同步出现在评论区（节流 + 上限，避免刷爆）
       if (!isLike && elapsed - lastCommentAt > 650 && added < 14) {
@@ -274,6 +282,8 @@ export function SocialDetail(p: {
     };
   };
   const commentLikes = (index: number | string, seed: string) => {
+    // 运行中新增的粉丝评论：赞数从 0 开始
+    if (typeof index === "string" && index.startsWith("rc")) return 0;
     const h = hashStr("like|" + item.id + "|" + seed);
     if (typeof index !== "number") return 1 + (h % 60);
     if (index < 5) return 1200 + (h % 8600);
@@ -648,7 +658,9 @@ export function SocialDetail(p: {
                 name,
                 body,
                 isOwner,
-                index,
+                !isOwner && runtimeCommentsAsText.includes(c)
+                  ? "rc" + index
+                  : index,
                 false,
                 isOwner
                   ? () => removeOwnerTop(extra.indexOf(c))
