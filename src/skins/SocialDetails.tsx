@@ -111,6 +111,7 @@ export function SocialDetail(p: {
   >([]);
   const notifTimers = useRef<number[]>([]);
   const notifSeq = useRef(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const stopNotifStorm = () => {
     notifTimers.current.forEach((t) => clearTimeout(t));
     notifTimers.current = [];
@@ -170,10 +171,16 @@ export function SocialDetail(p: {
   const fanNestedReplies = item.comments
     .map((c) => ({ c, to: fanReplyTarget(c) }))
     .filter((e) => e.to);
-  const comments = [
-    ...item.comments.filter((c) => !fanReplyTarget(c)),
-    ...extra.filter((c) => !isNestedReply(c)),
-  ];
+  const fanTopComments = item.comments.filter((c) => !fanReplyTarget(c));
+  // 自己发布的评论始终置顶，最新的排第一条
+  const ownerTopComments = extra
+    .filter((c) => !isNestedReply(c))
+    .slice()
+    .reverse();
+  const comments = [...ownerTopComments, ...fanTopComments];
+  const displayComments = sort
+    ? [...ownerTopComments, ...[...fanTopComments].reverse()]
+    : comments;
   const ownerBadge = p.owner ? <NameBadges /> : null;
   const removeExtraAt = (idx: number) => {
     setExtra(extra.filter((_, i) => i !== idx));
@@ -313,6 +320,18 @@ export function SocialDetail(p: {
     setTarget("");
     setTab("评论");
     if (target) startNotifStorm();
+    else
+      window.requestAnimationFrame(() => {
+        const box = scrollRef.current,
+          first = box?.querySelector(".post-detail-comments");
+        if (!box || !first) return;
+        const delta =
+          first.getBoundingClientRect().top - box.getBoundingClientRect().top;
+        box.scrollTo({
+          top: Math.max(0, box.scrollTop + delta - 6),
+          behavior: "smooth",
+        });
+      });
   };
   const actions = (
     <div className="post-detail-actions">
@@ -408,7 +427,7 @@ export function SocialDetail(p: {
           </button>
         </div>
       </header>
-      <div className="post-detail-scroll">
+      <div className="post-detail-scroll" ref={scrollRef}>
         <div className="post-detail-author">
           <VAvatar
             name={item.sender || "用户"}
@@ -524,9 +543,7 @@ export function SocialDetail(p: {
               ? sort
                 ? [...item.reposts].reverse()
                 : item.reposts
-              : sort
-                ? [...comments].reverse()
-                : comments
+              : displayComments
             ).map((c, index) => {
               const isOwner = ownerTopReplies.has(c),
                 split = c.search(/[：:]/),
