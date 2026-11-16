@@ -332,6 +332,8 @@ function PhoneRuntime({
       .flatMap((p) => p.mediaList ?? [])
       .filter(Boolean)
       .slice(0, 24);
+    // 记录上一个牌堆最先弹出的昵称，保证跨牌堆也不相邻同名
+    let lastName = "";
     const buildDeck = () => {
       const deck: { name: string; text: string; photos: string[] }[] = [];
       // 昵称轮换取用，避免连续两条同名粉丝
@@ -367,14 +369,25 @@ function PhoneRuntime({
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
       }
-      // 洗牌后再把相邻同名的往后换开
-      for (let i = 1; i < deck.length; i++) {
-        if (deck[i].name !== deck[i - 1].name) continue;
-        const k = deck.findIndex(
-          (d, idx) => idx > i && d.name !== deck[i].name,
-        );
-        if (k > i) [deck[i], deck[k]] = [deck[k], deck[i]];
+      // 洗牌后把相邻同名换开（弹窗从牌堆尾部依次取出，末尾两条最先弹出）
+      for (let round = 0; round < 2; round++) {
+        for (let i = 1; i < deck.length; i++) {
+          if (deck[i].name !== deck[i - 1].name) continue;
+          const k = deck.findIndex(
+            (d, idx) => idx !== i && idx !== i - 1 && d.name !== deck[i].name,
+          );
+          if (k >= 0) [deck[i], deck[k]] = [deck[k], deck[i]];
+        }
+        // 与上一个牌堆的衔接：末尾（最先弹出）不与 lastName 重复
+        const last = deck.length - 1;
+        if (deck.length > 1 && deck[last].name === lastName) {
+          const k = deck.findIndex(
+            (d, idx) => idx !== last && d.name !== lastName,
+          );
+          if (k >= 0) [deck[last], deck[k]] = [deck[k], deck[last]];
+        }
       }
+      lastName = deck[deck.length - 1]?.name ?? "";
       return deck;
     };
     let timer = 0;
