@@ -291,7 +291,7 @@ export function SocialDetail(p: {
                 }}
               >
                 <Heart size={15} />
-                <span className="comment-like-count">{likes}</span>
+                <span className="comment-like-count">{wanCount(likes)}</span>
               </button>
             </div>
           </div>
