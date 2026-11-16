@@ -204,16 +204,35 @@
   font-size: 14px;
   margin: 2px 0;
 }
+.ios18 .post-detail-comment > .comment-more-wrap {
+  flex: none;
+  width: 17px;
+  height: 17px;
+}
 .ios18 .comment-more-wrap {
   position: relative;
   flex: none;
+  display: flex;
+  align-items: flex-start;
+  width: 17px;
+  height: 17px;
+  color: #a7aeb5;
 }
 .ios18 .comment-more {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  padding: 0;
   border: 0;
   background: none;
-  padding: 2px 0 4px 6px;
-  color: #a7aeb5;
-  justify-content: flex-end;
+  color: inherit;
+  overflow: visible;
+}
+.ios18 .comment-more svg {
+  display: block;
 }
 .ios18 .comment-delete-menu {
   position: absolute;

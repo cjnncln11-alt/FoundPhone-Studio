@@ -238,8 +238,8 @@ export function SocialDetail(p: {
             </button>
           </div>
         </div>
-        {onDelete ? (
-          <div className="comment-more-wrap">
+        <div className="comment-more-wrap">
+          {onDelete ? (
             <button
               className="comment-more"
               aria-label={"更多操作" + name}
@@ -251,15 +251,17 @@ export function SocialDetail(p: {
             >
               <MoreHorizontal size={17} />
             </button>
-            {commentMenu === menuKey && (
-              <div className="comment-delete-menu">
-                <button onClick={onDelete}>删除</button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <MoreHorizontal size={17} />
-        )}
+          ) : (
+            <span className="comment-more is-static">
+              <MoreHorizontal size={17} />
+            </span>
+          )}
+          {onDelete && commentMenu === menuKey && (
+            <div className="comment-delete-menu">
+              <button onClick={onDelete}>删除</button>
+            </div>
+          )}
+        </div>
       </article>
       {!nested &&
         tab !== "转发" &&
