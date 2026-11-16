@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useSkinState } from "../skinState";
 import { RichText } from "../RichText";
-import { Avatar, Media, meta } from "./shared";
+import { Avatar, Media, meta, wanCount } from "./shared";
 import type { Item, UiValue } from "../schema";
 import "./social-details.css";
 export const socialDetailApps = new Set(["twitter", "weibo"]);
@@ -184,9 +184,9 @@ export function SocialDetail(p: {
               >
                 {name}{" "}
                 {name === "评论"
-                  ? count(comments.length)
+                  ? meta(item, "commentsCount") || count(comments.length)
                   : name === "赞"
-                    ? count(item.likes + (liked ? 1 : 0))
+                    ? wanCount(item.likes + (liked ? 1 : 0))
                     : meta(item, "reposts", "0")}
               </button>
             ))}

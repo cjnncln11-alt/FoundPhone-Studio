@@ -9,6 +9,7 @@ export const itemSchema = z.object({
   time: z.string(),
   sender: z.string(),
   avatar: z.string().default(""),
+  mediaList: z.array(z.string()).max(18).default([]),
   kind: z
     .enum([
       "text",

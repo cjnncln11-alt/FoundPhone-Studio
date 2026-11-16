@@ -103,6 +103,8 @@ export function Avatar({
     </span>
   );
 }
+export const wanCount = (n: number) =>
+  n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n);
 export function Media({
   item,
   className = "",
@@ -111,10 +113,13 @@ export function Media({
   className?: string;
 }) {
   const src = safeMedia(item.media);
-  return src ? (
-    item.kind === "audio" ? (
-      <audio className={className} controls src={src} />
-    ) : item.kind === "video" ? (
+  const list = item.mediaList
+    .map((m) => safeMedia(m))
+    .filter((m): m is string => !!m && item.kind !== "audio" && item.kind !== "video");
+  if (item.kind === "audio")
+    return <audio className={className} controls src={src} />;
+  if (item.kind === "video")
+    return (
       <video
         className={className}
         controls
@@ -122,9 +127,23 @@ export function Media({
         src={src}
         onClick={(e) => e.stopPropagation()}
       />
-    ) : (
-      <img className={className} loading="lazy" alt={item.title} src={src} />
-    )
+    );
+  if (list.length)
+    return (
+      <div className={`media-grid media-grid-${Math.min(list.length, 9)}`}>
+        {list.map((s, i) => (
+          <img
+            key={i}
+            loading="lazy"
+            alt={`${item.title} ${i + 1}`}
+            src={s}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ))}
+      </div>
+    );
+  return src ? (
+    <img className={className} loading="lazy" alt={item.title} src={src} />
   ) : (
     <div className={`catalog-art ${className}`}>
       <span>{item.title}</span>

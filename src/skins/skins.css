@@ -2017,6 +2017,41 @@
   gap: 12px;
   background: #f4ebdf;
 }
+.weibo-profile-cover {
+  height: 118px;
+  margin: -20px -20px 14px;
+  background-color: #1a1a1e;
+}
+.weibo-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.weibo-profile-head .catalog-avatar {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px #0003;
+}
+.weibo-profile-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.weibo-profile-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 10px;
+  color: #666;
+  flex-wrap: wrap;
+}
+.weibo-profile-stats b {
+  color: #333;
+  font-weight: 600;
+}
 .weibo-profile h2 {
   font-size: 17px;
   font-weight: 500;
@@ -2025,6 +2060,33 @@
   font-size: 9px;
   color: #999;
   margin-left: auto;
+}
+.media-grid {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(3, 1fr);
+}
+.media-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+}
+.media-grid-1 img,
+.media-grid-2 img {
+  aspect-ratio: auto;
+  max-height: 320px;
+  object-fit: cover;
+}
+.media-grid-1 {
+  grid-template-columns: 1fr;
+}
+.media-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.media-grid-4 {
+  grid-template-columns: repeat(2, 1fr);
 }
 .x-ui {
   --app-accent: #111;

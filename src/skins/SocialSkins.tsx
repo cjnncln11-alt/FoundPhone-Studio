@@ -29,6 +29,7 @@ import {
   SearchBox,
   Tabs,
   useContent,
+  wanCount,
   type Props,
 } from "./shared";
 function Actions({ p, item }: { p: Props; item: Item }) {
@@ -57,7 +58,7 @@ function Actions({ p, item }: { p: Props; item: Item }) {
 function PostHeader({ item, p }: { item: Item; p: Props }) {
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
-      <Avatar name={item.sender} />
+      <Avatar name={item.sender} src={item.avatar} />
       <span>
         <strong>{item.sender}</strong>
         <small>{meta(item, "handle", item.time)}</small>
@@ -75,7 +76,7 @@ function WeiboActions({ p, item }: { p: Props; item: Item }) {
       </button>
       <button aria-label={`评论${item.title}`} onClick={() => p.onItem(item)}>
         <MessageCircle size={17} />
-        {item.comments.length || "评论"}
+        {meta(item, "commentsCount") || item.comments.length || "评论"}
       </button>
       <button
         aria-label={`喜欢${item.title}`}
@@ -83,7 +84,7 @@ function WeiboActions({ p, item }: { p: Props; item: Item }) {
         onClick={() => setLiked(!liked)}
       >
         <ThumbsUp size={17} fill={liked ? "currentColor" : "none"} />
-        {item.likes + (liked ? 1 : 0) || "赞"}
+        {meta(item, "likesCount") || wanCount(item.likes + (liked ? 1 : 0)) || "赞"}
       </button>
     </div>
   );
@@ -109,8 +110,43 @@ export function WeiboSkin(p: Props) {
       <div className="catalog-scroll">
         {tab === "我" ? (
           <div className="weibo-profile">
-            <Avatar name={p.owner ?? "我"} />
-            <h2>{p.owner ?? "我"}</h2>
+            {meta(items[0], "profileCover") && (
+              <div
+                className="weibo-profile-cover"
+                style={{
+                  backgroundImage: `url(${meta(items[0], "profileCover")})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+            )}
+            <div className="weibo-profile-head">
+              <Avatar name={p.owner ?? "我"} src={items[0]?.avatar} />
+              <div className="weibo-profile-name">
+                <h2>{p.owner ?? "我"}</h2>
+                {(meta(items[0], "profileFans") ||
+                  meta(items[0], "profileFollowing") ||
+                  meta(items[0], "profileInteractions")) && (
+                  <div className="weibo-profile-stats">
+                    {meta(items[0], "profileFollowing") && (
+                      <span>
+                        <b>{meta(items[0], "profileFollowing")}</b> 关注
+                      </span>
+                    )}
+                    {meta(items[0], "profileFans") && (
+                      <span>
+                        <b>{meta(items[0], "profileFans")}</b> 粉丝
+                      </span>
+                    )}
+                    {meta(items[0], "profileInteractions") && (
+                      <span>
+                        <b>{meta(items[0], "profileInteractions")}</b> 转赞评
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
             <span>{items.length} 条微博</span>
           </div>
         ) : (
