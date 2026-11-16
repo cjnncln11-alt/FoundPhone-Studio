@@ -1,10 +1,6 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
-import {
-  WeiboNotifLayer,
-  clearWeiboNotif,
-  pushWeiboNotif,
-} from "./skins/weiboNotify";
+import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
 import {
   isStormRunning,
   setStormInWeibo,
@@ -318,11 +314,9 @@ function PhoneRuntime({
   >([]);
   const appRef = useRef(app);
   useEffect(() => {
-    const leavingWeibo = appRef.current === "weibo" && app !== "weibo";
     appRef.current = app;
     setStormInWeibo(app === "weibo");
-    // 退出微博立即清掉屏幕上的弹窗，随后进入 40 秒静默期
-    if (leavingWeibo) clearWeiboNotif();
+    // 退出微博时不清屏：屏幕上的那一条弹窗保留，自然消失后再进入 30 秒静默
   }, [app]);
   useEffect(() => {
     if (creator || locked) return;

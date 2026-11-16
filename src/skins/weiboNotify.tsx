@@ -47,7 +47,7 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
       timer.current = window.setTimeout(() => {
         visible.delete(n.id);
         setCurrent((c) => (c?.id === n.id ? null : c));
-      }, isInWeibo() ? 3400 : 1600);
+      }, isInWeibo() ? 3400 : 2800);
     };
     listeners.add(fn);
     const clear = () => {
