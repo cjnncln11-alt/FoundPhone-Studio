@@ -38,7 +38,10 @@ export function ImageViewer({
   likes: string;
   onClose: () => void;
 }) {
-  const touch = useRef<{ x: number; y: number } | null>(null);
+  const touch = useRef<{ x: number; y: number; id: number } | null>(null);
+  const endTouch = () => {
+    touch.current = null;
+  };
   const [liked, setLiked] = useState(false),
     [reposted, setReposted] = useState(false),
     [commented, setCommented] = useState(false);
@@ -71,15 +74,24 @@ export function ImageViewer({
       <div
         className="image-viewer-stage"
         onPointerDown={(e) => {
-          touch.current = { x: e.clientX, y: e.clientY };
+          if (!e.isPrimary) return;
+          touch.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
         }}
+        onPointerCancel={endTouch}
+        onPointerLeave={endTouch}
         onPointerUp={(e) => {
-          if (!touch.current) return;
-          const dx = e.clientX - touch.current.x,
-            dy = e.clientY - touch.current.y;
+          const start = touch.current;
           touch.current = null;
-          if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
-          else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) onClose();
+          if (!start || start.id !== e.pointerId) return;
+          const dx = e.clientX - start.x,
+            dy = e.clientY - start.y,
+            absX = Math.abs(dx),
+            absY = Math.abs(dy);
+          if (absX > 55 && absX > absY * 1.5) {
+            go(dx < 0 ? 1 : -1);
+          } else if (absX < 14 && absY < 14) {
+            onClose();
+          }
         }}
       >
         <img
