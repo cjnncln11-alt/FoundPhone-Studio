@@ -11,7 +11,15 @@ import { pushWeiboNotif } from "./weiboNotify";
 let timers: number[] = [];
 let stormRunning = false;
 let rcSeq = 0;
+let inWeibo = true;
+let lastPushAt = 0;
 const listeners = new Set<() => void>();
+
+/** 由 Phone 在切换 App 时同步：当前是否在微博内 */
+export function setStormInWeibo(v: boolean) {
+  inWeibo = v;
+}
+export const isInWeibo = () => inWeibo;
 
 export function subscribeOwnerData(fn: () => void) {
   listeners.add(fn);
@@ -90,7 +98,13 @@ export function startOwnerLikeStorm(opts: {
     const text = isLike
       ? "赞了你的评论：" + opts.preview.slice(0, 26)
       : nextCommentText();
-    pushWeiboNotif({ name, text, photos: opts.photos });
+    // 离开微博后弹窗降频：最多约每 4 秒一条，避免挡住其他 App 的操作
+    const now = performance.now();
+    const shouldPush = inWeibo || now - lastPushAt > 4000;
+    if (shouldPush) {
+      lastPushAt = now;
+      pushWeiboNotif({ name, text, photos: opts.photos });
+    }
     // 弹窗里的评论同步进入评论区（节流 + 上限）
     if (!isLike && elapsed - lastCommentAt > 700 && added < 14) {
       const list =

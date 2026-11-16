@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FanAvatar } from "./shared";
+import { isInWeibo } from "./weiboStorm";
 import "./weibo-notify.css";
 
 export type WeiboPush = {
@@ -33,7 +34,7 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
       timer.current = window.setTimeout(() => {
         visible.delete(n.id);
         setCurrent((c) => (c?.id === n.id ? null : c));
-      }, 3400);
+      }, isInWeibo() ? 3400 : 1600);
     };
     listeners.add(fn);
     return () => {

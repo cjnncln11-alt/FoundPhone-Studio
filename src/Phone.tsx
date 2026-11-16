@@ -1,7 +1,7 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
 import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
-import { isStormRunning } from "./skins/weiboStorm";
+import { isStormRunning, setStormInWeibo } from "./skins/weiboStorm";
 import { fanNormalTexts, fanNotifNames, clipText } from "./skins/weiboData";
 import { NativeCalculator } from "./ios/Calculator";
 import { HomeLauncher } from "./launcher/HomeLauncher";
@@ -311,6 +311,7 @@ function PhoneRuntime({
   const appRef = useRef(app);
   useEffect(() => {
     appRef.current = app;
+    setStormInWeibo(app === "weibo");
   }, [app]);
   useEffect(() => {
     if (creator || locked) return;
