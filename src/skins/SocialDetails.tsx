@@ -29,7 +29,13 @@ import {
   VAvatar,
   wanCount,
 } from "./shared";
-import { fanNotifNames, fanNotifTexts, ownerLikeStore } from "./weiboData";
+import {
+  fanNormalTexts,
+  fanNotifNames,
+  fanNotifTexts,
+  ownerLikeStore,
+  runtimeCommentStore,
+} from "./weiboData";
 import { pushWeiboNotif } from "./weiboNotify";
 import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
@@ -102,6 +108,17 @@ export function SocialDetail(p: {
   const [ownerLikes, setOwnerLikes] = useState<Record<string, number>>(
     () => ({ ...ownerLikeStore }),
   );
+  const [runtimeComments, setRuntimeComments] = useState(
+    () => [...(runtimeCommentStore[item.id] ?? [])],
+  );
+  const rcSeq = useRef(0);
+  const addRuntimeComment = (name: string, text: string) => {
+    const list =
+      runtimeCommentStore[item.id] || (runtimeCommentStore[item.id] = []);
+    list.push({ id: ++rcSeq.current, name, text });
+    if (list.length > 40) list.splice(0, list.length - 40);
+    setRuntimeComments([...list]);
+  };
   const likeTimers = useRef<number[]>([]);
   const stopLikeStorm = () => {
     likeTimers.current.forEach((t) => clearTimeout(t));
@@ -113,11 +130,18 @@ export function SocialDetail(p: {
   };
   // 发布评论/回复后，粉丝陆续点赞：10 秒内冲到 2000+，之后逐渐放缓；
   // 弹窗内容为"赞了你的评论"与求翻牌评论混排
-  const startLikeStorm = (seed: string, preview: string) => {
+  const startLikeStorm = (
+    seed: string,
+    preview: string,
+    allowBeg: boolean,
+  ) => {
     stopLikeStorm();
     ownerLikeStore[seed] = 0;
     setOwnerLikes({ ...ownerLikeStore });
     const startedAt = performance.now();
+    const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+    let lastCommentAt = -1000,
+      added = 0;
     const rand = (a: number, b: number) =>
       a + Math.floor(Math.random() * (b - a + 1));
     const tick = () => {
@@ -134,14 +158,20 @@ export function SocialDetail(p: {
               ? rand(10, 25)
               : rand(2, 8);
       bumpOwnerLikes(seed, bump);
-      pushWeiboNotif({
-        name,
-        text:
-          Math.random() < 0.5
-            ? "赞了你的评论：" + preview.slice(0, 26)
-            : fanNotifTexts[Math.floor(Math.random() * fanNotifTexts.length)],
-        photos: item.mediaList,
-      });
+      // 一半是"赞了你的评论"，另一半是粉丝评论：只有回复别人时才可能出现求翻牌文案
+      const isLike = Math.random() < 0.5;
+      const text = isLike
+        ? "赞了你的评论：" + preview.slice(0, 26)
+        : allowBeg && Math.random() < 0.55
+          ? pick(fanNotifTexts)
+          : pick(fanNormalTexts);
+      pushWeiboNotif({ name, text, photos: item.mediaList });
+      // 弹窗里的评论同步出现在评论区（节流 + 上限，避免刷爆）
+      if (!isLike && elapsed - lastCommentAt > 650 && added < 14) {
+        addRuntimeComment(name, text);
+        lastCommentAt = elapsed;
+        added += 1;
+      }
       const gap =
         elapsed < 10000
           ? 300
@@ -192,9 +222,20 @@ export function SocialDetail(p: {
     .filter((c) => !isNestedReply(c))
     .slice()
     .reverse();
-  const comments = [...ownerTopComments, ...fanTopComments];
+  const runtimeCommentsAsText = [...runtimeComments]
+    .reverse()
+    .map((r) => r.name + "：" + r.text);
+  const comments = [
+    ...ownerTopComments,
+    ...runtimeCommentsAsText,
+    ...fanTopComments,
+  ];
   const displayComments = sort
-    ? [...ownerTopComments, ...[...fanTopComments].reverse()]
+    ? [
+        ...ownerTopComments,
+        ...runtimeCommentsAsText,
+        ...[...fanTopComments].reverse(),
+      ]
     : comments;
   const ownerBadge = p.owner ? <NameBadges /> : null;
   // 评论元信息：时间（六成跟随博文发布时间，其余随机）、随机 IP 属地、随机赞数
@@ -400,7 +441,7 @@ export function SocialDetail(p: {
     setDraft("");
     setTarget("");
     setTab("评论");
-    startLikeStorm((p.owner || "机主") + "|" + text, text);
+    startLikeStorm((p.owner || "机主") + "|" + text, text, !!target);
     if (!target)
       window.requestAnimationFrame(() => {
         const box = scrollRef.current,

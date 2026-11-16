@@ -1,7 +1,7 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
 import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
-import { fanNotifNames, fanNotifTexts, clipText } from "./skins/weiboData";
+import { fanNormalTexts, fanNotifNames, clipText } from "./skins/weiboData";
 import { NativeCalculator } from "./ios/Calculator";
 import { HomeLauncher } from "./launcher/HomeLauncher";
 import { useDeviceLayout } from "./launcher/layout";
@@ -330,7 +330,7 @@ function PhoneRuntime({
           text: "赞了你的微博：" + clipText(post.body, 16),
           photos,
         });
-        fanNotifTexts.forEach((text) =>
+        fanNormalTexts.forEach((text) =>
           deck.push({
             name:
               fanNotifNames[Math.floor(Math.random() * fanNotifNames.length)],
