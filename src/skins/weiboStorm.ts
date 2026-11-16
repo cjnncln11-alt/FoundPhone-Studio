@@ -13,13 +13,22 @@ let stormRunning = false;
 let rcSeq = 0;
 let inWeibo = true;
 let lastPushAt = 0;
+let exitAt = 0;
+/** 退出微博后的静默冷却（40 秒内不弹任何微博消息） */
+const EXIT_COOLDOWN = 40000;
 const listeners = new Set<() => void>();
 
 /** 由 Phone 在切换 App 时同步：当前是否在微博内 */
 export function setStormInWeibo(v: boolean) {
+  if (inWeibo && !v) exitAt = performance.now();
   inWeibo = v;
 }
 export const isInWeibo = () => inWeibo;
+/** 退出微博后还需静默多久（毫秒），0 表示可以弹窗 */
+export function weiboCooldownRemaining() {
+  if (inWeibo) return 0;
+  return Math.max(0, EXIT_COOLDOWN - (performance.now() - exitAt));
+}
 
 export function subscribeOwnerData(fn: () => void) {
   listeners.add(fn);
@@ -100,7 +109,9 @@ export function startOwnerLikeStorm(opts: {
       : nextCommentText();
     // 离开微博后弹窗降频：最多约每 4 秒一条，避免挡住其他 App 的操作
     const now = performance.now();
-    const shouldPush = inWeibo || now - lastPushAt > 4000;
+    const shouldPush =
+      inWeibo ||
+      (now - lastPushAt > 4000 && weiboCooldownRemaining() === 0);
     if (shouldPush) {
       lastPushAt = now;
       pushWeiboNotif({ name, text, photos: opts.photos });

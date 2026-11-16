@@ -1,7 +1,15 @@
 import { StatusGlyph } from "./ios/StatusGlyph";
 import { SocialDetail, socialDetailApps } from "./skins/SocialDetails";
-import { WeiboNotifLayer, pushWeiboNotif } from "./skins/weiboNotify";
-import { isStormRunning, setStormInWeibo } from "./skins/weiboStorm";
+import {
+  WeiboNotifLayer,
+  clearWeiboNotif,
+  pushWeiboNotif,
+} from "./skins/weiboNotify";
+import {
+  isStormRunning,
+  setStormInWeibo,
+  weiboCooldownRemaining,
+} from "./skins/weiboStorm";
 import { fanNormalTexts, fanNotifNames, clipText } from "./skins/weiboData";
 import { NativeCalculator } from "./ios/Calculator";
 import { HomeLauncher } from "./launcher/HomeLauncher";
@@ -310,8 +318,11 @@ function PhoneRuntime({
   >([]);
   const appRef = useRef(app);
   useEffect(() => {
+    const leavingWeibo = appRef.current === "weibo" && app !== "weibo";
     appRef.current = app;
     setStormInWeibo(app === "weibo");
+    // 退出微博立即清掉屏幕上的弹窗，随后进入 40 秒静默期
+    if (leavingWeibo) clearWeiboNotif();
   }, [app]);
   useEffect(() => {
     if (creator || locked) return;
@@ -348,22 +359,33 @@ function PhoneRuntime({
       return deck;
     };
     let timer = 0;
-    const schedule = () => {
+    const baseDelay = () => 12000 + Math.random() * 18000;
+    const schedule = (delay: number) => {
       timer = window.setTimeout(
         () => {
+          if (appRef.current === "weibo") {
+            schedule(baseDelay());
+            return;
+          }
+          // 退出微博后的 40 秒静默期：等冷却结束再推
+          const cool = weiboCooldownRemaining();
+          if (cool > 0) {
+            schedule(cool + 400);
+            return;
+          }
           // 涨赞风暴进行中时，由风暴自己推送评论/点赞消息，避免互相顶掉
-          if (appRef.current !== "weibo" && !isStormRunning()) {
+          if (!isStormRunning()) {
             if (!weiboNotifDeck.current.length)
               weiboNotifDeck.current = buildDeck();
             const next = weiboNotifDeck.current.pop();
             if (next) pushWeiboNotif(next);
           }
-          schedule();
+          schedule(baseDelay());
         },
-        12000 + Math.random() * 18000,
+        delay,
       );
     };
-    schedule();
+    schedule(baseDelay());
     return () => window.clearTimeout(timer);
   }, [creator, locked, work]);
   const dismissNotice = (index: number) =>

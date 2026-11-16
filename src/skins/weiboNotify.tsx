@@ -13,6 +13,12 @@ export type WeiboPush = {
 let seq = 0;
 const listeners = new Set<(n: WeiboPush) => void>();
 const visible = new Set<number>();
+const clearers = new Set<() => void>();
+
+/** 立即清掉当前显示的弹窗（如退出微博时） */
+export function clearWeiboNotif() {
+  clearers.forEach((fn) => fn());
+}
 
 export function pushWeiboNotif(p: Omit<WeiboPush, "id">) {
   const item: WeiboPush = { id: ++seq, ...p };
@@ -44,8 +50,14 @@ export function WeiboNotifLayer({ photos = [] }: { photos?: string[] }) {
       }, isInWeibo() ? 3400 : 1600);
     };
     listeners.add(fn);
+    const clear = () => {
+      window.clearTimeout(timer.current);
+      setCurrent(null);
+    };
+    clearers.add(clear);
     return () => {
       listeners.delete(fn);
+      clearers.delete(clear);
       window.clearTimeout(timer.current);
     };
   }, []);
