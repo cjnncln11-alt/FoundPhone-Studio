@@ -2,10 +2,12 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-// 生日动态的前排评论对齐真实原博（2026：RkRwhx5xw；2025：5217451371398002；2024：5085179799933308）
+// 生日动态的前排评论对齐真实原博（2026：RkRwhx5xw；2025：5217451371398002；2024：5085179799933308；2023：4952907827121407）
+// 2023 年真实热评流中第 9 条是 4 赞的图片评论（Today455，微博热搜流原样呈现），故用 loose 模式：赞数与配图不做硬性校验
 const BIRTHDAY_POSTS = [
   {
     id: "wb-owner-1003-0000",
+    loose: false,
     chars: "立农二十六岁生日快乐",
     top: [
       "秋秋啊秋·",
@@ -22,6 +24,7 @@ const BIRTHDAY_POSTS = [
   },
   {
     id: "wb-owner-1003-2025",
+    loose: false,
     chars: "立农二十五岁生日快乐",
     top: [
       "忘记流逝时间里的眼泪",
@@ -38,6 +41,7 @@ const BIRTHDAY_POSTS = [
   },
   {
     id: "wb-owner-1003-2024",
+    loose: false,
     chars: "立农二十四岁生日快乐",
     top: [
       "巧克立农糖呀",
@@ -50,6 +54,23 @@ const BIRTHDAY_POSTS = [
       "朱迪丝不吃饭宁宁就晕倒",
       "小椿漫语",
       "我要改个什么很长的名字",
+    ],
+  },
+  {
+    id: "wb-owner-1003-2023",
+    chars: "立农二十三岁生日快乐",
+    loose: true,
+    top: [
+      "扁桃体发炎不发言-",
+      "巧克立农糖呀",
+      "巧克立农糖呀",
+      "吃了你的小蛮腰-N",
+      "立農記得按時吃飯",
+      "扁桃体发炎不发言-",
+      "只为農農_zx",
+      "小田想要天天天天天天天天天开心",
+      "Today455",
+      "朱迪丝不吃饭宁宁就晕倒",
     ],
   },
 ];
@@ -87,12 +108,16 @@ describe.each(BIRTHDAY_POSTS.map((p) => [p.id, p] as const))(
       expect(post.commentMeta?.length).toBe(post.comments.length);
       for (let i = 0; i < 10; i++) {
         const m = post.commentMeta?.[i];
-        expect(m?.likes).toBeGreaterThan(1000);
-        expect(m?.image).toBeTruthy();
+        if (!spec.loose) {
+          expect(m?.likes).toBeGreaterThan(1000);
+          expect(m?.image).toBeTruthy();
+        }
         expect(m?.avatar).toBeTruthy();
-        expect(existsSync(resolve(process.cwd(), "public", m!.image!))).toBe(
-          true,
-        );
+        if (m?.image) {
+          expect(existsSync(resolve(process.cwd(), "public", m.image))).toBe(
+            true,
+          );
+        }
         expect(existsSync(resolve(process.cwd(), "public", m!.avatar!))).toBe(
           true,
         );
