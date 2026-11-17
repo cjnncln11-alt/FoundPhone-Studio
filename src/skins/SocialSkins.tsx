@@ -6,14 +6,19 @@ import {
   Bookmark,
   Camera,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
+  Diamond,
   Grid,
   Hash,
   Heart,
   Home,
   ListFilter,
   MessageCircle,
+  MoreHorizontal,
   Repeat2,
+  Search,
+  ShieldCheck,
   User,
   Users,
   Share2,
@@ -105,6 +110,170 @@ function WeiboActions({ p, item }: { p: Props; item: Item }) {
     </div>
   );
 }
+type ViewerState = { item: Item; index: number } | null;
+function WeiboPostCard({
+  p,
+  item,
+  setViewer,
+}: {
+  p: Props;
+  item: Item;
+  setViewer: (v: ViewerState) => void;
+}) {
+  return (
+    <article className="weibo-post">
+      <PostHeader p={p} item={item} />
+      <button className="social-body" onClick={() => p.onItem(item)}>
+        <Foldable text={item.body} maxLines={6} />
+        {(item.media || item.mediaList.length > 0 || item.meta.video) && (
+          <Media
+            item={item}
+            onMore={
+              item.mediaList.length > 9 ? () => p.onItem(item) : undefined
+            }
+            onImage={(index) => setViewer({ item, index })}
+          />
+        )}
+        {meta(item, "hotIndex") && (
+          <span className="weibo-hot-pill">
+            <b>热文</b>热文指数{meta(item, "hotIndex")}
+          </span>
+        )}
+      </button>
+      <WeiboActions p={p} item={item} />
+    </article>
+  );
+}
+const ST_TABS = ["热门", "最新", "名人动态", "超友趣", "星动纪念册"];
+function SuperTopicPage({
+  p,
+  items,
+  onClose,
+}: {
+  p: Props;
+  items: Item[];
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState("热门");
+  const [signed, setSigned] = useSkinState<boolean>(p, "st-signed", false);
+  const [viewer, setViewer] = useState<ViewerState>(null);
+  const list =
+    tab === "热门"
+      ? [...items].sort((a, b) => b.likes - a.likes)
+      : tab === "最新"
+        ? items
+        : tab === "名人动态"
+          ? items.filter((i) => i.sender === p.owner)
+          : [];
+  const cover = meta(items[0], "profileCover");
+  return (
+    <>
+      <div
+        className="st-hero"
+        style={cover ? { backgroundImage: `url(${cover})` } : undefined}
+      >
+        <div className="st-hero-bar">
+          <button aria-label="返回" onClick={onClose}>
+            <ChevronLeft size={22} />
+          </button>
+          <span className="st-spacer" />
+          <button aria-label="搜索">
+            <Search size={19} />
+          </button>
+          <button aria-label="分享">
+            <Share2 size={19} />
+          </button>
+        </div>
+        <div className="st-hero-head">
+          <VAvatar name={p.owner ?? "我"} src={items[0]?.avatar} gold />
+          <div className="st-hero-info">
+            <h2>
+              {p.owner ?? "我"}
+              <span className="st-gold">👑金超</span>
+            </h2>
+            <p>
+              <b>460万</b>帖子<i>|</i>
+              <b>534万</b>农糖
+            </p>
+          </div>
+        </div>
+        <div className="st-hero-chips">
+          <span>明星超话</span>
+          <span>今日签到{signed ? "3.2" : "3.1"}万人</span>
+          <button
+            className={"st-sign" + (signed ? " done" : "")}
+            aria-pressed={signed}
+            onClick={() => setSigned(!signed)}
+          >
+            {signed ? "已签到" : "签到"}
+          </button>
+          <span className="st-spacer" />
+          <span className="st-streak">{signed ? "连签7天" : "连签6天"}</span>
+        </div>
+        <button className="st-expand">
+          展开查看更多
+          <ChevronDown size={13} />
+        </button>
+      </div>
+      <div className="st-tabs">
+        {ST_TABS.map((t) => (
+          <button
+            key={t}
+            className={tab === t ? "selected" : ""}
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      <div className="st-pin">
+        <b>置顶</b>❤️#陈立农#
+      </div>
+      <div className="catalog-scroll">
+        {list.map((i) => (
+          <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
+        ))}
+        <Empty items={list} />
+      </div>
+      <div className="st-bottom">
+        <span className="st-input">我来发一帖</span>
+        <span className="st-bottom-item">
+          <Users size={17} />
+          <small>群聊</small>
+        </span>
+        <span className="st-bottom-item">
+          <User size={17} />
+          <small>
+            我的<em>LV14</em>
+          </small>
+        </span>
+      </div>
+      {viewer && (
+        <ImageViewer
+          images={
+            viewer.item.mediaList.length
+              ? viewer.item.mediaList
+              : viewer.item.media
+                ? [viewer.item.media]
+                : []
+          }
+          index={viewer.index}
+          setIndex={(n) => setViewer({ ...viewer, index: n })}
+          sender={viewer.item.sender}
+          avatar={viewer.item.avatar}
+          owner={p.owner}
+          reposts={meta(viewer.item, "reposts", "转发")}
+          comments={
+            meta(viewer.item, "commentsCount") ||
+            String(viewer.item.comments.length)
+          }
+          likes={wanCount(viewer.item.likes)}
+          onClose={() => setViewer(null)}
+        />
+      )}
+    </>
+  );
+}
 export function WeiboSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "关注");
   const [feed, setFeed] = useState("全部");
@@ -117,6 +286,9 @@ export function WeiboSkin(p: Props) {
   const [filterOpen, setFilterOpen] = useState(false);
   // 「那年今天」：查看往年同月同日的动态
   const [todayMode, setTodayMode] = useState(false);
+  // 超话页 + 「喜欢你」点亮
+  const [stOpen, setStOpen] = useState(false);
+  const [likedYou, setLikedYou] = useSkinState<boolean>(p, "liked-you", false);
   const now = new Date();
   const todayMd = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(
     now.getDate(),
@@ -137,77 +309,147 @@ export function WeiboSkin(p: Props) {
   const list = asc ? [...matched].reverse() : matched;
   return (
     <div className="catalog-skin weibo-ui">
-      <Header p={p} />
-      <div className="weibo-sections">
-        {["关注", "发现", "我"].map((t) => (
-          <button
-            key={t}
-            className={tab === t ? "selected" : ""}
-            onClick={() => setTab(t)}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-      <div className="catalog-scroll">
-        {tab === "我" ? (
-          <div className="weibo-profile">
-            {meta(items[0], "profileCover") && (
-              <div
-                className="weibo-profile-cover"
-                style={{
-                  backgroundImage: `url(${meta(items[0], "profileCover")})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              />
-            )}
-            <div className="weibo-profile-head">
-              <VAvatar name={p.owner ?? "我"} src={items[0]?.avatar} gold />
-              <div className="weibo-profile-name">
-                <h2>
-                  {p.owner ?? "我"}
-                  <NameBadges />
-                </h2>
-                {(meta(items[0], "profileFans") ||
-                  meta(items[0], "profileFollowing") ||
-                  meta(items[0], "profileInteractions")) && (
-                  <div className="weibo-profile-stats">
-                    {meta(items[0], "profileFans") && (
-                      <span>
-                        <b>{meta(items[0], "profileFans")}</b> 粉丝
-                      </span>
-                    )}
-                    {meta(items[0], "profileFollowing") && (
-                      <span>
-                        <b>{meta(items[0], "profileFollowing")}</b> 关注
-                      </span>
-                    )}
-                    {meta(items[0], "profileInteractions") && (
-                      <span>
-                        <b>{meta(items[0], "profileInteractions")}</b> 转赞评
-                      </span>
-                    )}
+      {stOpen ? (
+        <SuperTopicPage
+          p={p}
+          items={items}
+          onClose={() => setStOpen(false)}
+        />
+      ) : (
+        <>
+          <Header p={p} />
+          <div className="weibo-sections">
+            {["关注", "发现", "我"].map((t) => (
+              <button
+                key={t}
+                className={tab === t ? "selected" : ""}
+                onClick={() => setTab(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+          <div className="catalog-scroll">
+            {tab === "我" ? (
+              <div className="weibo-profile">
+                {meta(items[0], "profileCover") && (
+                  <div
+                    className="weibo-profile-cover"
+                    style={{
+                      backgroundImage: `url(${meta(items[0], "profileCover")})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <div className="weibo-cover-bar">
+                      <button aria-label="返回" onClick={() => setTab("关注")}>
+                        <ChevronLeft size={22} />
+                      </button>
+                      <button
+                        className={"liked-you" + (likedYou ? " on" : "")}
+                        aria-pressed={likedYou}
+                        onClick={() => setLikedYou(!likedYou)}
+                      >
+                        <Heart
+                          size={15}
+                          fill={likedYou ? "currentColor" : "none"}
+                        />
+                        喜欢你
+                      </button>
+                      <span className="weibo-cover-spacer" />
+                      <button aria-label="拍摄">
+                        <Camera size={19} />
+                      </button>
+                      <button aria-label="搜索">
+                        <Search size={19} />
+                      </button>
+                      <button aria-label="更多">
+                        <MoreHorizontal size={19} />
+                      </button>
+                    </div>
                   </div>
                 )}
+                <div className="weibo-profile-card">
+                  <div className="weibo-profile-head">
+                    <VAvatar
+                      name={p.owner ?? "我"}
+                      src={items[0]?.avatar}
+                      gold
+                    />
+                    <h2>
+                      {p.owner ?? "我"}
+                      <NameBadges />
+                    </h2>
+                  </div>
+                  <div className="weibo-profile-stats">
+                    <span>
+                      <b>{meta(items[0], "profileFans")}</b> 粉丝
+                    </span>
+                    <span>
+                      <b>{meta(items[0], "profileFollowing")}</b> 关注
+                    </span>
+                    <span>
+                      <b>{meta(items[0], "profileInteractions")}</b> 转评赞
+                    </span>
+                  </div>
+                  <div className="weibo-profile-tags">
+                    <span>昨日阅读人数10万+</span>
+                    <span>本月互动人数18万</span>
+                    <ChevronDown size={16} className="weibo-tags-more" />
+                  </div>
+                  <div className="weibo-profile-verify">
+                    <ShieldCheck size={14} />
+                    歌手 演员 NINE PERCENT 成员 传奇星艺人
+                  </div>
+                  <div className="weibo-profile-cards">
+                    <button
+                      className="weibo-mini-card"
+                      onClick={() => setStOpen(true)}
+                    >
+                      <div>
+                        <div className="weibo-mini-title">
+                          <Diamond size={15} />
+                          超话
+                        </div>
+                        <p>533.5万农糖</p>
+                      </div>
+                      {items[0]?.avatar && (
+                        <img
+                          className="weibo-mini-thumb"
+                          src={items[0].avatar}
+                          alt=""
+                        />
+                      )}
+                    </button>
+                    <div className="weibo-mini-card">
+                      <div>
+                        <div className="weibo-mini-title">
+                          <Users size={15} />
+                          粉丝群
+                        </div>
+                        <p>25个群聊</p>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="weibo-profile-count">
+                    {items.length} 条微博
+                  </span>
+                </div>
               </div>
-            </div>
-            <span>{items.length} 条微博</span>
-          </div>
-        ) : (
-          <>
-            <SearchBox value={q} set={setQ} />
-            <div className="weibo-feed-filter">
-              {["全部", ...groupItems(items).filter((g) => g !== "未分类")].map(
-                (g) => (
-                  <button key={g} onClick={() => setFeed(g)}>
-                    {g}
-                  </button>
-                ),
-              )}
-            </div>
-          </>
-        )}
+            ) : (
+              <>
+                <SearchBox value={q} set={setQ} />
+                <div className="weibo-feed-filter">
+                  {["全部", ...groupItems(items).filter((g) => g !== "未分类")].map(
+                    (g) => (
+                      <button key={g} onClick={() => setFeed(g)}>
+                        {g}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </>
+            )}
         {tab === "我" && (
           <div className="weibo-count-bar">
             <span>{todayMode ? `那年今天(${list.length})` : `全部微博(${list.length})`}</span>
@@ -285,31 +527,13 @@ export function WeiboSkin(p: Props) {
           </>
         )}
         {list.map((i) => (
-          <article className="weibo-post" key={i.id}>
-            <PostHeader p={p} item={i} />
-            <button className="social-body" onClick={() => p.onItem(i)}>
-              <Foldable text={i.body} maxLines={6} />
-              {(i.media || i.mediaList.length > 0 || i.meta.video) && (
-                <Media
-                  item={i}
-                  onMore={
-                    i.mediaList.length > 9 ? () => p.onItem(i) : undefined
-                  }
-                  onImage={(index) => setViewer({ item: i, index })}
-                />
-              )}
-              {meta(i, "hotIndex") && (
-                <span className="weibo-hot-pill">
-                  <b>热文</b>热文指数{meta(i, "hotIndex")}
-                </span>
-              )}
-            </button>
-            <WeiboActions p={p} item={i} />
-          </article>
+          <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
         ))}
         <Empty items={list} />
       </div>
-      {viewer && (
+          </>
+        )}
+      {viewer && !stOpen && (
         <ImageViewer
           images={
             viewer.item.mediaList.length
