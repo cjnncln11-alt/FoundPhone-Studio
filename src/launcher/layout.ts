@@ -118,6 +118,36 @@ export function validateLayout(raw: unknown, input: Work) {
     ];
     layout.previewLayoutRevision = 1;
   }
+  if (w.id === "ui-test-phone-v2" && layout.previewLayoutRevision < 2) {
+    // 出厂即卸载的海外 App：老布局也要同步卸载，可在 App Store 重新下载
+    const removed = new Set([
+      "whatsapp",
+      "instagram",
+      "tiktok",
+      "twitter",
+      "telegram",
+      "line",
+      "snapchat",
+      "facebook",
+      "messenger",
+      "spotify",
+      "netflix",
+      "pinterest",
+      "threads",
+      "kakao",
+    ]);
+    for (const app of layout.apps) {
+      if (removed.has(app.id)) {
+        app.installed = false;
+        app.visible = false;
+        app.dock = false;
+      }
+    }
+    layout.order = layout.order.filter((id) => !removed.has(id));
+    for (const k of Object.keys(layout.positions))
+      if (removed.has(k)) delete layout.positions[k];
+    layout.previewLayoutRevision = 2;
+  }
   const entries = homeEntries(layout),
     packed = packHome(entries, layout.positions);
   for (const entry of entries) {
