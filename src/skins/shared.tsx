@@ -6,7 +6,13 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import type { SkinProps } from "../AppSkins";
 import { safeMedia, type Item } from "../schema";
 export type Props = SkinProps;
@@ -138,6 +144,34 @@ export function NameBadges() {
 }
 export const wanCount = (n: number) =>
   n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n);
+/**
+ * 视频滚出可视区域时自动暂停播放（feed 与详情页通用）。
+ * IntersectionObserver 以浏览器视口为根，内部滚动容器同样生效。
+ */
+export function PausingVideo({
+  className = "",
+  ...rest
+}: ComponentProps<"video">) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) {
+          // 可视面积不足两成即视为滑过，自动停止
+          if (!en.isIntersecting || en.intersectionRatio < 0.2) {
+            if (!el.paused) el.pause();
+          }
+        }
+      },
+      { threshold: [0, 0.2, 0.5, 1] },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return <video ref={ref} className={className} {...rest} />;
+}
 export function Media({
   item,
   className = "",
@@ -158,7 +192,7 @@ export function Media({
     return <audio className={className} controls src={src} />;
   if (item.kind === "video")
     return (
-      <video
+      <PausingVideo
         className={className}
         controls
         playsInline
@@ -170,7 +204,7 @@ export function Media({
   const postVideo = safeMedia(item.meta?.video ?? "");
   if (postVideo)
     return (
-      <video
+      <PausingVideo
         className={className}
         controls
         playsInline
