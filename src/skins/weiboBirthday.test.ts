@@ -274,3 +274,44 @@ describe("记录78 王彦霖评论保留（wb-owner-0520-1928）", () => {
     ).toBe(true);
   });
 });
+
+// 2020生日动态（91→4556456051093190）：20岁生日，名人评论区。
+// 热一王彦霖/热二郑恺/热三陈建州保留真实id+头像，陈立农本人回复保留；
+// 粉丝热评4~10用应援头像拼「二十岁生日快乐」（avatar-f01~f07）
+describe("生日动态评论区对齐真实原博（wb-owner-1003-2020·二十岁名人区）", () => {
+  const post = items.find((i) => i.id === "wb-owner-1003-2020")!;
+
+  it("有这条博文，名人评论真实保留", () => {
+    expect(post).toBeTruthy();
+    expect(post.comments[0]).toMatch(/^王彦霖：/);
+    expect(post.comments[2]).toMatch(/^郑恺：/);
+    expect(post.comments[4]).toMatch(/^黑人建州：/);
+    expect(post.commentMeta?.[0]?.avatar).toBe("weibo-hot/avatar-wyl.jpg");
+    expect(post.commentMeta?.[2]?.avatar).toBe("weibo-hot/avatar-zk.jpg");
+    expect(post.commentMeta?.[4]?.avatar).toBe("weibo-hot/avatar-cz.jpg");
+    for (const f of ["avatar-wyl.jpg", "avatar-zk.jpg", "avatar-cz.jpg"]) {
+      expect(existsSync(resolve(process.cwd(), "public", "weibo-hot", f))).toBe(true);
+    }
+  });
+
+  it("名人评论下陈立农本人回复全部保留", () => {
+    const own = post.comments.filter((c) => c.startsWith("陈立农：回复 @"));
+    expect(own.length).toBe(3);
+    expect(own.some((c) => c.includes("谢哥"))).toBe(true);
+    expect(own.some((c) => c.includes("恺哥"))).toBe(true);
+    expect(own.some((c) => c.includes("黑哥"))).toBe(true);
+  });
+
+  it("粉丝热评应援头像逐字拼出「二十岁生日快乐」", () => {
+    const chars = "二十岁生日快乐";
+    const fanMeta = (post.commentMeta ?? []).filter((m) =>
+      m?.avatar?.startsWith("weibo-hot/avatar-f"),
+    );
+    expect(fanMeta.length).toBe(7);
+    fanMeta.slice(0, 7).forEach((m, k) => {
+      const svg = readFileSync(resolve(process.cwd(), "public", m!.avatar!), "utf8");
+      expect(svg).toContain(`>${chars[k]}<`);
+    });
+    expect(post.commentMeta?.length).toBe(post.comments.length);
+  });
+});
