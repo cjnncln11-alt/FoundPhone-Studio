@@ -627,6 +627,8 @@
 /* 竖屏视口下全屏播放横向视频：旋转 90° 模拟横屏铺满 */
 .fs-stage:fullscreen video.fs-landscape,
 .fs-stage:-webkit-full-screen video.fs-landscape {
+  max-width: none;
+  max-height: none;
   width: 100vh;
   height: 100vw;
   transform: rotate(90deg);
