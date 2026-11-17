@@ -612,7 +612,7 @@ export function SocialDetail(p: {
         </div>
         <div className="post-detail-body">
           <RichText value={item.richText} fallback={item.body} />
-          {(item.media || item.mediaList.length > 0) && (
+          {(item.media || item.mediaList.length > 0 || item.meta.video) && (
             <Media item={item} onImage={(index) => setViewer(index)} />
           )}
           {weibo && meta(item, "hotIndex") && (

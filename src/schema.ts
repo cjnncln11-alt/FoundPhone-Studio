@@ -218,7 +218,9 @@ export function validateWork(input: unknown): Work {
 export function safeMedia(value: string) {
   return /^data:(image\/(png|jpeg|webp|gif)|audio\/(mpeg|mp3|wav|ogg|webm|mp4)|video\/(mp4|webm));base64,[a-zA-Z0-9+/=\s]+$/.test(
     value,
-  )
+  ) ||
+    // 本地静态大文件（视频/封面）：不内嵌进作品数据，由 public/ 随站点发布
+    /^\/videos\/[\w.-]+\.(mp4|webm|jpg|jpeg|png)$/.test(value)
     ? value
     : "";
 }

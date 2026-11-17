@@ -1436,7 +1436,9 @@
           "reposts": "5.4万",
           "commentsCount": "1.6万",
           "location": "发布于北京",
-          "source": "微博视频号"
+          "source": "微博视频号",
+          "video": "/videos/r09-5314548325160654.mp4",
+          "videoCover": "/videos/r09-cover.jpg"
         },
         "commentMeta": []
       },

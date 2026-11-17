@@ -188,7 +188,7 @@ export function WeiboSkin(p: Props) {
             <PostHeader p={p} item={i} />
             <button className="social-body" onClick={() => p.onItem(i)}>
               <p>{i.body}</p>
-              {(i.media || i.mediaList.length > 0) && (
+              {(i.media || i.mediaList.length > 0 || i.meta.video) && (
                 <Media
                   item={i}
                   onMore={

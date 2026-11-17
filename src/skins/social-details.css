@@ -567,3 +567,14 @@
   width: 92px;
   height: 92px;
 }
+
+/* 帖子内嵌视频（微博视频博文） */
+.ios18 .weibo-post video,
+.ios18 .post-detail-body video {
+  display: block;
+  width: 100%;
+  margin: 8px 0 2px;
+  border-radius: 10px;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}

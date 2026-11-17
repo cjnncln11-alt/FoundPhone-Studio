@@ -166,6 +166,20 @@ export function Media({
         onClick={(e) => e.stopPropagation()}
       />
     );
+  // 帖子内嵌视频（微博视频博文等）：视频本体存放在 public/videos/，封面作海报
+  const postVideo = safeMedia(item.meta?.video ?? "");
+  if (postVideo)
+    return (
+      <video
+        className={className}
+        controls
+        playsInline
+        preload="metadata"
+        poster={safeMedia(item.meta?.videoCover ?? "") || undefined}
+        src={postVideo}
+        onClick={(e) => e.stopPropagation()}
+      />
+    );
   if (list.length) {
     if (!onMore)
       return (
