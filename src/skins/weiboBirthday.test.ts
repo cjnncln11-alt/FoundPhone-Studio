@@ -2,18 +2,40 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-// 生日动态（记录 02）的前排评论对齐真实原博 weibo.com/6408414755/RkRwhx5xw
-const REAL_TOP = [
-  "秋秋啊秋·",
-  "和小农周六见",
-  "浣熊眠眠",
-  "小田想要天天天天天天天天天开心",
-  "October-03",
-  "超級農農的毛毛",
-  "小椿漫语",
-  "邬娜娜啊",
-  "nn牌盐酥鸡",
-  "每天都好想立农",
+// 生日动态的前排评论对齐真实原博（2026：weibo.com/6408414755/RkRwhx5xw；2025：mid 5217451371398002）
+const BIRTHDAY_POSTS = [
+  {
+    id: "wb-owner-1003-0000",
+    chars: "立农二十六岁生日快乐",
+    top: [
+      "秋秋啊秋·",
+      "和小农周六见",
+      "浣熊眠眠",
+      "小田想要天天天天天天天天天开心",
+      "October-03",
+      "超級農農的毛毛",
+      "小椿漫语",
+      "邬娜娜啊",
+      "nn牌盐酥鸡",
+      "每天都好想立农",
+    ],
+  },
+  {
+    id: "wb-owner-1003-2025",
+    chars: "立农二十五岁生日快乐",
+    top: [
+      "忘记流逝时间里的眼泪",
+      "邬娜娜啊",
+      "巧克立农糖呀",
+      "浣熊眠眠",
+      "农味收藏家-best",
+      "超級農農的毛毛",
+      "秋秋啊秋·",
+      "桔梗盛开在仲夏夜的尽头",
+      "别嫌我臭呀",
+      "和小农周六见",
+    ],
+  },
 ];
 
 const story = JSON.parse(
@@ -28,56 +50,56 @@ const items = (story.content?.weibo ?? []) as {
     avatar?: string;
   } | null)[];
 }[];
-const post = items.find((i) => i.id === "wb-owner-1003-0000")!;
 
-describe("生日动态评论区对齐真实原博", () => {
-  it("有这条博文且评论数量足够", () => {
-    expect(post).toBeTruthy();
-    expect(post.comments.length).toBeGreaterThanOrEqual(24);
-  });
+describe.each(BIRTHDAY_POSTS.map((p) => [p.id, p] as const))(
+  "生日动态评论区对齐真实原博（%s）",
+  (_id, spec) => {
+    const post = items.find((i) => i.id === spec.id)!;
 
-  it("前十条评论的昵称与真实热评一致", () => {
-    expect(post.comments.slice(0, 10).map((c) => c.split("：")[0])).toEqual(
-      REAL_TOP,
-    );
-  });
+    it("有这条博文且评论数量足够", () => {
+      expect(post).toBeTruthy();
+      expect(post.comments.length).toBeGreaterThanOrEqual(24);
+    });
 
-  it("commentMeta 与评论一一对应，且前排都有真实赞数与配图", () => {
-    expect(post.commentMeta?.length).toBe(post.comments.length);
-    for (let i = 0; i < 10; i++) {
-      const m = post.commentMeta?.[i];
-      expect(m?.likes).toBeGreaterThan(1000);
-      expect(m?.image).toBeTruthy();
-      expect(m?.avatar).toBeTruthy();
-      expect(existsSync(resolve(process.cwd(), "public", m!.image!))).toBe(true);
-      expect(existsSync(resolve(process.cwd(), "public", m!.avatar!))).toBe(
-        true,
+    it("前十条评论的昵称与真实热评一致", () => {
+      expect(post.comments.slice(0, 10).map((c) => c.split("：")[0])).toEqual(
+        spec.top,
       );
-    }
-  });
+    });
 
-  it("前排头像按顺序拼出「立农二十六岁生日快乐」", () => {
-    const chars = "立农二十六岁生日快乐";
-    for (let i = 0; i < 10; i++) {
-      const svg = readFileSync(
-        resolve(process.cwd(), "public", post.commentMeta![i]!.avatar!),
-        "utf8",
+    it("commentMeta 与评论一一对应，前排有真实赞数、配图与应援头像", () => {
+      expect(post.commentMeta?.length).toBe(post.comments.length);
+      for (let i = 0; i < 10; i++) {
+        const m = post.commentMeta?.[i];
+        expect(m?.likes).toBeGreaterThan(1000);
+        expect(m?.image).toBeTruthy();
+        expect(m?.avatar).toBeTruthy();
+        expect(existsSync(resolve(process.cwd(), "public", m!.image!))).toBe(
+          true,
+        );
+        expect(existsSync(resolve(process.cwd(), "public", m!.avatar!))).toBe(
+          true,
+        );
+        const svg = readFileSync(
+          resolve(process.cwd(), "public", m!.avatar!),
+          "utf8",
+        );
+        expect(svg).toContain(`>${spec.chars[i]}<`);
+      }
+    });
+
+    it("楼中楼的回复对象都能在顶层评论中找到", () => {
+      const top = new Set(
+        post.comments
+          .filter((c) => !/：\s*回复\s*@/.test(c))
+          .map((c) => c.split("：")[0]),
       );
-      expect(svg).toContain(`>${chars[i]}<`);
-    }
-  });
-
-  it("楼中楼的回复对象都能在顶层评论中找到", () => {
-    const top = new Set(
-      post.comments
-        .filter((c) => !/：\s*回复\s*@/.test(c))
-        .map((c) => c.split("：")[0]),
-    );
-    const nested = post.comments.filter((c) => /：\s*回复\s*@/.test(c));
-    expect(nested.length).toBeGreaterThan(0);
-    for (const n of nested) {
-      const to = /回复\s*@(.+?)：/.exec(n)?.[1] ?? "";
-      expect(top.has(to)).toBe(true);
-    }
-  });
-});
+      const nested = post.comments.filter((c) => /：\s*回复\s*@/.test(c));
+      expect(nested.length).toBeGreaterThan(0);
+      for (const n of nested) {
+        const to = /回复\s*@(.+?)：/.exec(n)?.[1] ?? "";
+        expect(top.has(to)).toBe(true);
+      }
+    });
+  },
+);
