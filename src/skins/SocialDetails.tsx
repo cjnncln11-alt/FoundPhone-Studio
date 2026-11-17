@@ -553,7 +553,9 @@ export function SocialDetail(p: {
               <small className="weibo-author-sub">
                 {(() => {
                   const md2 = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
-                  return md2 ? `${+md2[1]}-${+md2[2]}` : item.time;
+                  const date = md2 ? `${+md2[1]}-${+md2[2]}` : item.time;
+                  const source = meta(item, "source");
+                  return source ? `${date} 来自 ${source}` : date;
                 })()}
               </small>
             ) : (

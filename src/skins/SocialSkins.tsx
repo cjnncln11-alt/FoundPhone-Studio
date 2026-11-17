@@ -63,6 +63,7 @@ function PostHeader({ item, p }: { item: Item; p: Props }) {
   const gold = item.sender === p.owner;
   const md = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
   const date = md ? `${+md[1]}-${+md[2]}` : item.time;
+  const source = meta(item, "source");
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
       <VAvatar name={item.sender} src={item.avatar} gold={gold} />
@@ -72,7 +73,7 @@ function PostHeader({ item, p }: { item: Item; p: Props }) {
           {gold && <NameBadges />}
         </strong>
         <small className="weibo-author-sub">
-          {date}
+          {source ? `${date} 来自 ${source}` : date}
         </small>
       </span>
       <ChevronDown size={16} className="weibo-author-chevron" />
