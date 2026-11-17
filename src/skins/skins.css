@@ -2082,8 +2082,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
-  padding: 11px 14px 0 158px;
+  gap: 7px;
+  padding: 11px 13px 0 185px;
 }
 .weibo-td-title {
   display: flex;
@@ -2091,16 +2091,16 @@
 }
 .weibo-td-cell {
   position: relative;
-  width: 42px;
-  height: 42px;
-  border: 1px solid #6e9dcc;
-  background: #f1f8fd;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #8aa4bc;
+  background: rgba(255, 255, 255, 0.4);
   display: grid;
   place-items: center;
   font-family: "Kaiti SC", "KaiTi", "STKaiti", serif;
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 700;
-  color: #17497e;
+  color: #2b527e;
 }
 .weibo-td-cell::before {
   content: "";
@@ -2108,7 +2108,7 @@
   left: 2px;
   right: 2px;
   top: 50%;
-  border-top: 1px dashed #a9c8e4;
+  border-top: 1px dashed #b6c6d6;
 }
 .weibo-td-cell::after {
   content: "";
@@ -2116,23 +2116,24 @@
   top: 2px;
   bottom: 2px;
   left: 50%;
-  border-left: 1px dashed #a9c8e4;
+  border-left: 1px dashed #b6c6d6;
 }
 .weibo-td-sub {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #333;
+  color: #3f5876;
+  white-space: nowrap;
 }
 .weibo-td-go {
   font-style: normal;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(180deg, #ffc14d, #f79a1f);
+  background: linear-gradient(180deg, #ffb640, #f5820e);
   border-radius: 999px;
-  padding: 2px 10px;
+  padding: 2px 9px;
 }
 .weibo-td-banner.active .weibo-td-go {
   background: linear-gradient(180deg, #9fc7ec, #5f94c9);
