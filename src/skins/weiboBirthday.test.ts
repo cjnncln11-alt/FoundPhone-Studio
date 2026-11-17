@@ -83,6 +83,8 @@ const items = (story.content?.weibo ?? []) as {
   comments: string[];
   commentMeta?: ({
     likes?: number;
+    time?: string;
+    province?: string;
     image?: string;
     avatar?: string;
   } | null)[];
@@ -144,3 +146,45 @@ describe.each(BIRTHDAY_POSTS.map((p) => [p.id, p] as const))(
     });
   },
 );
+
+// 2022生日动态（495→4820274287222807）：全国省份明信片应援。
+// 热一为王彦霖（真实id+头像完全保留），陈立农本人的楼中楼回复也保留，其余为真实的省份评论
+describe("生日动态评论区对齐真实原博（wb-owner-1003-2022·全国明信片）", () => {
+  const post = items.find((i) => i.id === "wb-owner-1003-2022")!;
+
+  it("有这条博文且评论数量足够（三四十条省份评论）", () => {
+    expect(post).toBeTruthy();
+    expect(post.comments.length).toBeGreaterThanOrEqual(36);
+  });
+
+  it("热一为王彦霖且真实头像完全保留", () => {
+    expect(post.comments[0]).toMatch(/^王彦霖：/);
+    const m = post.commentMeta?.[0];
+    expect(m?.avatar).toBe("weibo-hot/avatar-wyl.jpg");
+    expect(
+      existsSync(resolve(process.cwd(), "public", "weibo-hot/avatar-wyl.jpg")),
+    ).toBe(true);
+    expect(m?.likes).toBeGreaterThan(1000);
+  });
+
+  it("陈立农本人的回复保留且头像为本人真实头像", () => {
+    const idx = post.comments.findIndex((c) =>
+      c.startsWith("陈立农：回复 @王彦霖："),
+    );
+    expect(idx).toBeGreaterThan(0);
+    const m = post.commentMeta?.[idx];
+    expect(m?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+    expect(
+      existsSync(resolve(process.cwd(), "public", "weibo-hot/avatar-cln.jpg")),
+    ).toBe(true);
+    expect(post.comments[idx]).toContain("谢谢王家大爷大娘大姑娘啊");
+  });
+
+  it("commentMeta 与评论一一对应且省份评论对齐真实", () => {
+    expect(post.commentMeta?.length).toBe(post.comments.length);
+    const provinces = (post.commentMeta ?? [])
+      .map((m) => m?.province)
+      .filter(Boolean) as string[];
+    expect(new Set(provinces).size).toBeGreaterThanOrEqual(15);
+  });
+});
