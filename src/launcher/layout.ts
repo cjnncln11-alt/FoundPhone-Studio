@@ -156,6 +156,21 @@ export function validateLayout(raw: unknown, input: Work) {
     }
     layout.previewLayoutRevision = 3;
   }
+  if (w.id === "ui-test-phone-v2" && layout.previewLayoutRevision < 4) {
+    // 第二批卸载：网易云音乐 / 论坛 / Discord / Reddit，可在 App Store 重新下载
+    const removed2 = new Set(["netease", "forum", "discord", "reddit"]);
+    for (const app of layout.apps) {
+      if (removed2.has(app.id)) {
+        app.installed = false;
+        app.visible = false;
+        app.dock = false;
+      }
+    }
+    layout.order = layout.order.filter((id) => !removed2.has(id));
+    for (const k of Object.keys(layout.positions))
+      if (removed2.has(k)) delete layout.positions[k];
+    layout.previewLayoutRevision = 4;
+  }
   const entries = homeEntries(layout),
     packed = packHome(entries, layout.positions);
   for (const entry of entries) {
