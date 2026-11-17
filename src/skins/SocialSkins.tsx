@@ -33,6 +33,7 @@ import {
   useContent,
   VAvatar,
   wanCount,
+  weiboDate,
   type Props,
 } from "./shared";
 import { ImageViewer } from "./ImageViewer";
@@ -61,8 +62,7 @@ function Actions({ p, item }: { p: Props; item: Item }) {
 }
 function PostHeader({ item, p }: { item: Item; p: Props }) {
   const gold = item.sender === p.owner;
-  const md = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
-  const date = md ? `${+md[1]}-${+md[2]}` : item.time;
+  const date = weiboDate(item.time);
   const source = meta(item, "source");
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>

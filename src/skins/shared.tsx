@@ -144,6 +144,22 @@ export function NameBadges() {
 }
 export const wanCount = (n: number) =>
   n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n);
+
+/** 故事时间线的"现在"是 2026 年：当年的博文只显示"月-日"，往年的带上年份 */
+export const WEIBO_NOW_YEAR = 2026;
+/** 博文头部的发布日期："5-17" / 往年 "2024-5-17" */
+export const weiboDate = (t: string) => {
+  const m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (!m) return t;
+  return +m[1] >= WEIBO_NOW_YEAR
+    ? `${+m[2]}-${+m[3]}`
+    : `${m[1]}-${+m[2]}-${+m[3]}`;
+};
+/** 评论时间戳：往年的补上年份前缀 */
+export const weiboStamp = (t: string, year?: number) => {
+  if (!year || year >= WEIBO_NOW_YEAR || /^\d{4}-/.test(t)) return t;
+  return `${year}-${t}`;
+};
 /**
  * 视频滚出可视区域时自动暂停播放（feed 与详情页通用）。
  * IntersectionObserver 以浏览器视口为根，内部滚动容器同样生效。
@@ -169,6 +185,32 @@ export function PausingVideo({
     );
     io.observe(el);
     return () => io.disconnect();
+  }, []);
+  // 全屏时锁定横屏，退出全屏恢复竖屏
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const lock = (o: string) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (screen.orientation as any)?.lock?.(o)?.catch?.(() => {});
+      } catch {
+        /* 桌面端或不支持时静默忽略 */
+      }
+    };
+    const onFs = () => {
+      if (document.fullscreenElement === el) {
+        lock("landscape");
+      } else if (!document.fullscreenElement) {
+        try {
+          screen.orientation?.unlock?.();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
   return <video ref={ref} className={className} {...rest} />;
 }

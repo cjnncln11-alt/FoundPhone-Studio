@@ -578,3 +578,15 @@
   background: #000;
   aspect-ratio: 16 / 9;
 }
+
+/* 视频全屏：完整显示画面、黑底铺满（配合全屏时锁定横屏） */
+video:fullscreen,
+video:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  background: #000;
+  border-radius: 0;
+}

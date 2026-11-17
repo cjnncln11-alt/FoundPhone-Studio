@@ -27,7 +27,7 @@ export default defineConfig(({ command }) => ({
           "videos/n22-*.mp4",
           "videos/n24-*.mp4",
         ],
-        maximumFileSizeToCacheInBytes: 64000000,
+        maximumFileSizeToCacheInBytes: 120000000,
       },
     }),
   ],

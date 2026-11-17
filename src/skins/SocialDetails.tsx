@@ -35,6 +35,8 @@ import {
   NameBadges,
   VAvatar,
   wanCount,
+  weiboDate,
+  weiboStamp,
 } from "./shared";
 import {
   ownerLikeStore,
@@ -234,6 +236,7 @@ export function SocialDetail(p: {
   );
   const postDate = postClock
     ? {
+        y: +postClock[1],
         m: +postClock[2],
         d: +postClock[3],
         h: +postClock[4],
@@ -309,10 +312,12 @@ export function SocialDetail(p: {
     const articleKey = rowKey ?? String(index);
     const seed = name + "|" + body,
       info = commentMeta(seed),
-      metaTime =
+      metaTime = weiboStamp(
         isOwner && postDate
           ? `${postDate.m}-${postDate.d} ${pad2(postDate.h)}:${pad2(postDate.min)}`
           : (hot?.time ?? info.time),
+        postDate?.y,
+      ),
       metaProvince = isOwner ? postProvince : (hot?.province ?? info.province),
       likes = isOwner
         ? (ownerLikeStore[seed] ?? 0)
@@ -585,8 +590,7 @@ export function SocialDetail(p: {
             {weibo ? (
               <small className="weibo-author-sub">
                 {(() => {
-                  const md2 = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
-                  const date = md2 ? `${+md2[1]}-${+md2[2]}` : item.time;
+                  const date = weiboDate(item.time);
                   const source = meta(item, "source");
                   return source ? `${date} 来自 ${source}` : date;
                 })()}
