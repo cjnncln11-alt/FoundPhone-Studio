@@ -4353,3 +4353,20 @@
   background: rgba(0, 0, 0, 0.22);
   border-radius: 4px;
 }
+/* 微博宽幅单图：完整展示，不裁剪 */
+.weibo-post .media-grid.media-grid-1 img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.weibo-post-detail .post-detail-body .media-grid.media-grid-1 img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  border-radius: 10px;
+}
