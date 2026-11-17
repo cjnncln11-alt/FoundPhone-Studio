@@ -341,3 +341,41 @@ describe("生日动态评论区对齐真实原博（wb-owner-1003-2019·十九�
     }
   });
 });
+
+// 记录128（画熊猫）：陈立农9条楼中楼回复全部保留，紧跟对应热评
+describe("记录128 本人回复保留（wb-owner-0716-2000）", () => {
+  const post = items.find((i) => i.id === "wb-owner-0716-2000")!;
+
+  it("9条本人回复全部保留且头像为真实头像", () => {
+    expect(post).toBeTruthy();
+    const ownIdx = post.comments
+      .map((c, i) => ({ c, i }))
+      .filter(({ c }) => c.startsWith("陈立农：回复 @"))
+      .map(({ i }) => i);
+    expect(ownIdx.length).toBe(9);
+    for (const i of ownIdx) {
+      expect(post.commentMeta?.[i]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+    }
+    expect(post.commentMeta?.length).toBe(post.comments.length);
+  });
+
+  it("回复内容与热评一一对应（生日快乐等真实短回复）", () => {
+    const own = post.comments.filter((c) => c.startsWith("陈立农：回复 @"));
+    expect(own.some((c) => c.endsWith("：生日快乐"))).toBe(true);
+    expect(own.some((c) => c.endsWith("：你们比较可爱"))).toBe(true);
+  });
+});
+
+// 记录135（昨日 新朋友）：对新浪娱乐的本人回复保留
+describe("记录135 本人回复保留（wb-owner-0505-1816）", () => {
+  const post = items.find((i) => i.id === "wb-owner-0505-1816")!;
+
+  it("新浪娱乐热评与本人回复均保留", () => {
+    expect(post).toBeTruthy();
+    expect(post.comments[0]).toMatch(/^新浪娱乐：/);
+    const own = post.comments.filter((c) => c.startsWith("陈立农：回复 @新浪娱乐："));
+    expect(own.length).toBe(1);
+    const idx = post.comments.findIndex((c) => c.startsWith("陈立农：回复 @新浪娱乐："));
+    expect(post.commentMeta?.[idx]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+  });
+});
