@@ -73,10 +73,62 @@ export const fanNotifHue = (name: string) =>
 export const clipText = (text: string, max = 18) =>
   text.length > max ? text.slice(0, max) + "…" : text;
 
-// 机主评论赞数跨页面持久化（退出微博再进来不丢失）
-export const ownerLikeStore: Record<string, number> = {};
+// —— 机主评论赞数与新增粉丝评论的跨会话持久化 ——
+// 退出微博、甚至关闭链接再打开，都保留上次的使用记录
+const RUNTIME_KEY = "weibo-runtime-v1";
+type RuntimeComment = { id: number; name: string; text: string };
+function readPersistedRuntime(): {
+  likes: Record<string, number>;
+  comments: Record<string, RuntimeComment[]>;
+} {
+  try {
+    const raw = localStorage.getItem(RUNTIME_KEY);
+    if (!raw) return { likes: {}, comments: {} };
+    const parsed = JSON.parse(raw) as {
+      likes?: Record<string, number>;
+      comments?: Record<string, RuntimeComment[]>;
+    };
+    return { likes: parsed.likes ?? {}, comments: parsed.comments ?? {} };
+  } catch {
+    return { likes: {}, comments: {} };
+  }
+}
+const persistedRuntime = readPersistedRuntime();
 
-// 普通粉丝评论（非求翻牌），用于正常发布评论后的弹窗与评论追加
+export const ownerLikeStore: Record<string, number> = persistedRuntime.likes;
+export const runtimeCommentStore: Record<string, RuntimeComment[]> =
+  persistedRuntime.comments;
+
+let saveTimer = 0;
+const writeNow = () => {
+  try {
+    localStorage.setItem(
+      RUNTIME_KEY,
+      JSON.stringify({
+        likes: ownerLikeStore,
+        comments: runtimeCommentStore,
+      }),
+    );
+  } catch {
+    /* 存储不可用时忽略 */
+  }
+};
+/** 节流写回本地存储（涨赞高频调用时合并写入） */
+export function persistWeiboRuntime() {
+  if (saveTimer) return;
+  saveTimer = window.setTimeout(() => {
+    saveTimer = 0;
+    writeNow();
+  }, 800);
+}
+if (typeof window !== "undefined")
+  window.addEventListener("pagehide", () => {
+    if (saveTimer) {
+      window.clearTimeout(saveTimer);
+      saveTimer = 0;
+    }
+    writeNow();
+  });
 export const fanNormalTexts = [
   "哥哥今天的营业也太好看了吧，截图存了三张",
   "血肠汤饭看着就香，下次直播吃给我们看",
@@ -103,8 +155,3 @@ export const fanNormalTexts = [
   "哥的审美一直在线，从来没输过",
 ];
 
-// 评论区内运行时新增的粉丝评论（跨页面保留）
-export const runtimeCommentStore: Record<
-  string,
-  { id: number; name: string; text: string }[]
-> = {};

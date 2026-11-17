@@ -3,6 +3,7 @@ import {
   fanNotifNames,
   fanNotifTexts,
   ownerLikeStore,
+  persistWeiboRuntime,
   runtimeCommentStore,
 } from "./weiboData";
 import { pushWeiboNotif } from "./weiboNotify";
@@ -10,7 +11,13 @@ import { pushWeiboNotif } from "./weiboNotify";
 // 全局"粉丝点赞风暴"：即使离开微博页面（组件卸载），计时器仍在模块级继续运行
 let timers: number[] = [];
 let stormRunning = false;
-let rcSeq = 0;
+// 恢复上次会话的评论 id 序号，避免持久化后 id 冲突
+let rcSeq = Math.max(
+  0,
+  ...Object.values(runtimeCommentStore)
+    .flat()
+    .map((c) => c.id),
+);
 let inWeibo = true;
 let exitAt = 0;
 /** 用户上滑/点击关掉弹窗后，在此时间点之前一律静默 */
@@ -55,7 +62,10 @@ export function subscribeOwnerData(fn: () => void) {
     listeners.delete(fn);
   };
 }
-const emit = () => listeners.forEach((fn) => fn());
+const emit = () => {
+  listeners.forEach((fn) => fn());
+  persistWeiboRuntime();
+};
 
 export const isStormRunning = () => stormRunning;
 

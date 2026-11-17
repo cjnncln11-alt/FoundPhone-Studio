@@ -35,7 +35,11 @@ import {
   VAvatar,
   wanCount,
 } from "./shared";
-import { ownerLikeStore, runtimeCommentStore } from "./weiboData";
+import {
+  ownerLikeStore,
+  persistWeiboRuntime,
+  runtimeCommentStore,
+} from "./weiboData";
 import {
   ensureFiveDigitLikes,
   startOwnerLikeStorm,
@@ -260,6 +264,7 @@ export function SocialDetail(p: {
     if (body) {
       stopOwnerLikeStorm();
       delete ownerLikeStore[ownerName + "|" + body];
+      persistWeiboRuntime();
       forceRender();
     }
     setExtra(
