@@ -2158,6 +2158,15 @@
   margin-top: -46px;
   flex: none;
 }
+/* 大头像上的红V标保持原始小尺寸 */
+.weibo-profile-head .v-badge-gold {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  font-size: 9px;
+  border-width: 2px;
+}
 .weibo-profile-head .catalog-avatar {
   width: 76px;
   height: 76px;

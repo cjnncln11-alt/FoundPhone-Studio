@@ -379,7 +379,7 @@ export function WeiboSkin(p: Props) {
                   </div>
                   <div className="weibo-profile-tags">
                     <span>昨日阅读人数10万+</span>
-                    <span>本月互动人数18万</span>
+                    <span>本月互动人数100万</span>
                     <ChevronDown size={16} className="weibo-tags-more" />
                   </div>
                   <div className="weibo-profile-verify">
