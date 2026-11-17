@@ -2158,8 +2158,10 @@
   margin-top: -46px;
   flex: none;
 }
-/* 大头像上的红V标保持原始小尺寸 */
+/* 大头像上的红V标保持原始小尺寸，中心落在头像右下圆弧上 */
 .weibo-profile-head .v-badge-gold {
+  right: 0;
+  bottom: 0;
   width: 20px;
   height: 20px;
   min-width: 20px;
