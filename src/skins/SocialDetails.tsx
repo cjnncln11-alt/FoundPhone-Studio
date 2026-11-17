@@ -592,7 +592,16 @@ export function SocialDetail(p: {
                 {(() => {
                   const date = weiboDate(item.time);
                   const source = meta(item, "source");
-                  return source ? `${date} 来自 ${source}` : date;
+                  const loc = (meta(item, "location") || "")
+                    .replace(/^发布于/, "")
+                    .trim();
+                  const tail = [
+                    source ? `来自 ${source}` : "",
+                    loc ? `发布于 ${loc}` : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return tail ? `${date} ${tail}` : date;
                 })()}
               </small>
             ) : (
