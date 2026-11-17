@@ -326,6 +326,11 @@ export function SocialDetail(p: {
       >
         {isOwner ? (
           <Avatar name={name} src={p.ownerAvatar} />
+        ) : hot?.avatar ? (
+          // 应援头像：粉丝团统一的单字粉底图
+          <span className="catalog-avatar round fan-avatar">
+            <img src={commentPicSrc(hot.avatar)} alt="" />
+          </span>
         ) : (
           <FanAvatar name={name} photos={item.mediaList} />
         )}

@@ -22,7 +22,11 @@ const story = JSON.parse(
 const items = (story.content?.weibo ?? []) as {
   id: string;
   comments: string[];
-  commentMeta?: ({ likes?: number; image?: string } | null)[];
+  commentMeta?: ({
+    likes?: number;
+    image?: string;
+    avatar?: string;
+  } | null)[];
 }[];
 const post = items.find((i) => i.id === "wb-owner-1003-0000")!;
 
@@ -44,7 +48,22 @@ describe("生日动态评论区对齐真实原博", () => {
       const m = post.commentMeta?.[i];
       expect(m?.likes).toBeGreaterThan(1000);
       expect(m?.image).toBeTruthy();
+      expect(m?.avatar).toBeTruthy();
       expect(existsSync(resolve(process.cwd(), "public", m!.image!))).toBe(true);
+      expect(existsSync(resolve(process.cwd(), "public", m!.avatar!))).toBe(
+        true,
+      );
+    }
+  });
+
+  it("前排头像按顺序拼出「立农二十六岁生日快乐」", () => {
+    const chars = "立农二十六岁生日快乐";
+    for (let i = 0; i < 10; i++) {
+      const svg = readFileSync(
+        resolve(process.cwd(), "public", post.commentMeta![i]!.avatar!),
+        "utf8",
+      );
+      expect(svg).toContain(`>${chars[i]}<`);
     }
   });
 

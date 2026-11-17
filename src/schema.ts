@@ -45,6 +45,7 @@ export const itemSchema = z.object({
           time: z.string().max(60).optional(),
           province: z.string().max(60).optional(),
           image: z.string().max(400000).optional(),
+          avatar: z.string().max(400000).optional(),
         })
         .nullable(),
     )

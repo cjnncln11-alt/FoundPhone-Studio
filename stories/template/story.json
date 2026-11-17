@@ -729,61 +729,71 @@
             "likes": 1705,
             "time": "10-3 00:00",
             "province": "山东",
-            "image": "weibo-hot/hc01.jpg"
+            "image": "weibo-hot/hc01.jpg",
+            "avatar": "weibo-hot/avatar-01.svg"
           },
           {
             "likes": 1564,
             "time": "10-3 00:00",
             "province": "贵州",
-            "image": "weibo-hot/hc02.jpg"
+            "image": "weibo-hot/hc02.jpg",
+            "avatar": "weibo-hot/avatar-02.svg"
           },
           {
             "likes": 1527,
             "time": "10-3 00:00",
             "province": "山东",
-            "image": "weibo-hot/hc03.jpg"
+            "image": "weibo-hot/hc03.jpg",
+            "avatar": "weibo-hot/avatar-03.svg"
           },
           {
             "likes": 1505,
             "time": "10-3 00:00",
             "province": "福建",
-            "image": "weibo-hot/hc04.jpg"
+            "image": "weibo-hot/hc04.jpg",
+            "avatar": "weibo-hot/avatar-04.svg"
           },
           {
             "likes": 1457,
             "time": "10-3 00:00",
             "province": "广东",
-            "image": "weibo-hot/hc05.jpg"
+            "image": "weibo-hot/hc05.jpg",
+            "avatar": "weibo-hot/avatar-05.svg"
           },
           {
             "likes": 1426,
             "time": "10-3 00:00",
             "province": "广东",
-            "image": "weibo-hot/hc06.jpg"
+            "image": "weibo-hot/hc06.jpg",
+            "avatar": "weibo-hot/avatar-06.svg"
           },
           {
             "likes": 1377,
             "time": "10-3 00:00",
             "province": "广东",
-            "image": "weibo-hot/hc07.jpg"
+            "image": "weibo-hot/hc07.jpg",
+            "avatar": "weibo-hot/avatar-07.svg"
           },
           {
             "likes": 1357,
             "time": "10-3 00:00",
             "province": "福建",
-            "image": "weibo-hot/hc08.jpg"
+            "image": "weibo-hot/hc08.jpg",
+            "avatar": "weibo-hot/avatar-08.svg"
           },
           {
             "likes": 1173,
             "time": "10-3 00:00",
             "province": "浙江",
-            "image": "weibo-hot/hc09.jpg"
+            "image": "weibo-hot/hc09.jpg",
+            "avatar": "weibo-hot/avatar-09.svg"
           },
           {
             "likes": 1212,
             "time": "10-3 00:06",
             "province": "贵州",
-            "image": "weibo-hot/hc10.jpg"
+            "image": "weibo-hot/hc10.jpg",
+            "avatar": "weibo-hot/avatar-10.svg"
           },
           {
             "likes": 968,
