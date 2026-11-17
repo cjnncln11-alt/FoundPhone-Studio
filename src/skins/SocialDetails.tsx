@@ -7,6 +7,7 @@ import {
 } from "react";
 import {
   ChevronLeft,
+  ChevronDown,
   MoreHorizontal,
   Heart,
   MessageCircle,
@@ -14,7 +15,7 @@ import {
   Bookmark,
   Share,
   Headphones,
-  Star,
+  ThumbsUp,
   Camera,
   Crown,
   Copy,
@@ -450,36 +451,62 @@ export function SocialDetail(p: {
   };
   const actions = (
     <div className="post-detail-actions">
-      <button aria-label="查看评论" onClick={() => setTab("评论")}>
-        <MessageCircle />
-        {count(rows.length)}
-      </button>
-      <button aria-label="查看转发" onClick={() => setTab("转发")}>
-        <Repeat2 />
-        {meta(item, "reposts", "0")}
-      </button>
-      <button
-        aria-label="喜欢帖子"
-        aria-pressed={liked}
-        onClick={() => setLiked(!liked)}
-      >
-        <Heart
-          fill={liked ? "#f91880" : "none"}
-          color={liked ? "#f91880" : undefined}
-        />
-        {count(item.likes + (liked ? 1 : 0))}
-      </button>
-      <button
-        aria-label="收藏帖子"
-        aria-pressed={saved}
-        onClick={() => setSaved(!saved)}
-      >
-        <Bookmark fill={saved ? "currentColor" : "none"} />
-        {saved ? "1" : "0"}
-      </button>
-      <button aria-label="分享帖子" onClick={() => setMenu(!menu)}>
-        <Share />
-      </button>
+      {weibo ? (
+        <>
+          <button aria-label="查看转发" onClick={() => setTab("转发")}>
+            <Repeat2 />
+            {meta(item, "reposts", "0")}
+          </button>
+          <button aria-label="查看评论" onClick={() => setTab("评论")}>
+            <MessageCircle />
+            {count(rows.length)}
+          </button>
+          <button
+            aria-label="喜欢帖子"
+            aria-pressed={liked}
+            onClick={() => setLiked(!liked)}
+          >
+            <Heart
+              fill={liked ? "#f91880" : "none"}
+              color={liked ? "#f91880" : undefined}
+            />
+            {count(item.likes + (liked ? 1 : 0))}
+          </button>
+        </>
+      ) : (
+        <>
+          <button aria-label="查看评论" onClick={() => setTab("评论")}>
+            <MessageCircle />
+            {count(rows.length)}
+          </button>
+          <button aria-label="查看转发" onClick={() => setTab("转发")}>
+            <Repeat2 />
+            {meta(item, "reposts", "0")}
+          </button>
+          <button
+            aria-label="喜欢帖子"
+            aria-pressed={liked}
+            onClick={() => setLiked(!liked)}
+          >
+            <Heart
+              fill={liked ? "#f91880" : "none"}
+              color={liked ? "#f91880" : undefined}
+            />
+            {count(item.likes + (liked ? 1 : 0))}
+          </button>
+          <button
+            aria-label="收藏帖子"
+            aria-pressed={saved}
+            onClick={() => setSaved(!saved)}
+          >
+            <Bookmark fill={saved ? "currentColor" : "none"} />
+            {saved ? "1" : "0"}
+          </button>
+          <button aria-label="分享帖子" onClick={() => setMenu(!menu)}>
+            <Share />
+          </button>
+        </>
+      )}
     </div>
   );
   return (
@@ -522,18 +549,23 @@ export function SocialDetail(p: {
               {item.sender || "用户"}
               {item.sender === p.owner && <NameBadges />}
             </strong>
-            <small>
-              {weibo
-                ? item.time + " " + meta(item, "location")
-                : meta(item, "handle", item.sender ? "@" + item.sender : "")}
-            </small>
+            {weibo ? (
+              <small className="weibo-author-sub">
+                {item.sender === p.owner && <i className="weibo-v-badge">V</i>}
+                {(() => {
+                  const md2 = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
+                  return md2 ? `${+md2[1]}-${+md2[2]}` : item.time;
+                })()}
+              </small>
+            ) : (
+              <small>
+                {meta(item, "handle", item.sender ? "@" + item.sender : "")}
+              </small>
+            )}
           </div>
           {weibo ? (
-            <button
-              aria-label="关注作者"
-              onClick={() => setFollowed(!followed)}
-            >
-              <Star fill={followed ? "#ff9500" : "none"} />
+            <button aria-label="收起博文" onClick={() => setFollowed(!followed)}>
+              <ChevronDown size={22} />
             </button>
           ) : (
             <button
@@ -549,8 +581,14 @@ export function SocialDetail(p: {
           {(item.media || item.mediaList.length > 0) && (
             <Media
               item={item}
+              live={weibo && item.mediaList.length >= 9}
               onImage={(index) => setViewer(index)}
             />
+          )}
+          {weibo && meta(item, "hotIndex") && (
+            <span className="weibo-hot-pill">
+              <b>热文</b>热文指数{meta(item, "hotIndex")}
+            </span>
           )}
         </div>
         {weibo ? (
@@ -575,13 +613,19 @@ export function SocialDetail(p: {
         )}
         {weibo ? (
           <div className="weibo-detail-tabs">
-            {["转发", "评论", "赞"].map((name) => (
+            {(
+              [
+                ["转发", Repeat2],
+                ["评论", MessageCircle],
+                ["赞", ThumbsUp],
+              ] as const
+            ).map(([name, Icon]) => (
               <button
                 key={name}
                 aria-pressed={tab === name}
                 onClick={() => setTab(name)}
               >
-                {name}{" "}
+                <Icon size={21} />
                 {name === "评论"
                   ? meta(item, "commentsCount") || count(rows.length)
                   : name === "赞"

@@ -142,10 +142,13 @@ export function Media({
   item,
   className = "",
   onImage,
+  live,
 }: {
   item: Item;
   className?: string;
   onImage?: (index: number, images: string[]) => void;
+  /** 微博九宫格样式：每格 LIVE 徽章，超过 9 张时第 9 格显示 "+N" */
+  live?: boolean;
 }) {
   const src = safeMedia(item.media);
   const list = item.mediaList
@@ -163,23 +166,74 @@ export function Media({
         onClick={(e) => e.stopPropagation()}
       />
     );
-  if (list.length)
+  if (list.length) {
+    if (!live)
+      return (
+        <div className={`media-grid media-grid-${Math.min(list.length, 9)}`}>
+          {list.map((s, i) => (
+            <img
+              key={i}
+              loading="lazy"
+              alt={`${item.title} ${i + 1}`}
+              src={s}
+              onClick={(e) => {
+                e.stopPropagation();
+                onImage?.(i, list);
+              }}
+            />
+          ))}
+        </div>
+      );
+    const shown = list.slice(0, 8);
+    const rest = list.length - shown.length;
     return (
-      <div className={`media-grid media-grid-${Math.min(list.length, 9)}`}>
-        {list.map((s, i) => (
-          <img
-            key={i}
-            loading="lazy"
-            alt={`${item.title} ${i + 1}`}
-            src={s}
-            onClick={(e) => {
-              e.stopPropagation();
-              onImage?.(i, list);
-            }}
-          />
+      <div className="media-grid media-grid-9 weibo-live-grid">
+        {shown.map((s, i) => (
+          <div className="weibo-media-cell" key={i}>
+            <img
+              loading="lazy"
+              alt={`${item.title} ${i + 1}`}
+              src={s}
+              onClick={(e) => {
+                e.stopPropagation();
+                onImage?.(i, list);
+              }}
+            />
+            <span className="weibo-live-badge">
+              <i />
+              LIVE
+            </span>
+          </div>
         ))}
+        {rest > 0 && (
+          <div className="weibo-media-cell">
+            <img
+              loading="lazy"
+              alt={`${item.title} 更多`}
+              src={list[8]}
+              onClick={(e) => {
+                e.stopPropagation();
+                onImage?.(8, list);
+              }}
+            />
+            <span className="weibo-live-badge">
+              <i />
+              LIVE
+            </span>
+            <span
+              className="weibo-media-more"
+              onClick={(e) => {
+                e.stopPropagation();
+                onImage?.(8, list);
+              }}
+            >
+              +{rest}
+            </span>
+          </div>
+        )}
       </div>
     );
+  }
   return src ? (
     <img
       className={className}

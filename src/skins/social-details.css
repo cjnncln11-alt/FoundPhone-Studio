@@ -503,3 +503,47 @@
 .weibo-post-detail .weibo-like-row svg {
   flex: none;
 }
+
+/* ── 微博详情：对照参考截图的排版 ─────────────────── */
+.ios18 .weibo-post-detail .weibo-author-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #65737f;
+}
+.ios18 .weibo-post-detail .post-detail-author > button {
+  color: #b9b9b9;
+}
+.ios18 .weibo-post-detail .post-detail-body .weibo-hot-pill {
+  font-size: 13px;
+  padding: 7px 14px;
+}
+.ios18 .weibo-post-detail .post-detail-actions {
+  border-top: none;
+  border-bottom: none;
+  justify-content: space-around;
+  color: #333;
+  padding: 16px 12px;
+}
+.ios18 .weibo-post-detail .post-detail-actions button {
+  font-size: 14px;
+  gap: 8px;
+  color: #333;
+}
+.ios18 .weibo-post-detail .post-detail-actions svg {
+  width: 23px;
+  height: 23px;
+}
+.ios18 .weibo-post-detail .weibo-detail-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+.ios18 .weibo-post-detail .weibo-detail-tabs button[aria-pressed="true"] {
+  color: #222;
+}
+.ios18 .weibo-post-detail .weibo-detail-tabs {
+  border-bottom: none;
+}

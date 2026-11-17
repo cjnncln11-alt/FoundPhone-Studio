@@ -4252,3 +4252,140 @@
   border: 1px solid #ffffff88;
   white-space: nowrap;
 }
+
+/* ── 微博博文卡片：对照参考截图的排版 ─────────────────── */
+.weibo-post .social-author {
+  padding: 12px 13px 10px;
+  gap: 10px;
+}
+.weibo-post .social-author .catalog-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.weibo-post .social-author strong {
+  font-size: 15px;
+}
+.weibo-author-sub {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+.weibo-v-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #ffb14e, #f77c2e);
+  color: #fff;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  flex: none;
+}
+.weibo-author-chevron {
+  margin-left: auto;
+  color: #b9b9b9;
+  flex: none;
+}
+.weibo-post > .social-body {
+  padding: 0 13px 10px;
+}
+.weibo-post > .social-body > p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #222;
+  margin: 0;
+}
+.weibo-hot-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 18px;
+  font-size: 12px;
+  color: #333;
+}
+.weibo-hot-pill b {
+  color: #ff7c2e;
+  background: #fff1e6;
+  border-radius: 8px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.weibo-post .social-actions {
+  border-top: none;
+  padding: 10px 18px 12px;
+  justify-content: space-around;
+  color: #333;
+}
+.weibo-actions button {
+  font-size: 13px;
+  gap: 7px;
+  color: #333;
+}
+.weibo-actions button:last-child {
+  margin-left: 0;
+}
+.weibo-actions svg {
+  width: 21px;
+  height: 21px;
+}
+/* 九宫格 LIVE 徽章与 "+N" 收起图块 */
+.weibo-live-grid {
+  gap: 4px;
+}
+.weibo-media-cell {
+  position: relative;
+}
+.weibo-media-cell img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #eee;
+  display: block;
+}
+.weibo-live-badge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px #0006;
+  pointer-events: none;
+}
+.weibo-live-badge i {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px #0006;
+}
+.weibo-media-more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 600;
+  text-shadow: 0 1px 4px #0008;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 4px;
+}

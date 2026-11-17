@@ -5,6 +5,7 @@ import {
   AtSign,
   Bookmark,
   Camera,
+  ChevronDown,
   ChevronRight,
   Grid,
   Hash,
@@ -60,6 +61,8 @@ function Actions({ p, item }: { p: Props; item: Item }) {
 }
 function PostHeader({ item, p }: { item: Item; p: Props }) {
   const gold = item.sender === p.owner;
+  const md = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
+  const date = md ? `${+md[1]}-${+md[2]}` : item.time;
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
       <VAvatar name={item.sender} src={item.avatar} gold={gold} />
@@ -68,8 +71,12 @@ function PostHeader({ item, p }: { item: Item; p: Props }) {
           {item.sender}
           {gold && <NameBadges />}
         </strong>
-        <small>{meta(item, "handle", item.time)}</small>
+        <small className="weibo-author-sub">
+          {gold && <i className="weibo-v-badge">V</i>}
+          {date}
+        </small>
       </span>
+      <ChevronDown size={16} className="weibo-author-chevron" />
     </button>
   );
 }
@@ -184,8 +191,14 @@ export function WeiboSkin(p: Props) {
               {(i.media || i.mediaList.length > 0) && (
                 <Media
                   item={i}
+                  live={i.mediaList.length >= 9}
                   onImage={(index) => setViewer({ item: i, index })}
                 />
+              )}
+              {meta(i, "hotIndex") && (
+                <span className="weibo-hot-pill">
+                  <b>热文</b>热文指数{meta(i, "hotIndex")}
+                </span>
               )}
             </button>
             <WeiboActions p={p} item={i} />
