@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-// 生日动态的前排评论对齐真实原博（2026：weibo.com/6408414755/RkRwhx5xw；2025：mid 5217451371398002）
+// 生日动态的前排评论对齐真实原博（2026：RkRwhx5xw；2025：5217451371398002；2024：5085179799933308）
 const BIRTHDAY_POSTS = [
   {
     id: "wb-owner-1003-0000",
@@ -34,6 +34,22 @@ const BIRTHDAY_POSTS = [
       "桔梗盛开在仲夏夜的尽头",
       "别嫌我臭呀",
       "和小农周六见",
+    ],
+  },
+  {
+    id: "wb-owner-1003-2024",
+    chars: "立农二十四岁生日快乐",
+    top: [
+      "巧克立农糖呀",
+      "超級農農的毛毛",
+      "浣熊眠眠",
+      "ZIWEN__",
+      "吃飽飽準備上課",
+      "小田想要天天天天天天天天天开心",
+      "胖三斤_1003",
+      "朱迪丝不吃饭宁宁就晕倒",
+      "小椿漫语",
+      "我要改个什么很长的名字",
     ],
   },
 ];
