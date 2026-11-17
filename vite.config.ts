@@ -26,7 +26,7 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg}"],
+        globPatterns: ["**/*.{js,css,html,svg,jpg,png,webp}"],
         maximumFileSizeToCacheInBytes: 4000000,
         skipWaiting: true,
         clientsClaim: true,

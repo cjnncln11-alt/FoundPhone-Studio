@@ -547,3 +547,23 @@
 .ios18 .weibo-post-detail .weibo-detail-tabs {
   border-bottom: none;
 }
+
+/* 评论区正文里的 @ 昵称 */
+.ios18 .post-detail-comment .weibo-at {
+  color: #eb7350;
+}
+/* 评论配图：与微博评论区一致的小方缩略图 */
+.ios18 .post-detail-comment .weibo-comment-pic {
+  display: block;
+  width: 112px;
+  height: 112px;
+  margin: 7px 0 5px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 7px;
+  background: #f2f3f5;
+}
+.ios18 .post-detail-comment.weibo-nested-reply .weibo-comment-pic {
+  width: 92px;
+  height: 92px;
+}

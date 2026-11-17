@@ -51,6 +51,23 @@ import { ImageViewer } from "./ImageViewer";
 import type { Item, UiValue } from "../schema";
 import "./social-details.css";
 export const socialDetailApps = new Set(["twitter", "weibo"]);
+// 评论补充信息：真实评论的赞数 / 时间 / 属地 / 配图
+type CommentMeta = NonNullable<Item["commentMeta"]>[number];
+// 评论正文里的 @ 昵称高亮成蓝色链接
+const AT_RE = /(@[\u4e00-\u9fa5A-Za-z0-9_\-·]+)/g;
+const renderBody = (body: string) =>
+  body.split(AT_RE).map((seg, i) =>
+    seg.startsWith("@") ? (
+      <span key={i} className="weibo-at">
+        {seg}
+      </span>
+    ) : (
+      seg
+    ),
+  );
+// 评论配图：支持 data: / http(s) / 站点相对路径（public 目录）
+const commentPicSrc = (src: string) =>
+  /^(data:|https?:)/.test(src) ? src : import.meta.env.BASE_URL + src;
 const count = (n: number) =>
   n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "w" : String(n);
 const commentProvinces = [
@@ -145,7 +162,7 @@ export function SocialDetail(p: {
     return body.match(fanReplyRe)?.[1] || "";
   };
   const fanNestedReplies = item.comments
-    .map((c) => ({ c, to: fanReplyTarget(c) }))
+    .map((c, i) => ({ c, i, to: fanReplyTarget(c) }))
     .filter((e) => e.to);
   const parseTopText = (c: string) => {
     const split = c.search(/[：:]/),
@@ -286,6 +303,7 @@ export function SocialDetail(p: {
     onDelete?: () => void,
     rowKey?: string,
     showNested?: boolean,
+    hot?: CommentMeta,
   ): ReactElement => {
     const menuKey = "menu-" + (rowKey ?? String(index));
     const articleKey = rowKey ?? String(index);
@@ -294,11 +312,11 @@ export function SocialDetail(p: {
       metaTime =
         isOwner && postDate
           ? `${postDate.m}-${postDate.d} ${pad2(postDate.h)}:${pad2(postDate.min)}`
-          : info.time,
-      metaProvince = isOwner ? postProvince : info.province,
+          : (hot?.time ?? info.time),
+      metaProvince = isOwner ? postProvince : (hot?.province ?? info.province),
       likes = isOwner
         ? (ownerLikeStore[seed] ?? 0)
-        : commentLikes(index, seed);
+        : (hot?.likes ?? commentLikes(index, seed));
     return (
       <>        <article
         key={articleKey}
@@ -316,7 +334,15 @@ export function SocialDetail(p: {
             {name}
             {isOwner && ownerBadge}
           </strong>
-          <p>{body}</p>
+          <p>{renderBody(body)}</p>
+          {hot?.image && (
+            <img
+              className="weibo-comment-pic"
+              src={commentPicSrc(hot.image)}
+              alt=""
+              loading="lazy"
+            />
+          )}
           <div className="comment-meta-row">
             <span className="comment-meta-info">
               {metaTime} 来自 {metaProvince}
@@ -404,6 +430,8 @@ export function SocialDetail(p: {
               true,
               undefined,
               articleKey + "f" + i,
+              true,
+              item.commentMeta?.[e.i] || undefined,
             );
           })}
     </>
@@ -687,6 +715,9 @@ export function SocialDetail(p: {
                   : undefined,
                 row.key,
                 firstOfName,
+                row.owner || row.rc
+                  ? undefined
+                  : item.commentMeta?.[row.fanIndex] || undefined,
               );
             })}
             {(tab === "转发" ? !item.reposts.length : !rows.length) && (

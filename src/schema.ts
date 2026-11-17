@@ -35,6 +35,20 @@ export const itemSchema = z.object({
   read: z.boolean().default(false),
   likes: z.number().default(0),
   comments: z.array(z.string()).default([]),
+  // 与 comments 下标一一对应的补充信息（赞数、时间、IP 属地、评论配图）
+  // 用真实数据覆盖按 hash 生成的模拟值，null 表示该条走默认模拟
+  commentMeta: z
+    .array(
+      z
+        .object({
+          likes: z.number().optional(),
+          time: z.string().max(60).optional(),
+          province: z.string().max(60).optional(),
+          image: z.string().max(400000).optional(),
+        })
+        .nullable(),
+    )
+    .default([]),
   reposts: z.array(z.string()).default([]),
   likedBy: z.array(z.string()).default([]),
 });
