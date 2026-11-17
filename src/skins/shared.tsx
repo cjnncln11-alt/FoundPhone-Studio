@@ -238,11 +238,12 @@ export function PausingVideo({
       void document.exitFullscreen?.();
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const req = stage.requestFullscreen?.bind(stage) ||
-      ((stage as any).webkitRequestFullscreen?.bind(stage) as
-        | (() => Promise<void>)
-        | undefined);
+    const stageWithWebkit = stage as HTMLSpanElement & {
+      webkitRequestFullscreen?: () => Promise<void>;
+    };
+    const req =
+      stage.requestFullscreen?.bind(stage) ??
+      stageWithWebkit.webkitRequestFullscreen?.bind(stage);
     try {
       const p = req?.();
       p?.catch?.(() => {});
