@@ -11,6 +11,7 @@ import {
   Hash,
   Heart,
   Home,
+  ListFilter,
   MessageCircle,
   Repeat2,
   User,
@@ -31,6 +32,7 @@ import {
   SearchBox,
   Tabs,
   useContent,
+  Foldable,
   VAvatar,
   wanCount,
   weiboDate,
@@ -109,7 +111,16 @@ export function WeiboSkin(p: Props) {
   const [viewer, setViewer] = useState<{ item: Item; index: number } | null>(
     null,
   );
-  const list = feed === "全部" ? items : items.filter((i) => i.folder === feed);
+  // 年份筛选 + 时间正/倒序（默认"最新在前"，即数据本来的倒序）
+  const [year, setYear] = useState("全部");
+  const [asc, setAsc] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const years = [...new Set(items.map((i) => i.time.slice(0, 4)))]
+    .sort()
+    .reverse();
+  const base = feed === "全部" ? items : items.filter((i) => i.folder === feed);
+  const matched = year === "全部" ? base : base.filter((i) => i.time.startsWith(year));
+  const list = asc ? [...matched].reverse() : matched;
   return (
     <div className="catalog-skin weibo-ui">
       <Header p={p} />
@@ -183,11 +194,64 @@ export function WeiboSkin(p: Props) {
             </div>
           </>
         )}
+        {tab === "我" && (
+          <div className="weibo-count-bar">
+            <span>全部微博({list.length})</span>
+            <button
+              className={filterOpen ? "selected" : ""}
+              onClick={() => setFilterOpen(!filterOpen)}
+            >
+              <ListFilter size={15} aria-hidden="true" />
+              筛选
+            </button>
+          </div>
+        )}
+        {tab === "我" && filterOpen && (
+              <div className="weibo-filter-panel">
+                <div className="weibo-filter-row">
+                  <span>年份</span>
+                  <div>
+                    <button
+                      className={year === "全部" ? "selected" : ""}
+                      onClick={() => setYear("全部")}
+                    >
+                      全部
+                    </button>
+                    {years.map((y) => (
+                      <button
+                        key={y}
+                        className={year === y ? "selected" : ""}
+                        onClick={() => setYear(y)}
+                      >
+                        {y}年
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="weibo-filter-row">
+                  <span>排序</span>
+                  <div>
+                    <button
+                      className={!asc ? "selected" : ""}
+                      onClick={() => setAsc(false)}
+                    >
+                      最新在前
+                    </button>
+                    <button
+                      className={asc ? "selected" : ""}
+                      onClick={() => setAsc(true)}
+                    >
+                      最早在前
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
         {list.map((i) => (
           <article className="weibo-post" key={i.id}>
             <PostHeader p={p} item={i} />
             <button className="social-body" onClick={() => p.onItem(i)}>
-              <p>{i.body}</p>
+              <Foldable text={i.body} maxLines={6} />
               {(i.media || i.mediaList.length > 0 || i.meta.video) && (
                 <Media
                   item={i}
@@ -268,7 +332,7 @@ export function XSkin(p: Props) {
                   </span>
                 </button>
                 <button className="social-body" onClick={() => p.onItem(i)}>
-                  <p>{i.body}</p>
+                  <Foldable text={i.body} maxLines={6} />
                   {(i.media || i.mediaList.length > 0) && <Media item={i} />}
                 </button>
                 <Actions p={p} item={i} />
@@ -314,7 +378,7 @@ export function ThreadsSkin(p: Props) {
                 <small>{i.time.slice(5, 10)}</small>
               </div>
               <button className="social-body" onClick={() => p.onItem(i)}>
-                <p>{i.body}</p>
+                <Foldable text={i.body} maxLines={6} />
                 {(i.media || i.mediaList.length > 0) && <Media item={i} />}
               </button>
               <Actions p={p} item={i} />
@@ -373,7 +437,7 @@ export function FacebookSkin(p: Props) {
                 <article className="fb-post" key={i.id}>
                   <PostHeader p={p} item={i} />
                   <button className="social-body" onClick={() => p.onItem(i)}>
-                    <p>{i.body}</p>
+                    <Foldable text={i.body} maxLines={6} />
                     {(i.media || i.mediaList.length > 0) && <Media item={i} />}
                   </button>
                   <Actions p={p} item={i} />
@@ -408,7 +472,7 @@ export function FacebookSkin(p: Props) {
                   onClick={() => p.onItem(i)}
                 >
                   {i.title}
-                  <p>{i.body}</p>
+                  <Foldable text={i.body} maxLines={6} />
                 </button>
               ))}
           </>
@@ -588,7 +652,7 @@ function RedditPost({ p, item: i }: { p: Props; item: Item }) {
       </button>
       <button className="social-body" onClick={() => p.onItem(i)}>
         <h3>{i.title}</h3>
-        <p>{i.body}</p>
+        <Foldable text={i.body} maxLines={6} />
         {(i.media || i.mediaList.length > 0) && <Media item={i} />}
       </button>
       <div className="reddit-actions">
