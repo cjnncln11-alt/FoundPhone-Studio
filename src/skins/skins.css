@@ -2138,13 +2138,6 @@
   font-size: 15px;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
 }
-.weibo-cover-bar button.liked-you {
-  font-weight: 600;
-}
-.weibo-cover-bar button.liked-you.on {
-  color: #ff6d92;
-  text-shadow: 0 1px 6px rgba(255, 109, 146, 0.45);
-}
 .weibo-cover-spacer {
   flex: 1;
 }

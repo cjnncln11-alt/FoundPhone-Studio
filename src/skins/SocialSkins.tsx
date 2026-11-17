@@ -286,9 +286,8 @@ export function WeiboSkin(p: Props) {
   const [filterOpen, setFilterOpen] = useState(false);
   // 「那年今天」：查看往年同月同日的动态
   const [todayMode, setTodayMode] = useState(false);
-  // 超话页 + 「喜欢你」点亮
+  // 超话页
   const [stOpen, setStOpen] = useState(false);
-  const [likedYou, setLikedYou] = useSkinState<boolean>(p, "liked-you", false);
   const now = new Date();
   const todayMd = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(
     now.getDate(),
@@ -342,20 +341,6 @@ export function WeiboSkin(p: Props) {
                     }}
                   >
                     <div className="weibo-cover-bar">
-                      <button aria-label="返回" onClick={() => setTab("关注")}>
-                        <ChevronLeft size={22} />
-                      </button>
-                      <button
-                        className={"liked-you" + (likedYou ? " on" : "")}
-                        aria-pressed={likedYou}
-                        onClick={() => setLikedYou(!likedYou)}
-                      >
-                        <Heart
-                          size={15}
-                          fill={likedYou ? "currentColor" : "none"}
-                        />
-                        喜欢你
-                      </button>
                       <span className="weibo-cover-spacer" />
                       <button aria-label="拍摄">
                         <Camera size={19} />
