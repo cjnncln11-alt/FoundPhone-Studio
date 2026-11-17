@@ -379,3 +379,253 @@ describe("记录135 本人回复保留（wb-owner-0505-1816）", () => {
     expect(post.commentMeta?.[idx]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
   });
 });
+
+// 记录136~155（2019-04-12 → 2018-10-02）：真实原博补齐，含 8 条视频与 3 处本人回复
+describe("记录136~155 真实原博补齐", () => {
+  type FullPost = {
+    id: string;
+    body: string;
+    time: string;
+    likes: number;
+    mediaList?: string[];
+    comments: string[];
+    commentMeta?: ({ avatar?: string; likes?: number } | null)[];
+    meta: { location?: string; source?: string; video?: string; videoCover?: string };
+  };
+  const all = (story.content?.weibo ?? []) as FullPost[];
+  const ids = [
+    "wb-owner-0412-2016",
+    "wb-owner-0403-2220",
+    "wb-owner-0330-2128",
+    "wb-owner-0224-1816",
+    "wb-owner-0219-2055",
+    "wb-owner-0214-1921",
+    "wb-owner-0207-1928",
+    "wb-owner-0204-1934",
+    "wb-owner-0201-1947",
+    "wb-owner-0129-2301",
+    "wb-owner-0108-1945",
+    "wb-owner-1217-1818",
+    "wb-owner-1211-1640",
+    "wb-owner-1209-0209",
+    "wb-owner-1206-0004",
+    "wb-owner-1126-2158",
+    "wb-owner-1124-1833",
+    "wb-owner-1015-2223",
+    "wb-owner-1012-1838",
+    "wb-owner-1002-2359",
+  ];
+
+  it("20 条按时间倒序排列且顺序全部正确", () => {
+    for (const id of ids) expect(all.some((p) => p.id === id)).toBe(true);
+    const times = all.map((p) => p.time);
+    const sorted = [...times].sort().reverse();
+    expect(times).toEqual(sorted);
+    const picked = ids.map((id) => all.find((p) => p.id === id)!.time);
+    expect(picked).toEqual([...picked].sort().reverse());
+  });
+
+  it("每条都有来源 IP 与真实赞数", () => {
+    for (const id of ids) {
+      const p = all.find((x) => x.id === id)!;
+      expect(p.likes).toBeGreaterThan(190000);
+      expect(p.meta.location).toBe("发布于中国台湾");
+    }
+  });
+
+  it("9 条视频与封面文件都存在", () => {
+    const videos = ids
+      .map((id) => all.find((p) => p.id === id)!)
+      .filter((p) => p.meta.video);
+    expect(videos.length).toBe(9);
+    for (const p of videos) {
+      expect(["微博视频号", "微博视频", "微博故事"]).toContain(p.meta.source);
+      expect(existsSync(resolve(process.cwd(), "public", p.meta.video!.slice(1)))).toBe(true);
+      expect(existsSync(resolve(process.cwd(), "public", p.meta.videoCover!.slice(1)))).toBe(true);
+    }
+  });
+
+  it("三处本人回复保留且头像为真实头像", () => {
+    const cases: [string, string][] = [
+      ["wb-owner-0403-2220", "陈立农：回复 @新浪娱乐：等工作结束才行"],
+      ["wb-owner-0219-2055", "陈立农：回复 @新浪娱乐：猜猜[哈哈]"],
+      ["wb-owner-0108-1945", "陈立农：回复 @新浪娱乐：你也不错哈哈😄"],
+    ];
+    for (const [id, text] of cases) {
+      const p = all.find((x) => x.id === id)!;
+      expect(p.comments[0]).toMatch(/^新浪娱乐：/);
+      const idx = p.comments.indexOf(text);
+      expect(idx).toBeGreaterThan(0);
+      expect(p.commentMeta?.[idx]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+      expect(p.commentMeta?.length).toBe(p.comments.length);
+    }
+  });
+
+  it("记录140 保留新浪娱乐对本人回复的追评", () => {
+    const p = all.find((x) => x.id === "wb-owner-0219-2055")!;
+    const idx = p.comments.indexOf("陈立农：回复 @新浪娱乐：猜猜[哈哈]");
+    expect(p.comments[idx + 1]).toBe("新浪娱乐：回复 @陈立农：猜对有奖吗？[阴险]");
+  });
+});
+
+// 记录156~179（19-04-12 → 18-09-27 可获取的 18 条）：含 5 条视频、王彦霖评论与两处置顶自评
+describe("记录156~179 真实原博补齐", () => {
+  type FullPost = {
+    id: string;
+    body: string;
+    time: string;
+    likes: number;
+    mediaList?: string[];
+    comments: string[];
+    commentMeta?: ({ avatar?: string; likes?: number } | null)[];
+    meta: { location?: string; source?: string; video?: string; videoCover?: string };
+  };
+  const all = (story.content?.weibo ?? []) as FullPost[];
+  const ids = [
+    "wb-owner-0927-1149",
+    "wb-owner-0909-2018",
+    "wb-owner-0730-1945",
+    "wb-owner-0729-1820",
+    "wb-owner-0726-1719",
+    "wb-owner-0706-2236",
+    "wb-owner-0704-1622",
+    "wb-owner-0627-2119",
+    "wb-owner-0626-0908",
+    "wb-owner-0621-1834",
+    "wb-owner-0530-2252",
+    "wb-owner-0527-2121",
+    "wb-owner-0503-1001",
+    "wb-owner-0427-1553",
+    "wb-owner-0418-1052",
+    "wb-owner-0416-1333",
+    "wb-owner-0414-1213",
+    "wb-owner-0412-1245",
+  ];
+
+  it("18 条齐备且全序列时间倒序", () => {
+    for (const id of ids) expect(all.some((p) => p.id === id)).toBe(true);
+    const times = all.map((p) => p.time);
+    expect(times).toEqual([...times].sort().reverse());
+  });
+
+  it("每条都有来源 IP 与真实赞数", () => {
+    for (const id of ids) {
+      const p = all.find((x) => x.id === id)!;
+      expect(p.likes).toBeGreaterThan(200000);
+      expect(p.meta.location).toBe("发布于中国台湾");
+    }
+  });
+
+  it("8 条视频与封面文件都存在", () => {
+    const videos = ids
+      .map((id) => all.find((p) => p.id === id)!)
+      .filter((p) => p.meta.video);
+    expect(videos.length).toBe(8);
+    for (const p of videos) {
+      expect(["微博视频号", "微博视频", "微博故事"]).toContain(p.meta.source);
+      expect(existsSync(resolve(process.cwd(), "public", p.meta.video!.slice(1)))).toBe(true);
+      expect(existsSync(resolve(process.cwd(), "public", p.meta.videoCover!.slice(1)))).toBe(true);
+    }
+  });
+
+  it("王彦霖评论与本人回复真实保留（记录159/160）", () => {
+    for (const id of ["wb-owner-0730-1945", "wb-owner-0729-1820"]) {
+      const p = all.find((x) => x.id === id)!;
+      expect(p.comments[0]).toMatch(/^王彦霖：/);
+      expect(p.commentMeta?.[0]?.avatar).toBe("weibo-hot/avatar-wyl.jpg");
+      expect(p.commentMeta?.[0]?.likes).toBeGreaterThan(30000);
+      expect(p.comments[1]).toMatch(/^陈立农：回复 @王彦霖：/);
+      expect(p.commentMeta?.[1]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+      expect(p.commentMeta?.length).toBe(p.comments.length);
+    }
+  });
+
+  it("置顶自评用本人头像与真实赞数（记录167/169）", () => {
+    const cases: [string, number][] = [
+      ["wb-owner-0503-1001", 187940],
+      ["wb-owner-0530-2252", 92728],
+    ];
+    for (const [id, likes] of cases) {
+      const p = all.find((x) => x.id === id)!;
+      expect(p.comments[0]).toMatch(/^陈立农：/);
+      expect(p.commentMeta?.[0]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+      expect(p.commentMeta?.[0]?.likes).toBe(likes);
+    }
+  });
+});
+
+// 记录157/171/176~179：用户直接补录的 6 条（原文案 + 2 视频 + 4 图）
+// 发布时间由微博 mid 位解码还原（mid >> 22 + 515483463，误差 ±1 秒）
+describe("记录157/171/176~179 用户补录", () => {
+  type FullPost = {
+    id: string;
+    body: string;
+    time: string;
+    likes: number;
+    mediaList?: string[];
+    comments: string[];
+    meta: { location?: string; source?: string; video?: string; videoCover?: string };
+  };
+  const all = (story.content?.weibo ?? []) as FullPost[];
+  const pick = (id: string) => all.find((p) => p.id === id)!;
+  const ids = [
+    "wb-owner-0924-2101",
+    "wb-owner-0426-1600",
+    "wb-owner-0407-1833",
+    "wb-owner-0402-1948",
+    "wb-owner-0324-2016",
+    "wb-owner-0311-1653",
+  ];
+
+  it("6 条齐备且全序列时间倒序", () => {
+    for (const id of ids) expect(all.some((p) => p.id === id)).toBe(true);
+    const times = all.map((p) => p.time);
+    expect(times).toEqual([...times].sort().reverse());
+  });
+
+  it("时间按 mid 解码落在正确区间（中秋/决赛后/见面会前）", () => {
+    expect(pick("wb-owner-0924-2101").time).toBe("2018-09-24 21:01");
+    expect(pick("wb-owner-0426-1600").time).toBe("2018-04-26 16:00");
+    expect(pick("wb-owner-0407-1833").time).toBe("2018-04-07 18:33");
+    expect(pick("wb-owner-0402-1948").time).toBe("2018-04-02 19:48");
+    expect(pick("wb-owner-0324-2016").time).toBe("2018-03-24 20:16");
+    expect(pick("wb-owner-0311-1653").time).toBe("2018-03-11 16:53");
+    expect(pick("wb-owner-0407-1833").time < pick("wb-owner-0402-1948").time).toBe(false);
+  });
+
+  it("正文保留原文关键内容", () => {
+    expect(pick("wb-owner-0924-2101").body).toContain("1003见");
+    expect(pick("wb-owner-0426-1600").body).toContain("一百万粉丝福利");
+    expect(pick("wb-owner-0407-1833").body).toContain("皮皮");
+    expect(pick("wb-owner-0402-1948").body).toContain("#偶像练习生#");
+    expect(pick("wb-owner-0324-2016").body).toContain("#偶像练习生VIP千人见面会");
+    expect(pick("wb-owner-0311-1653").body).toContain("全民製作人");
+  });
+
+  it("2 条视频与封面文件都存在且标为视频号", () => {
+    for (const id of ["wb-owner-0924-2101", "wb-owner-0426-1600"]) {
+      const p = pick(id);
+      expect(p.meta.source).toBe("微博视频号");
+      expect(existsSync(resolve(process.cwd(), "public", p.meta.video!.slice(1)))).toBe(true);
+      expect(existsSync(resolve(process.cwd(), "public", p.meta.videoCover!.slice(1)))).toBe(true);
+    }
+  });
+
+  it("4 条图文各有 1 张内嵌图，视频博不带图", () => {
+    for (const id of ["wb-owner-0407-1833", "wb-owner-0402-1948", "wb-owner-0324-2016", "wb-owner-0311-1653"]) {
+      const p = pick(id);
+      expect(p.mediaList?.length).toBe(1);
+      expect(p.mediaList![0].startsWith("data:image/jpeg;base64,")).toBe(true);
+    }
+    expect(pick("wb-owner-0924-2101").meta.video).toBeTruthy();
+  });
+
+  it("每条都有来源 IP、赞数与评论", () => {
+    for (const id of ids) {
+      const p = pick(id);
+      expect(p.meta.location).toBe("发布于中国台湾");
+      expect(p.likes).toBeGreaterThan(290000);
+      expect(p.comments.length).toBeGreaterThanOrEqual(14);
+    }
+  });
+});

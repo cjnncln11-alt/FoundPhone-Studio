@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import type { SkinProps } from "../AppSkins";
@@ -165,25 +166,56 @@ export const weiboStamp = (t: string, year?: number) => {
  * IntersectionObserver 以浏览器视口为根，内部滚动容器同样生效。
  * 右下角自定义放大按钮：全屏后锁定横屏；竖屏视口下横向视频旋转 90° 模拟横屏。
  */
+export const SEEK_STEP = 10;
+/** 双击热区：左侧 35% 后退、右侧 35% 前进、中间留给播放/暂停 */
+export const seekZone = (ratio: number): "back" | "forward" | null =>
+  ratio <= 0.35 ? "back" : ratio >= 0.65 ? "forward" : null;
+/** 目标时间：夹在 [0, duration] 内（duration 未知时只保底 0） */
+export const seekTarget = (
+  current: number,
+  duration: number,
+  delta: number,
+) => {
+  const end =
+    Number.isFinite(duration) && duration > 0 ? duration : Number.MAX_VALUE;
+  return Math.min(Math.max(current + delta, 0), end);
+};
+export const clockText = (t: number) => {
+  const v = Number.isFinite(t) && t > 0 ? t : 0;
+  return `${Math.floor(v / 60)}:${String(Math.floor(v % 60)).padStart(2, "0")}`;
+};
+
 export function PausingVideo({
   className = "",
+  src,
   ...rest
 }: ComponentProps<"video">) {
   const ref = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLSpanElement>(null);
+  // HLS 分片播放：静态托管不带 Range 支持，整段 mp4 无法定位，改由 m3u8 + hls.js 按片加载
+  const isHls = typeof src === "string" && /\.m3u8(?:$|\?)/.test(src);
+  const tapRef = useRef<{ t: number; paused: boolean } | null>(null);
+  const hintTimer = useRef<number | null>(null);
+  const [hint, setHint] = useState<{
+    side: "back" | "forward";
+    text: string;
+  } | null>(null);
+  // 临近视口才初始化 HLS，避免信息流里几十个实例同时拉清单和分片
+  const [near, setNear] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
       (entries) => {
         for (const en of entries) {
+          if (en.isIntersecting) setNear(true);
           // 可视面积不足两成即视为滑过，自动停止
           if (!en.isIntersecting || en.intersectionRatio < 0.2) {
             if (!el.paused) el.pause();
           }
         }
       },
-      { threshold: [0, 0.2, 0.5, 1] },
+      { threshold: [0, 0.2, 0.5, 1], rootMargin: "300px" },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -231,6 +263,93 @@ export function PausingVideo({
       el.removeEventListener("loadedmetadata", onMeta);
     };
   }, []);
+  // HLS：优先 hls.js（MSE 可控分片），不支持 MSE 时退回原生（iOS Safari）
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isHls || typeof src !== "string" || !near) return;
+    let hls: { destroy: () => void; startLoad: () => void } | null = null;
+    let dead = false;
+    const onPlay = () => hls?.startLoad();
+    const nativeHls = () => {
+      if (dead || !ref.current) return;
+      ref.current.preload = "metadata";
+      ref.current.src = src;
+    };
+    void import("hls.js")
+      .then((mod) => {
+        const Hls = mod.default;
+        if (dead || !ref.current) return;
+        if (!Hls.isSupported()) {
+          nativeHls();
+          return;
+        }
+        // 不自动起播：点播放、拖进度时再按片拉流，信息流滚动不浪费流量
+        const inst = new Hls({
+          maxBufferLength: 30,
+          backBufferLength: 30,
+          autoStartLoad: false,
+        });
+        hls = inst;
+        inst.loadSource(src);
+        inst.attachMedia(ref.current);
+        ref.current.addEventListener("play", onPlay);
+        ref.current.addEventListener("seeking", onPlay);
+        // 挂载前用户已点过播放（此时没人监听 play 事件）：补一次起流
+        if (!ref.current.paused && ref.current.readyState < 3) onPlay();
+      })
+      .catch(nativeHls);
+    return () => {
+      dead = true;
+      ref.current?.removeEventListener("play", onPlay);
+      ref.current?.removeEventListener("seeking", onPlay);
+      hls?.destroy();
+    };
+  }, [src, isHls, near]);
+  useEffect(
+    () => () => {
+      if (hintTimer.current) window.clearTimeout(hintTimer.current);
+    },
+    [],
+  );
+  const flashHint = (side: "back" | "forward", text: string) => {
+    setHint({ side, text });
+    if (hintTimer.current) window.clearTimeout(hintTimer.current);
+    hintTimer.current = window.setTimeout(() => setHint(null), 900);
+  };
+  /** 双击左右两侧 ±10 秒；原生单击的播放/暂停保持不动 */
+  const onSeekTap = (e: ReactPointerEvent<HTMLVideoElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const rect = el.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    // 底部原生控件条交给浏览器（进度条拖动等）
+    if (y > rect.height - 44) return;
+    const x = e.clientX - rect.left;
+    const now = Date.now();
+    const prev = tapRef.current;
+    tapRef.current = { t: now, paused: el.paused };
+    if (!prev || now - prev.t > 320) return;
+    const zone = seekZone(x / Math.max(1, rect.width));
+    tapRef.current = null;
+    if (!zone) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const delta = zone === "forward" ? SEEK_STEP : -SEEK_STEP;
+    const target = seekTarget(el.currentTime, el.duration, delta);
+    try {
+      el.currentTime = target;
+    } catch {
+      /* 不支持定位时静默忽略 */
+    }
+    // 双击的第一下可能已切换过播放状态，按第一次点击前的状态恢复
+    if (prev.paused) el.pause();
+    else void el.play().catch(() => {});
+    flashHint(
+      zone,
+      `${zone === "forward" ? "+" : "−"}${SEEK_STEP}s · ${clockText(target)}`,
+    );
+  };
   const enterFs = () => {
     const stage = stageRef.current;
     if (!stage) return;
@@ -259,8 +378,19 @@ export function PausingVideo({
         controls
         playsInline
         controlsList="nofullscreen"
+        src={isHls ? undefined : src}
+        onPointerUp={onSeekTap}
+        onDoubleClick={(e) => e.preventDefault()}
         {...rest}
       />
+      {hint && (
+        <span
+          className={`v-seek-hint is-${hint.side}`}
+          aria-hidden="true"
+        >
+          {hint.text}
+        </span>
+      )}
       <button
         type="button"
         className="fs-btn"
@@ -575,5 +705,51 @@ export function FanAvatar({
         </span>
       )}
     </span>
+  );
+}
+
+/** 长文案折叠：超过 maxLines 行时收起，显示「全文 / 收起」按钮（微博式交互） */
+export function Foldable({
+  text,
+  children,
+  maxLines = 6,
+  className,
+}: {
+  text?: string;
+  children?: React.ReactNode;
+  maxLines?: number;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  // null = 尚未测量（先按折叠态渲染才能量出行数差）；true = 超行；false = 无需折叠
+  const [over, setOver] = useState<boolean | null>(null);
+  const ref = useRef<HTMLParagraphElement & HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) setOver(el.scrollHeight > el.clientHeight + 2);
+  }, [text, children]);
+  const clamped = over !== false && !open;
+  const Tag = (text !== undefined ? "p" : "div") as "p";
+  return (
+    <>
+      <Tag
+        ref={ref}
+        className={[className, clamped ? "wb-clamp" : ""].filter(Boolean).join(" ") || undefined}
+        style={clamped ? ({ WebkitLineClamp: maxLines } as React.CSSProperties) : undefined}
+      >
+        {text !== undefined ? text : children}
+      </Tag>
+      {over === true && (
+        <button
+          className="wb-fold-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(!open);
+          }}
+        >
+          {open ? "收起" : "全文"}
+        </button>
+      )}
+    </>
   );
 }

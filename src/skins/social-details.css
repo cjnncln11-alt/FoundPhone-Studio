@@ -604,6 +604,39 @@
 .fs-btn:active {
   background: rgba(0, 0, 0, 0.65);
 }
+/* 双击快进/快退的短暂提示 */
+.v-seek-hint {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: v-seek-in 0.16s ease-out;
+}
+.v-seek-hint.is-back {
+  left: 14px;
+}
+.v-seek-hint.is-forward {
+  right: 14px;
+}
+@keyframes v-seek-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
 .fs-stage:fullscreen,
 .fs-stage:-webkit-full-screen {
   width: 100%;
@@ -633,4 +666,26 @@
   height: 100vw;
   transform: rotate(90deg);
   object-fit: contain;
+}
+
+/* 长文案折叠（信息流 6 行 / 详情页 14 行） */
+.wb-clamp {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.wb-fold-btn {
+  display: block;
+  background: none;
+  border: none;
+  color: #5090cc;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 4px 0 0;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios18 .weibo-post .social-body .wb-fold-btn {
+  font-size: 14px;
 }

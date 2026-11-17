@@ -271,105 +271,12 @@ export function WeiboSkin(p: Props) {
               }}
               aria-pressed={todayMode}
             >
-              <svg
+              <img
                 className="weibo-td-art"
-                viewBox="0 0 430 84"
-                preserveAspectRatio="xMidYMid slice"
-                aria-hidden="true"
-              >
-                <defs>
-                  <linearGradient id="tdbg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#ffffff" />
-                    <stop offset="1" stopColor="#e6f0fa" />
-                  </linearGradient>
-                  <linearGradient id="tdpage" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#ffffff" />
-                    <stop offset="1" stopColor="#d5e8f8" />
-                  </linearGradient>
-                  <linearGradient id="tdpencil" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stopColor="#f8c64a" />
-                    <stop offset="1" stopColor="#eda321" />
-                  </linearGradient>
-                </defs>
-                <rect width="430" height="84" fill="url(#tdbg)" />
-                {/* 虚线航迹：左下 → 纸飞机 → 右侧 */}
-                <path
-                  d="M0 72 C 55 76, 105 68, 138 50 C 168 32, 196 20, 232 22"
-                  fill="none"
-                  stroke="#a9c8e4"
-                  strokeWidth="1.6"
-                  strokeDasharray="5 4"
-                />
-                <path
-                  d="M262 38 C 298 52, 338 62, 386 58"
-                  fill="none"
-                  stroke="#bcd5ec"
-                  strokeWidth="1.4"
-                  strokeDasharray="5 4"
-                  opacity="0.85"
-                />
-                {/* 纸飞机 */}
-                <g transform="translate(234 10) rotate(-4)">
-                  <polygon points="0,13 36,0 17,20" fill="#d8e9f9" />
-                  <polygon points="0,13 17,20 13,31" fill="#a5c8ea" />
-                  <polygon points="17,20 36,0 21,26" fill="#bfd8f1" />
-                  <polygon points="0,13 36,0 15,17" fill="#c9dff4" />
-                </g>
-                {/* 台历 */}
-                <g transform="translate(60 44) rotate(12)">
-                  {/* 扇形翻页 */}
-                  <rect x="-30" y="-27" width="60" height="52" rx="6" fill="#c2dcef" transform="rotate(15 -24 -4)" />
-                  <rect x="-30" y="-27" width="60" height="52" rx="6" fill="#dcEFFb" transform="rotate(8 -24 -4)" />
-                  {/* 主页面 */}
-                  <rect x="-30" y="-27" width="60" height="52" rx="6" fill="url(#tdpage)" stroke="#b9d3ea" strokeWidth="1" />
-                  {/* 绿色线圈 */}
-                  {[-22, -12, -2, 8, 18].map((x) => (
-                    <g key={x}>
-                      <line x1={x} y1="-27" x2={x} y2="-22" stroke="#5aab7f" strokeWidth="1.6" />
-                      <ellipse cx={x} cy="-31" rx="3" ry="4.6" fill="none" stroke="#6fbf8f" strokeWidth="2" />
-                    </g>
-                  ))}
-                  {/* 202? 标签 */}
-                  <rect x="-24" y="-20" width="31" height="12" rx="3" fill="#4a7fc0" />
-                  <text x="-8.5" y="-11" textAnchor="middle" fontSize="9" fontWeight="800" fill="#fff">202?</text>
-                  <text x="20" y="-11" textAnchor="middle" fontSize="9" fill="#f3b83d">★</text>
-                  {/* 日期数字 */}
-                  {Array.from({ length: 20 }, (_, k) => k + 1).map((n) => (
-                    <text
-                      key={n}
-                      x={-25 + ((n - 1) % 7) * 8.5}
-                      y={1 + Math.floor((n - 1) / 7) * 9.5}
-                      textAnchor="middle"
-                      fontSize="7"
-                      fill="#8fb0cc"
-                    >
-                      {n}
-                    </text>
-                  ))}
-                  {/* 17号红圈 */}
-                  <circle cx="-8" cy="17.5" r="5.8" fill="none" stroke="#e04848" strokeWidth="1.6" />
-                  {/* 铅笔：笔尖指向17号 */}
-                  <g transform="translate(2 -2) rotate(140)">
-                    <rect x="-16" y="-4" width="34" height="8" rx="1.4" fill="url(#tdpencil)" />
-                    <rect x="-23" y="-4" width="7" height="8" rx="2.4" fill="#f2a0ab" />
-                    <polygon points="18,-4 28,0 18,4" fill="#f3dfc0" />
-                    <polygon points="26.4,-0.8 28,0 26.4,0.8" fill="#3a3a3a" />
-                  </g>
-                </g>
-              </svg>
-              <span className="weibo-td-content">
-                <span className="weibo-td-title">
-                  {["那", "年", "今", "天"].map((c) => (
-                    <span className="weibo-td-cell" key={c}>
-                      {c}
-                    </span>
-                  ))}
-                </span>
-                <span className="weibo-td-sub">
-                  {todayMode ? "正在查看那年今天" : "那年的你在今天有什么动态"}
-                  <i className="weibo-td-go">{todayMode ? "退出" : "GO"}</i>
-                </span>
-              </span>
+                src="images/nianianjintian.jpg"
+                alt="那年今天：那年的你在今天有什么动态"
+                draggable={false}
+              />
             </button>
             <div className="weibo-manage-row">
               <span>管理定时发博</span>

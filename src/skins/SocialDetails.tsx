@@ -36,7 +36,7 @@ import {
   VAvatar,
   wanCount,
   weiboDate,
-  weiboStamp,
+  weiboStamp,  Foldable,
 } from "./shared";
 import {
   ownerLikeStore,
@@ -307,6 +307,7 @@ export function SocialDetail(p: {
     rowKey?: string,
     showNested?: boolean,
     hot?: CommentMeta,
+    depth?: number,
   ): ReactElement => {
     const menuKey = "menu-" + (rowKey ?? String(index));
     const articleKey = rowKey ?? String(index);
@@ -407,6 +408,7 @@ export function SocialDetail(p: {
       </article>
       {!nested &&
         showNested !== false &&
+        depth === 0 &&
         tab !== "转发" &&
         nestedReplies
           .filter((r) => r.to === name)
@@ -419,10 +421,13 @@ export function SocialDetail(p: {
               true,
               () => removeExtraAt(r.i),
               articleKey + "n" + r.i,
+              true,
+              undefined,
+              (depth ?? 0) + 1,
             ),
           )}
-      {!nested &&
-        showNested !== false &&
+      {showNested !== false &&
+        (depth ?? 0) < 2 &&
         tab !== "转发" &&
         fanNestedReplies
           .map((e, i) => ({ e, i }))
@@ -442,6 +447,7 @@ export function SocialDetail(p: {
               articleKey + "f" + i,
               true,
               item.commentMeta?.[e.i] || undefined,
+              (depth ?? 0) + 1,
             );
           })}
     </>
@@ -624,7 +630,9 @@ export function SocialDetail(p: {
           )}
         </div>
         <div className="post-detail-body">
-          <RichText value={item.richText} fallback={item.body} />
+          <Foldable maxLines={14}>
+            <RichText value={item.richText} fallback={item.body} />
+          </Foldable>
           {(item.media || item.mediaList.length > 0 || item.meta.video) && (
             <Media item={item} onImage={(index) => setViewer(index)} />
           )}
