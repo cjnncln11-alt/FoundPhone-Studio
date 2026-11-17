@@ -315,3 +315,29 @@ describe("生日动态评论区对齐真实原博（wb-owner-1003-2020·二十�
     expect(post.commentMeta?.length).toBe(post.comments.length);
   });
 });
+
+// 2019生日动态（118→4423459343603354）：19岁生日。
+// 前排十条对齐真实热评，头像逐字拼「立农十九岁生日快乐」（avatar-g01~g10），真实赞数/时间/属地
+describe("生日动态评论区对齐真实原博（wb-owner-1003-2019·十九岁）", () => {
+  const post = items.find((i) => i.id === "wb-owner-1003-2019")!;
+
+  it("有这条博文且前排十条为真实热评", () => {
+    expect(post).toBeTruthy();
+    expect(post.comments.length).toBeGreaterThanOrEqual(10);
+    expect(post.comments[0]).toMatch(/^大仙的超级农农：/);
+    expect(post.comments[1]).toMatch(/^帅农头上的呆毛儿：/);
+    expect(post.commentMeta?.length).toBe(post.comments.length);
+  });
+
+  it("前排十条头像逐字拼出「祝立农十九岁生日快乐」", () => {
+    const chars = "祝立农十九岁生日快乐";
+    for (let k = 0; k < 10; k++) {
+      const m = post.commentMeta?.[k];
+      expect(m?.avatar).toBe(`weibo-hot/avatar-g${k + 1 < 10 ? "0" + (k + 1) : k + 1}.svg`);
+      const svg = readFileSync(resolve(process.cwd(), "public", m!.avatar!), "utf8");
+      expect(svg).toContain(`>${chars[k]}<`);
+      expect(m?.likes).toBeGreaterThan(1000);
+      expect(m?.time).toBeTruthy();
+    }
+  });
+});
