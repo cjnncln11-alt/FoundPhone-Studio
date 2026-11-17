@@ -122,7 +122,6 @@ export function validateLayout(raw: unknown, input: Work) {
     // 出厂即卸载的海外 App：老布局也要同步卸载，可在 App Store 重新下载
     const removed = new Set([
       "whatsapp",
-      "instagram",
       "tiktok",
       "twitter",
       "telegram",
@@ -147,6 +146,15 @@ export function validateLayout(raw: unknown, input: Work) {
     for (const k of Object.keys(layout.positions))
       if (removed.has(k)) delete layout.positions[k];
     layout.previewLayoutRevision = 2;
+  }
+  if (w.id === "ui-test-phone-v2" && layout.previewLayoutRevision < 3) {
+    // Instagram 不在卸载名单里：把它装回桌面
+    const ig = layout.apps.find((a) => a.id === "instagram");
+    if (ig) {
+      ig.installed = true;
+      ig.visible = true;
+    }
+    layout.previewLayoutRevision = 3;
   }
   const entries = homeEntries(layout),
     packed = packHome(entries, layout.positions);

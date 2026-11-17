@@ -83,9 +83,9 @@
     },
     {
       "id": "instagram",
-      "name": "",
-      "installed": false,
-      "visible": false,
+      "name": "Instagram",
+      "installed": true,
+      "visible": true,
       "dock": false,
       "folder": "",
       "icon": ""
@@ -723,6 +723,16 @@
         "id": "test-appstore",
         "title": "测试内容",
         "body": "这是一条测试内容。"
+      }
+    ],
+    "instagram": [
+      {
+        "id": "test-item-instagram",
+        "title": "测试内容",
+        "body": "这是一条测试内容。",
+        "sender": "测试用户",
+        "kind": "text",
+        "meta": {}
       }
     ]
   },
