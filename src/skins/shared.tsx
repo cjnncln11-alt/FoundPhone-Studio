@@ -163,12 +163,14 @@ export const weiboStamp = (t: string, year?: number) => {
 /**
  * 视频滚出可视区域时自动暂停播放（feed 与详情页通用）。
  * IntersectionObserver 以浏览器视口为根，内部滚动容器同样生效。
+ * 右下角自定义放大按钮：全屏后锁定横屏；竖屏视口下横向视频旋转 90° 模拟横屏。
  */
 export function PausingVideo({
   className = "",
   ...rest
 }: ComponentProps<"video">) {
   const ref = useRef<HTMLVideoElement>(null);
+  const stageRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -186,10 +188,17 @@ export function PausingVideo({
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  // 全屏时锁定横屏，退出全屏恢复竖屏
+  // 全屏（包裹层）时锁定横屏；竖屏视口下横向视频旋转 90° 铺满
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    const stage = stageRef.current;
+    if (!el || !stage) return;
+    const apply = () => {
+      const fsing = document.fullscreenElement === stage;
+      const portrait = window.innerHeight > window.innerWidth;
+      const horiz = el.videoWidth > el.videoHeight;
+      el.classList.toggle("fs-landscape", fsing && portrait && horiz);
+    };
     const lock = (o: string) => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,20 +208,79 @@ export function PausingVideo({
       }
     };
     const onFs = () => {
-      if (document.fullscreenElement === el) {
+      if (document.fullscreenElement === stage) {
         lock("landscape");
+        apply();
       } else if (!document.fullscreenElement) {
         try {
           screen.orientation?.unlock?.();
         } catch {
           /* ignore */
         }
+        el.classList.remove("fs-landscape");
       }
     };
+    const onResize = () => apply();
+    const onMeta = () => apply();
     document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
+    window.addEventListener("resize", onResize);
+    el.addEventListener("loadedmetadata", onMeta);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs);
+      window.removeEventListener("resize", onResize);
+      el.removeEventListener("loadedmetadata", onMeta);
+    };
   }, []);
-  return <video ref={ref} className={className} {...rest} />;
+  const enterFs = () => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    if (document.fullscreenElement) {
+      void document.exitFullscreen?.();
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const req = stage.requestFullscreen?.bind(stage) ||
+      ((stage as any).webkitRequestFullscreen?.bind(stage) as
+        | (() => Promise<void>)
+        | undefined);
+    try {
+      const p = req?.();
+      p?.catch?.(() => {});
+    } catch {
+      /* ignore */
+    }
+  };
+  return (
+    <span ref={stageRef} className="fs-stage">
+      <video
+        ref={ref}
+        className={className}
+        controls
+        playsInline
+        controlsList="nofullscreen"
+        {...rest}
+      />
+      <button
+        type="button"
+        className="fs-btn"
+        aria-label="全屏播放"
+        onClick={(e) => {
+          e.stopPropagation();
+          enterFs();
+        }}
+      >
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+          <path
+            d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+    </span>
+  );
 }
 export function Media({
   item,
