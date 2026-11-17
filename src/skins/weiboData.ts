@@ -129,6 +129,21 @@ if (typeof window !== "undefined")
     }
     writeNow();
   });
+
+/** 重新打开链接时清空上一次交互留下的赞数与新增评论 */
+export function resetWeiboRuntime() {
+  try {
+    window.clearTimeout(saveTimer);
+    saveTimer = 0;
+    localStorage.removeItem(RUNTIME_KEY);
+  } catch {
+    /* 存储不可用时忽略 */
+  }
+  for (const k of Object.keys(ownerLikeStore)) delete ownerLikeStore[k];
+  for (const k of Object.keys(runtimeCommentStore))
+    delete runtimeCommentStore[k];
+}
+
 export const fanNormalTexts = [
   "哥哥今天的营业也太好看了吧，截图存了三张",
   "血肠汤饭看着就香，下次直播吃给我们看",

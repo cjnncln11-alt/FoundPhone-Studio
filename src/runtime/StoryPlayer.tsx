@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Phone } from "../Phone";
 import { validateWork, type Work } from "../schema";
+import { resetPlayerState } from "../freshStart";
 import "../styles.css";
 import "./player.css";
 function StoryPlayer() {
@@ -21,10 +22,12 @@ function StoryPlayer() {
         if (!r.ok) throw Error("缺少作品文件，请运行 npm run story:build");
         return r.json();
       })
-      .then((x) => {
+      .then(async (x) => {
         const w = validateWork(x);
         document.title =
           w.title === "捡手机" ? "捡手机" : w.title + " · 捡手机";
+        // 每次重新打开链接都从初始状态开始，不留上一次的交互痕迹
+        await resetPlayerState();
         setWork(w);
       })
       .catch((e) => {
