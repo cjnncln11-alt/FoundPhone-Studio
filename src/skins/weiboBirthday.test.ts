@@ -188,3 +188,89 @@ describe("生日动态评论区对齐真实原博（wb-owner-1003-2022·全国�
     expect(new Set(provinces).size).toBeGreaterThanOrEqual(15);
   });
 });
+
+// 2021生日动态（70→4688002691369464）：20条真实热评全部保留，每条都带陈立农楼中楼回复；
+// 前排十条热评头像拼「立农二十一岁生日快乐」（avatar-e01~e10），本人回复头像为真人（avatar-cln.jpg）
+describe("生日动态评论区对齐真实原博（wb-owner-1003-2021·二十一岁翻牌）", () => {
+  const post = items.find((i) => i.id === "wb-owner-1003-2021")!;
+
+  it("有这条博文且20条热评+20条本人回复全部保留", () => {
+    expect(post).toBeTruthy();
+    expect(post.comments.length).toBe(40);
+    expect(post.commentMeta?.length).toBe(40);
+    const hotCount = post.comments.filter((c) => !c.startsWith("陈立农：回复 @")).length;
+    const ownCount = post.comments.filter((c) => c.startsWith("陈立农：回复 @")).length;
+    expect(hotCount).toBe(20);
+    expect(ownCount).toBe(20);
+  });
+
+  it("热评与本人回复交替排列，本人回复头像为真实头像", () => {
+    for (let i = 0; i < 40; i += 2) {
+      expect(post.comments[i]).not.toMatch(/^陈立农：回复 @/);
+      expect(post.comments[i + 1]).toMatch(/^陈立农：回复 @/);
+      expect(post.commentMeta?.[i + 1]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+    }
+    expect(
+      existsSync(resolve(process.cwd(), "public", "weibo-hot/avatar-cln.jpg")),
+    ).toBe(true);
+  });
+
+  it("前排十条热评头像逐字拼出应援语，全部配图文件存在", () => {
+    const chars = "立农二十一岁生日快乐";
+    for (let k = 0; k < 10; k++) {
+      const m = post.commentMeta?.[k * 2];
+      expect(m?.avatar).toBe(`weibo-hot/avatar-e${k + 1 < 10 ? "0" + (k + 1) : k + 1}.svg`);
+      const svg = readFileSync(resolve(process.cwd(), "public", m!.avatar!), "utf8");
+      expect(svg).toContain(`>${chars[k]}<`);
+      expect(m?.likes).toBeGreaterThan(5000);
+    }
+    for (const m of post.commentMeta ?? []) {
+      if (m?.image) {
+        expect(existsSync(resolve(process.cwd(), "public", m.image))).toBe(true);
+      }
+    }
+  });
+});
+
+// 记录71：有陈立农本人回复的评论全部保留（16条楼中楼回复）
+describe("记录71 本人回复保留（wb-owner-0907-1720）", () => {
+  const post = items.find((i) => i.id === "wb-owner-0907-1720")!;
+
+  it("16条本人回复全部保留且头像为真实头像", () => {
+    expect(post).toBeTruthy();
+    const own = post.comments.filter((c) => c.startsWith("陈立农：回复 @"));
+    expect(own.length).toBe(16);
+    const ownIdx = post.comments
+      .map((c, i) => ({ c, i }))
+      .filter(({ c }) => c.startsWith("陈立农：回复 @"))
+      .map(({ i }) => i);
+    for (const i of ownIdx) {
+      expect(post.commentMeta?.[i]?.avatar).toBe("weibo-hot/avatar-cln.jpg");
+    }
+    expect(post.commentMeta?.length).toBe(post.comments.length);
+  });
+});
+
+// 记录78：王彦霖的评论保留（两条，真实头像），陈立农的回复也保留
+describe("记录78 王彦霖评论保留（wb-owner-0520-1928）", () => {
+  const post = items.find((i) => i.id === "wb-owner-0520-1928")!;
+
+  it("王彦霖两条评论保留且头像为真实头像", () => {
+    expect(post).toBeTruthy();
+    const wylIdx = post.comments
+      .map((c, i) => ({ c, i }))
+      .filter(({ c }) => c.startsWith("王彦霖："))
+      .map(({ i }) => i);
+    expect(wylIdx.length).toBe(2);
+    for (const i of wylIdx) {
+      expect(post.commentMeta?.[i]?.avatar).toBe("weibo-hot/avatar-wyl.jpg");
+    }
+    expect(post.comments[0]).toMatch(/^王彦霖：/);
+  });
+
+  it("陈立农对王彦霖的回复保留", () => {
+    expect(
+      post.comments.some((c) => c.startsWith("陈立农：回复 @王彦霖：")),
+    ).toBe(true);
+  });
+});
