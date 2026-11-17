@@ -1999,6 +1999,160 @@
   color: #999;
   padding: 4px;
 }
+/* 「全部微博(N) · 筛选」小板块 + 年份/排序面板 */
+.weibo-count-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 13px;
+  background: #f7f7f7;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.weibo-count-bar > span {
+  font-size: 13px;
+  color: #666;
+}
+.weibo-count-bar > button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #5090cc;
+  padding: 2px 4px;
+}
+.weibo-count-bar > button.selected {
+  font-weight: 600;
+}
+.weibo-filter-panel {
+  background: #fff;
+  padding: 10px 13px 12px;
+  border-bottom: 1px solid #eee;
+  display: grid;
+  gap: 9px;
+}
+.weibo-filter-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.weibo-filter-row > span {
+  font-size: 12px;
+  color: #999;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+.weibo-filter-row > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.weibo-filter-row > div > button {
+  font-size: 12px;
+  color: #444;
+  background: #f2f2f2;
+  border-radius: 14px;
+  padding: 4px 12px;
+}
+.weibo-filter-row > div > button.selected {
+  color: #fff;
+  background: #f1913c;
+  font-weight: 500;
+}
+/* 「那年今天」banner + 管理定时发博 / 草稿箱 */
+.weibo-td-banner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 84px;
+  overflow: hidden;
+  background: #e3effa;
+  text-align: left;
+}
+.weibo-td-banner > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.weibo-td-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 11px 14px 0 158px;
+}
+.weibo-td-title {
+  display: flex;
+  gap: 5px;
+}
+.weibo-td-cell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #6e9dcc;
+  background: #f1f8fd;
+  display: grid;
+  place-items: center;
+  font-family: "Kaiti SC", "KaiTi", "STKaiti", serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #17497e;
+}
+.weibo-td-cell::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  border-top: 1px dashed #a9c8e4;
+}
+.weibo-td-cell::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  border-left: 1px dashed #a9c8e4;
+}
+.weibo-td-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+}
+.weibo-td-go {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, #ffc14d, #f79a1f);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.weibo-td-banner.active .weibo-td-go {
+  background: linear-gradient(180deg, #9fc7ec, #5f94c9);
+}
+.weibo-manage-row {
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+.weibo-manage-row > span {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  color: #3b4a5a;
+  padding: 15px 0;
+}
+.weibo-manage-row > span + span {
+  border-left: 1px solid #eee;
+}
 .weibo-post {
   margin-bottom: 8px;
   background: #fff;

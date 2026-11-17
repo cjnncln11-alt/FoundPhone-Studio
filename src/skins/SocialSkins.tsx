@@ -115,11 +115,25 @@ export function WeiboSkin(p: Props) {
   const [year, setYear] = useState("全部");
   const [asc, setAsc] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  // 「那年今天」：查看往年同月同日的动态
+  const [todayMode, setTodayMode] = useState(false);
+  const now = new Date();
+  const todayMd = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+    now.getDate(),
+  ).padStart(2, "0")}`;
+  const curYear = String(now.getFullYear());
+  const todayPosts = items.filter(
+    (i) => i.time.slice(5, 10) === todayMd && i.time.slice(0, 4) !== curYear,
+  );
   const years = [...new Set(items.map((i) => i.time.slice(0, 4)))]
     .sort()
     .reverse();
   const base = feed === "全部" ? items : items.filter((i) => i.folder === feed);
-  const matched = year === "全部" ? base : base.filter((i) => i.time.startsWith(year));
+  const matched = todayMode
+    ? todayPosts
+    : year === "全部"
+      ? base
+      : base.filter((i) => i.time.startsWith(year));
   const list = asc ? [...matched].reverse() : matched;
   return (
     <div className="catalog-skin weibo-ui">
@@ -196,7 +210,7 @@ export function WeiboSkin(p: Props) {
         )}
         {tab === "我" && (
           <div className="weibo-count-bar">
-            <span>全部微博({list.length})</span>
+            <span>{todayMode ? `那年今天(${list.length})` : `全部微博(${list.length})`}</span>
             <button
               className={filterOpen ? "selected" : ""}
               onClick={() => setFilterOpen(!filterOpen)}
@@ -206,7 +220,7 @@ export function WeiboSkin(p: Props) {
             </button>
           </div>
         )}
-        {tab === "我" && filterOpen && (
+        {tab === "我" && filterOpen && !todayMode && (
               <div className="weibo-filter-panel">
                 <div className="weibo-filter-row">
                   <span>年份</span>
@@ -247,6 +261,104 @@ export function WeiboSkin(p: Props) {
                 </div>
               </div>
             )}
+        {tab === "我" && (
+          <>
+            <button
+              className={"weibo-td-banner" + (todayMode ? " active" : "")}
+              onClick={() => {
+                setTodayMode(!todayMode);
+                setFilterOpen(false);
+              }}
+              aria-pressed={todayMode}
+            >
+              <svg
+                className="weibo-td-art"
+                viewBox="0 0 430 84"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true"
+              >
+                <defs>
+                  <linearGradient id="tdbg" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#f8fcff" />
+                    <stop offset="1" stopColor="#dbeafa" />
+                  </linearGradient>
+                  <linearGradient id="tdcover" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#6fa8dc" />
+                    <stop offset="1" stopColor="#346fb3" />
+                  </linearGradient>
+                </defs>
+                <rect width="430" height="84" fill="url(#tdbg)" />
+                {/* 台历 */}
+                <g transform="translate(62 46) rotate(-8)">
+                  <rect x="-33" y="-16" width="66" height="42" rx="4" fill="#2b5f9e" />
+                  <rect x="-29" y="-22" width="60" height="44" rx="4" fill="url(#tdcover)" />
+                  {[-24, -12, 0, 12, 24].map((x) => (
+                    <g key={x}>
+                      <line x1={x} y1="-30" x2={x} y2="-21" stroke="#8fb4d9" strokeWidth="2" />
+                      <circle cx={x} cy="-31" r="2.6" fill="none" stroke="#4b8ec9" strokeWidth="1.4" />
+                    </g>
+                  ))}
+                  <rect x="-23" y="-13" width="28" height="11" rx="2" fill="#eaf4fc" />
+                  <text x="-9" y="-4.5" textAnchor="middle" fontSize="8.5" fontWeight="700" fill="#2f66a8">202?</text>
+                  <text x="12" y="-4.5" textAnchor="middle" fontSize="8.5" fontWeight="700" fill="#f3d04a">★</text>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20].map(
+                    (n, k) => (
+                      <text
+                        key={n}
+                        x={-24 + (k % 7) * 8}
+                        y={7 + Math.floor(k / 7) * 10}
+                        textAnchor="middle"
+                        fontSize="6.5"
+                        fill="#cfe3f6"
+                      >
+                        {n}
+                      </text>
+                    ),
+                  )}
+                  <circle cx="19" cy="24" r="6" fill="none" stroke="#e05252" strokeWidth="1.4" />
+                  {/* 铅笔 */}
+                  <g transform="translate(10 -2) rotate(38)">
+                    <rect x="0" y="-2.5" width="26" height="5" rx="1" fill="#f5b83d" />
+                    <rect x="26" y="-2.5" width="4" height="5" fill="#e8e2d6" />
+                    <polygon points="30,-2.5 36,0 30,2.5" fill="#eccfa2" />
+                    <polygon points="34.6,-0.8 36,0 34.6,0.8" fill="#3a3a3a" />
+                    <rect x="-5" y="-2.5" width="5" height="5" rx="1.5" fill="#ef8f9c" />
+                  </g>
+                </g>
+                {/* 虚线航迹 + 纸飞机 */}
+                <path
+                  d="M128 58 C 170 14, 208 74, 252 34"
+                  fill="none"
+                  stroke="#8fb8dd"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 4"
+                />
+                <g transform="translate(226 24)">
+                  <polygon points="0,10 28,0 13,15" fill="#d3e6f8" />
+                  <polygon points="0,10 13,15 11,24" fill="#9ec4e8" />
+                  <polygon points="13,15 28,0 17,20" fill="#b7d5ef" />
+                </g>
+              </svg>
+              <span className="weibo-td-content">
+                <span className="weibo-td-title">
+                  {["那", "年", "今", "天"].map((c) => (
+                    <span className="weibo-td-cell" key={c}>
+                      {c}
+                    </span>
+                  ))}
+                </span>
+                <span className="weibo-td-sub">
+                  {todayMode ? "正在查看那年今天" : "那年的你在今天有什么动态"}
+                  <i className="weibo-td-go">{todayMode ? "退出" : "GO"}</i>
+                </span>
+              </span>
+            </button>
+            <div className="weibo-manage-row">
+              <span>管理定时发博</span>
+              <span>草稿箱(99+)</span>
+            </div>
+          </>
+        )}
         {list.map((i) => (
           <article className="weibo-post" key={i.id}>
             <PostHeader p={p} item={i} />
