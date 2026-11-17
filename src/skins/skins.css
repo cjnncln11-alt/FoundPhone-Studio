@@ -4274,20 +4274,6 @@
   color: #999;
   margin-top: 4px;
 }
-.weibo-v-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #ffb14e, #f77c2e);
-  color: #fff;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 700;
-  flex: none;
-}
 .weibo-author-chevron {
   margin-left: auto;
   color: #b9b9b9;
@@ -4353,28 +4339,6 @@
   border-radius: 4px;
   background: #eee;
   display: block;
-}
-.weibo-live-badge {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  text-shadow: 0 1px 3px #0006;
-  pointer-events: none;
-}
-.weibo-live-badge i {
-  width: 11px;
-  height: 11px;
-  border: 1.5px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px #0006;
 }
 .weibo-media-more {
   position: absolute;

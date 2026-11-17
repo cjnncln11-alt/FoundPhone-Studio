@@ -142,13 +142,13 @@ export function Media({
   item,
   className = "",
   onImage,
-  live,
+  onMore,
 }: {
   item: Item;
   className?: string;
   onImage?: (index: number, images: string[]) => void;
-  /** 微博九宫格样式：每格 LIVE 徽章，超过 9 张时第 9 格显示 "+N" */
-  live?: boolean;
+  /** 折叠模式：超过 9 张时只显示 8 张 + 第 9 格 "+N"，点击 "+N" 触发 onMore（进入微博正文展开全部） */
+  onMore?: () => void;
 }) {
   const src = safeMedia(item.media);
   const list = item.mediaList
@@ -167,7 +167,7 @@ export function Media({
       />
     );
   if (list.length) {
-    if (!live)
+    if (!onMore)
       return (
         <div className={`media-grid media-grid-${Math.min(list.length, 9)}`}>
           {list.map((s, i) => (
@@ -199,10 +199,6 @@ export function Media({
                 onImage?.(i, list);
               }}
             />
-            <span className="weibo-live-badge">
-              <i />
-              LIVE
-            </span>
           </div>
         ))}
         {rest > 0 && (
@@ -213,18 +209,14 @@ export function Media({
               src={list[8]}
               onClick={(e) => {
                 e.stopPropagation();
-                onImage?.(8, list);
+                onMore();
               }}
             />
-            <span className="weibo-live-badge">
-              <i />
-              LIVE
-            </span>
             <span
               className="weibo-media-more"
               onClick={(e) => {
                 e.stopPropagation();
-                onImage?.(8, list);
+                onMore();
               }}
             >
               +{rest}

@@ -551,7 +551,6 @@ export function SocialDetail(p: {
             </strong>
             {weibo ? (
               <small className="weibo-author-sub">
-                {item.sender === p.owner && <i className="weibo-v-badge">V</i>}
                 {(() => {
                   const md2 = item.time.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
                   return md2 ? `${+md2[1]}-${+md2[2]}` : item.time;
@@ -579,11 +578,7 @@ export function SocialDetail(p: {
         <div className="post-detail-body">
           <RichText value={item.richText} fallback={item.body} />
           {(item.media || item.mediaList.length > 0) && (
-            <Media
-              item={item}
-              live={weibo && item.mediaList.length >= 9}
-              onImage={(index) => setViewer(index)}
-            />
+            <Media item={item} onImage={(index) => setViewer(index)} />
           )}
           {weibo && meta(item, "hotIndex") && (
             <span className="weibo-hot-pill">

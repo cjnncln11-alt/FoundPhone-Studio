@@ -72,7 +72,6 @@ function PostHeader({ item, p }: { item: Item; p: Props }) {
           {gold && <NameBadges />}
         </strong>
         <small className="weibo-author-sub">
-          {gold && <i className="weibo-v-badge">V</i>}
           {date}
         </small>
       </span>
@@ -191,7 +190,9 @@ export function WeiboSkin(p: Props) {
               {(i.media || i.mediaList.length > 0) && (
                 <Media
                   item={i}
-                  live={i.mediaList.length >= 9}
+                  onMore={
+                    i.mediaList.length > 9 ? () => p.onItem(i) : undefined
+                  }
                   onImage={(index) => setViewer({ item: i, index })}
                 />
               )}
