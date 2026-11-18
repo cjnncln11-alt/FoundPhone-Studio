@@ -690,19 +690,33 @@
   font-size: 14px;
 }
 
-/* ── 仅粉丝可见提示条：详情页顶部灰色提示（对照截图 1:1） ── */
+/* ── 仅粉丝可见提示条：卡片/详情页顶部灰色提示（对照截图 1:1） ── */
 .weibo-fansonly {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   padding: 12px 14px;
   font-size: 14px;
-  color: #949494;
+  color: #818181;
+}
+.weibo-fansonly-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .weibo-fansonly svg {
   width: 18px;
   height: 18px;
   flex: none;
+}
+.weibo-fansonly-chevron {
+  color: #c9c9c9;
+  width: 20px;
+  height: 20px;
+}
+/* 信息流卡片内的提示条与下方作者区分隔 */
+.weibo-post > .weibo-fansonly {
+  border-bottom: 1px solid #f5f5f5;
 }
 /* ── 详情页作者区：两行时间/来源（日期 来自xx / 发布于xx） ── */
 .weibo-author-sub-col {

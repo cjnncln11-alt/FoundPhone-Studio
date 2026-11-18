@@ -164,6 +164,51 @@ export function CrownPendant() {
     </svg>
   );
 }
+/** 仅粉丝可见提示条：信息流卡片顶部（带折叠箭头）与详情页顶部共用 */
+export function WeiboFansOnly({ chevron = false }: { chevron?: boolean }) {
+  return (
+    <div className="weibo-fansonly" aria-label="仅粉丝可见">
+      <span className="weibo-fansonly-label">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+          <rect
+            x="4.2"
+            y="9"
+            width="15.6"
+            height="11"
+            rx="3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          />
+          <path
+            d="M12 17.6c-1.9-1.3-3-2.4-3-3.6 0-.9.7-1.6 1.6-1.6.6 0 1.1.3 1.4.8.3-.5.8-.8 1.4-.8.9 0 1.6.7 1.6 1.6 0 1.2-1.1 2.3-3 3.6Z"
+            fill="currentColor"
+          />
+        </svg>
+        仅粉丝可见
+      </span>
+      {chevron && (
+        <svg className="weibo-fansonly-chevron" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M6 9.5l6 6 6-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </div>
+  );
+}
 export function NameBadges() {
   return (
     <span className="name-badges">

@@ -44,6 +44,7 @@ import {
   wanCount,
   weiboDate,
   type Props,
+  WeiboFansOnly,
 } from "./shared";
 import { ImageViewer } from "./ImageViewer";
 function Actions({ p, item }: { p: Props; item: Item }) {
@@ -69,13 +70,21 @@ function Actions({ p, item }: { p: Props; item: Item }) {
     </div>
   );
 }
-function PostHeader({ item, p }: { item: Item; p: Props }) {
+function PostHeader({
+  item,
+  p,
+  hideChevron = false,
+}: {
+  item: Item;
+  p: Props;
+  hideChevron?: boolean;
+}) {
   const gold = item.sender === p.owner;
   const blue = !gold && meta(item, "badge") === "blue";
   const orange = meta(item, "orangeName") === "true";
   const crown = meta(item, "crown") === "true";
   const withSuper = meta(item, "superTopic") !== "0";
-  const date = meta(item, "dateText") || weiboDate(item.time);
+  const date = weiboDate(item.time);
   const source = meta(item, "source");
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
@@ -96,18 +105,30 @@ function PostHeader({ item, p }: { item: Item; p: Props }) {
           {source ? `${date} 来自 ${source}` : date}
         </small>
       </span>
-      <ChevronDown size={16} className="weibo-author-chevron" />
+      {!hideChevron && (
+        <ChevronDown size={16} className="weibo-author-chevron" />
+      )}
     </button>
   );
 }
-function WeiboActions({ p, item }: { p: Props; item: Item }) {
+function WeiboActions({
+  p,
+  item,
+  hideRepost = false,
+}: {
+  p: Props;
+  item: Item;
+  hideRepost?: boolean;
+}) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false);
   return (
     <div className="social-actions weibo-actions">
-      <button aria-label={`转发${item.title}`} onClick={() => p.onItem(item)}>
-        <Share2 size={17} />
-        {meta(item, "reposts", "转发")}
-      </button>
+      {!hideRepost && (
+        <button aria-label={`转发${item.title}`} onClick={() => p.onItem(item)}>
+          <Share2 size={17} />
+          {meta(item, "reposts", "转发")}
+        </button>
+      )}
       <button aria-label={`评论${item.title}`} onClick={() => p.onItem(item)}>
         <MessageCircle size={17} />
         {meta(item, "commentsCount") || item.comments.length || "评论"}
@@ -133,9 +154,11 @@ function WeiboPostCard({
   item: Item;
   setViewer: (v: ViewerState) => void;
 }) {
+  const fansOnly = meta(item, "fansOnly") === "true";
   return (
     <article className="weibo-post">
-      <PostHeader p={p} item={item} />
+      {fansOnly && <WeiboFansOnly chevron />}
+      <PostHeader p={p} item={item} hideChevron={fansOnly} />
       <button className="social-body" onClick={() => p.onItem(item)}>
         <Foldable text={item.body} maxLines={6} />
         {(item.media || item.mediaList.length > 0 || item.meta.video) && (
@@ -153,7 +176,7 @@ function WeiboPostCard({
           </span>
         )}
       </button>
-      <WeiboActions p={p} item={item} />
+      <WeiboActions p={p} item={item} hideRepost={fansOnly} />
     </article>
   );
 }

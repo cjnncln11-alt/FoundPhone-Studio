@@ -38,6 +38,7 @@ import {
   wanCount,
   weiboDate,
   weiboStamp,  Foldable,
+  WeiboFansOnly,
 } from "./shared";
 import {
   ownerLikeStore,
@@ -594,34 +595,7 @@ export function SocialDetail(p: {
         </div>
       </header>
       <div className="post-detail-scroll" ref={scrollRef}>
-        {fansOnly && (
-          <div className="weibo-fansonly" aria-label="仅粉丝可见">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-              <rect
-                x="4.2"
-                y="9"
-                width="15.6"
-                height="11"
-                rx="3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              />
-              <path
-                d="M12 17.6c-1.9-1.3-3-2.4-3-3.6 0-.9.7-1.6 1.6-1.6.6 0 1.1.3 1.4.8.3-.5.8-.8 1.4-.8.9 0 1.6.7 1.6 1.6 0 1.2-1.1 2.3-3 3.6Z"
-                fill="currentColor"
-              />
-            </svg>
-            仅粉丝可见
-          </div>
-        )}
+        {fansOnly && <WeiboFansOnly />}
         <div className="post-detail-author">
           <VAvatar
             name={item.sender || "用户"}
