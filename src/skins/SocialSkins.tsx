@@ -503,18 +503,20 @@ export function WeiboSkin(p: Props) {
               </>
             )}
         {tab === "我" && (
-          <div className="weibo-count-bar">
-            <span>{todayMode ? `那年今天(${list.length})` : `全部微博(${list.length})`}</span>
-            <button
-              className={filterOpen ? "selected" : ""}
-              onClick={() => setFilterOpen(!filterOpen)}
-            >
-              <ListFilter size={15} aria-hidden="true" />
-              筛选
-            </button>
-          </div>
-        )}
-        {tab === "我" && filterOpen && !todayMode && (
+          <div className="weibo-filter-sticky">
+            <div className="weibo-count-bar">
+              <span>
+                {todayMode ? `那年今天(${list.length})` : `全部微博(${list.length})`}
+              </span>
+              <button
+                className={filterOpen ? "selected" : ""}
+                onClick={() => setFilterOpen(!filterOpen)}
+              >
+                <ListFilter size={15} aria-hidden="true" />
+                筛选
+              </button>
+            </div>
+            {filterOpen && !todayMode && (
               <div className="weibo-filter-panel">
                 <div className="weibo-filter-row">
                   <span>年份</span>
@@ -555,6 +557,8 @@ export function WeiboSkin(p: Props) {
                 </div>
               </div>
             )}
+          </div>
+        )}
         {tab === "我" && (
           <>
             <button
