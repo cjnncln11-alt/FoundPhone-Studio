@@ -33,6 +33,7 @@ import {
   Media,
   meta,
   NameBadges,
+  StudioBadges,
   VAvatar,
   wanCount,
   weiboDate,
@@ -71,7 +72,7 @@ const renderBody = (body: string) =>
 const commentPicSrc = (src: string) =>
   /^(data:|https?:)/.test(src) ? src : import.meta.env.BASE_URL + src;
 const count = (n: number) =>
-  n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "w" : String(n);
+  n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n);
 const commentProvinces = [
   "北京",
   "上海",
@@ -595,6 +596,8 @@ export function SocialDetail(p: {
             <strong>
               {item.sender || "用户"}
               {item.sender === p.owner && <NameBadges />}
+              {item.sender !== p.owner &&
+                meta(item, "badge") === "blue" && <StudioBadges />}
             </strong>
             {weibo ? (
               <small className="weibo-author-sub">

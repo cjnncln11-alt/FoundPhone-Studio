@@ -154,6 +154,77 @@ export function NameBadges() {
     </span>
   );
 }
+/** 工作室博文头部的铁粉等级徽章 + 超话标识（对照真实截图 1:1） */
+export function StudioBadges() {
+  return (
+    <span className="studio-badges">
+      <svg
+        className="fan-level-badge"
+        viewBox="0 0 46 20"
+        aria-label="铁粉I级"
+      >
+        {/* 深蓝皇冠 + 金描边 + 金星 */}
+        <path
+          d="M2 13 Q2 6 4 6 L5.5 2.6 L9 5.6 L13 1.6 L17 5.6 L20.5 2.6 L22 6 Q24 6 24 13 Q24 17 20 17 L6 17 Q2 17 2 13 Z"
+          fill="#20263f"
+          stroke="#d9a231"
+          strokeWidth="1.3"
+        />
+        <circle cx="5.5" cy="2.6" r="1.3" fill="#e8b13c" />
+        <circle cx="13" cy="1.6" r="1.3" fill="#e8b13c" />
+        <circle cx="20.5" cy="2.6" r="1.3" fill="#e8b13c" />
+        <path
+          d="M13 7.2 L14.3 10.2 L17.5 10.4 L15 12.4 L15.9 15.5 L13 13.7 L10.1 15.5 L11 12.4 L8.5 10.4 L11.7 10.2 Z"
+          fill="#e8b13c"
+        />
+        {/* 金色箭头旗 + I */}
+        <path
+          d="M24 5 L38 5 Q39.5 5 40.5 6 L45 10 L40.5 14 Q39.5 15 38 15 L24 15 Q23 15 23 14 L23 6 Q23 5 24 5 Z"
+          fill="url(#fanGold)"
+          stroke="#c98d1f"
+          strokeWidth="1"
+        />
+        <path d="M28 5 L29.5 15 M33 5 L34.5 15" stroke="#c98d1f" strokeWidth="0.8" opacity="0.7" />
+        <text
+          x="36.5"
+          y="12.6"
+          textAnchor="middle"
+          fontSize="9.5"
+          fontWeight="800"
+          fill="#8c3d10"
+          fontFamily="Georgia, serif"
+        >
+          I
+        </text>
+        <defs>
+          <linearGradient id="fanGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffe27a" />
+            <stop offset="0.5" stopColor="#f7c53c" />
+            <stop offset="1" stopColor="#eda723" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <span className="st-super-link">
+        <svg viewBox="0 0 14 14" aria-hidden="true">
+          <rect
+            x="3.2"
+            y="3.2"
+            width="7.6"
+            height="7.6"
+            fill="none"
+            stroke="#7b8ba1"
+            strokeWidth="1.4"
+            transform="rotate(45 7 7)"
+          />
+        </svg>
+        陈立农超话
+      </span>
+      <span className="st-super-sticker" aria-hidden="true">
+        超话
+      </span>
+    </span>
+  );
+}
 export const wanCount = (n: number) =>
   n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n);
 

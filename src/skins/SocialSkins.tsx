@@ -35,6 +35,7 @@ import {
   Media,
   meta,
   NameBadges,
+  StudioBadges,
   SearchBox,
   Tabs,
   useContent,
@@ -80,6 +81,7 @@ function PostHeader({ item, p }: { item: Item; p: Props }) {
         <strong>
           {item.sender}
           {gold && <NameBadges />}
+          {blue && <StudioBadges />}
         </strong>
         <small className="weibo-author-sub">
           {source ? `${date} 来自 ${source}` : date}
