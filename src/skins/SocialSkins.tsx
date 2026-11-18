@@ -4,6 +4,7 @@ import {
   ArrowUp,
   AtSign,
   Bookmark,
+  CalendarCheck,
   Camera,
   ChevronDown,
   ChevronLeft,
@@ -155,7 +156,7 @@ function SuperTopicPage({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState("热门");
-  const [signed, setSigned] = useSkinState<boolean>(p, "st-signed", false);
+  const [signed, setSigned] = useSkinState<boolean>(p, "st-signed2", false);
   const [viewer, setViewer] = useState<ViewerState>(null);
   const list =
     tab === "热门"
@@ -166,6 +167,18 @@ function SuperTopicPage({
           ? items.filter((i) => i.sender === p.owner)
           : [];
   const cover = meta(items[0], "profileCover");
+  // 置顶博文：点击可查看详情（正文待补充）
+  const pinnedItem: Item = {
+    ...items[0],
+    id: "st-pinned",
+    title: "❤️#陈立农#",
+    body: "❤️#陈立农#",
+    time: "2026-11-17 10:20",
+    comments: [],
+    mediaList: [],
+    media: "",
+    meta: { ...items[0].meta, source: "" },
+  };
   return (
     <>
       <div
@@ -178,28 +191,40 @@ function SuperTopicPage({
           </button>
           <span className="st-spacer" />
           <button aria-label="搜索">
-            <Search size={19} />
+            <Search size={20} />
           </button>
           <button aria-label="分享">
-            <Share2 size={19} />
+            <Share2 size={20} />
           </button>
         </div>
         <div className="st-hero-head">
-          <VAvatar name={p.owner ?? "我"} src={items[0]?.avatar} gold />
+          <img
+            className="st-ava"
+            src="images/st-avatar.jpg"
+            alt="超话头像"
+            draggable={false}
+          />
           <div className="st-hero-info">
             <h2>
               {p.owner ?? "我"}
-              <span className="st-gold">👑金超</span>
+              <span className="st-gold">🏆金超</span>
             </h2>
             <p>
-              <b>460万</b>帖子<i>|</i>
-              <b>534万</b>农糖
+              <b>460万</b> 帖子
+              <b>534万</b> 农糖
+              <ChevronRight size={13} className="st-chev" />
             </p>
           </div>
+          <span className="st-streak-wrap">
+            <i className="st-streak-ico">
+              <CalendarCheck size={17} />
+            </i>
+            <small>{signed ? "连签1天" : "连签0天"}</small>
+          </span>
         </div>
         <div className="st-hero-chips">
           <span>明星超话</span>
-          <span>今日签到{signed ? "3.2" : "3.1"}万人</span>
+          <span>今日签到{signed ? "2.4" : "2.3"}万人</span>
           <button
             className={"st-sign" + (signed ? " done" : "")}
             aria-pressed={signed}
@@ -207,8 +232,6 @@ function SuperTopicPage({
           >
             {signed ? "已签到" : "签到"}
           </button>
-          <span className="st-spacer" />
-          <span className="st-streak">{signed ? "连签7天" : "连签6天"}</span>
         </div>
         <button className="st-expand">
           展开查看更多
@@ -226,10 +249,56 @@ function SuperTopicPage({
           </button>
         ))}
       </div>
-      <div className="st-pin">
-        <b>置顶</b>❤️#陈立农#
-      </div>
+      <button className="st-pin" onClick={() => p.onItem(pinnedItem)}>
+        <b>置顶</b>
+        <span className="st-pin-text">❤️#陈立农# …</span>
+      </button>
       <div className="catalog-scroll">
+        <article className="weibo-post st-studio-post">
+          <div className="st-studio-head">
+            <span className="st-studio-ava">
+              <img src={items[0]?.avatar} alt="" />
+              <i className="st-bluev">V</i>
+            </span>
+            <div className="st-studio-who">
+              <strong>
+                陈立农工作室
+                <span className="st-crown">👑</span>
+                <span className="st-daka">大咖</span>
+              </strong>
+              <small>1小时前&ensp;最后评论&ensp;已编辑</small>
+            </div>
+            <ChevronDown size={16} className="st-studio-chevron" />
+          </div>
+          <div className="st-studio-body">
+            <p className="st-studio-line1">
+              🎬 | <i>nong's vlog</i>
+            </p>
+            <p>追逐光影 演绎人间</p>
+            <p>
+              定格<span className="st-at">@陈立农</span> 的每一瞬
+            </p>
+            <p>继续向远前行</p>
+            <p className="st-topic">#陈立农金鸡百花电影节#</p>
+          </div>
+          <div className="st-studio-video">
+            <span>厦门 · 十一月五日 · 星期日</span>
+          </div>
+          <div className="social-actions weibo-actions st-studio-actions">
+            <button aria-label="转发">
+              <Share2 size={17} />
+              852
+            </button>
+            <button aria-label="评论">
+              <MessageCircle size={17} />
+              904
+            </button>
+            <button aria-label="点赞">
+              <ThumbsUp size={17} />
+              4081
+            </button>
+          </div>
+        </article>
         {list.map((i) => (
           <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
         ))}
