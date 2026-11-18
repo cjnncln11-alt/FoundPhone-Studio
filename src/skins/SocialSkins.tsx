@@ -572,29 +572,25 @@ function WeiboSplash() {
         <span>发现新鲜事！</span>
       </div>
       <div className="weibo-splash-logo">
-        <svg viewBox="0 0 48 40" aria-hidden="true">
-          <ellipse
-            cx="21"
-            cy="26"
-            rx="14.5"
-            ry="11"
-            fill="#e6162d"
-          />
-          <ellipse cx="21" cy="26" rx="9" ry="6.6" fill="#fff" />
-          <circle cx="24" cy="26.5" r="3.6" fill="#3c3c3c" />
-          <circle cx="25.3" cy="25.3" r="1.1" fill="#fff" />
+        <svg viewBox="0 0 50 42" aria-hidden="true">
+          {/* 眼睛：红色椭圆 + 白眼球 + 黑瞳 */}
+          <ellipse cx="21" cy="27" rx="15.6" ry="11.4" fill="#e6162d" />
+          <ellipse cx="21" cy="27" rx="10.6" ry="7.4" fill="#fff" />
+          <circle cx="24.2" cy="27.4" r="4.2" fill="#2b2b2b" />
+          <circle cx="25.7" cy="26" r="1.3" fill="#fff" />
+          {/* 右上两条橙色信号弧（同心、以眼心为圆心） */}
           <path
-            d="M33.5 12.2 Q39 6.8 44.5 8.6"
+            d="M27.6 14.2 A14.8 14.8 0 0 1 35.4 24.6"
             fill="none"
             stroke="#f86400"
-            strokeWidth="3.2"
+            strokeWidth="3"
             strokeLinecap="round"
           />
           <path
-            d="M31.8 5.4 Q39.5 -0.6 46.6 3.4"
+            d="M30.4 9.4 A19.6 19.6 0 0 1 40.4 25.2"
             fill="none"
             stroke="#f86400"
-            strokeWidth="3.2"
+            strokeWidth="3"
             strokeLinecap="round"
           />
         </svg>
