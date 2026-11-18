@@ -594,52 +594,58 @@ export function WeiboSkin(p: Props) {
           </div>
           <div className="catalog-scroll">
             {tab === "我" ? (
-              <div className="weibo-profile">                {meta(items[0], "profileCover") && (
-                  <div
-                    className="weibo-profile-cover"
-                    style={{
-                      backgroundImage: `url(${meta(items[0], "profileCover")})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  >
-                    <div className="weibo-cover-bar">
-                      <span className="weibo-cover-spacer" />
-                      <button aria-label="拍摄">
-                        <Camera size={19} />
-                      </button>
-                      <button aria-label="搜索">
-                        <Search size={19} />
-                      </button>
-                      <button aria-label="更多">
-                        <MoreHorizontal size={19} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <div className="weibo-profile-card">
-                  <div className="weibo-profile-head">
-                    <VAvatar
-                      name={p.owner ?? "我"}
-                      src={items[0]?.avatar}
-                      gold
-                    />
-                    <h2>
-                      {p.owner ?? "我"}
-                      <NameBadges />
-                    </h2>
-                  </div>
-                  <div className="weibo-profile-stats">
-                    <span>
-                      <b>{meta(items[0], "profileFans")}</b> 粉丝
-                    </span>
-                    <span>
-                      <b>{meta(items[0], "profileFollowing")}</b> 关注
-                    </span>
-                    <span>
-                      <b>{meta(items[0], "profileInteractions")}</b> 转评赞
-                    </span>
-                  </div>
+              // 「我」页资料卡元数据固定取本人博文（列表排序后 items[0] 不一定是本人）
+              (() => {
+                const ownerBase =
+                  items.find((i) => i.sender === p.owner) ?? items[0];
+                return (
+                  <div className="weibo-profile">
+                    {meta(ownerBase, "profileCover") && (
+                      <div
+                        className="weibo-profile-cover"
+                        style={{
+                          backgroundImage: `url(${meta(ownerBase, "profileCover")})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }}
+                      >
+                        <div className="weibo-cover-bar">
+                          <span className="weibo-cover-spacer" />
+                          <button aria-label="拍摄">
+                            <Camera size={19} />
+                          </button>
+                          <button aria-label="搜索">
+                            <Search size={19} />
+                          </button>
+                          <button aria-label="更多">
+                            <MoreHorizontal size={19} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="weibo-profile-card">
+                      <div className="weibo-profile-head">
+                        <VAvatar
+                          name={p.owner ?? "我"}
+                          src={ownerBase?.avatar}
+                          gold
+                        />
+                        <h2>
+                          {p.owner ?? "我"}
+                          <NameBadges />
+                        </h2>
+                      </div>
+                      <div className="weibo-profile-stats">
+                        <span>
+                          <b>{meta(ownerBase, "profileFans")}</b> 粉丝
+                        </span>
+                        <span>
+                          <b>{meta(ownerBase, "profileFollowing")}</b> 关注
+                        </span>
+                        <span>
+                          <b>{meta(ownerBase, "profileInteractions")}</b> 转评赞
+                        </span>
+                      </div>
                   <div className="weibo-profile-tags">
                     <span>昨日阅读人数10万+</span>
                     <span>本月互动人数100万</span>
@@ -661,7 +667,7 @@ export function WeiboSkin(p: Props) {
                         </div>
                         <p>533.5万农糖</p>
                       </div>
-                      {items[0]?.avatar && (
+                      {ownerBase?.avatar && (
                         <img
                           className="weibo-mini-thumb"
                           src="images/st-avatar.jpg"
@@ -682,8 +688,10 @@ export function WeiboSkin(p: Props) {
                   <span className="weibo-profile-count">
                     {items.length} 条微博
                   </span>
-                </div>
-              </div>
+                    </div>
+                  </div>
+                );
+              })()
             ) : tab === "发现" ? (
               <DiscoverPage p={p} items={items} setViewer={setViewer} />
             ) : (
