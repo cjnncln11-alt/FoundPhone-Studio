@@ -1,5 +1,8 @@
 # 捡手机 · FoundPhone Studio
 
+> 本仓库是**陈立农虚拟手机**定制版：解锁密码 `1003`，内含微博（关注 / 发现 / 超话）、微信、Instagram 等剧情内容。
+> 在线体验：https://addeaa0842bce9fe1.app.workbuddy.host/?sharecode=YYJMJI5ESH
+
 《捡手机》是一个可以通过 AI 添加剧情的交互式虚拟手机框架。你不需要重新制作手机界面，只需要准备人物设定、聊天记录和剧情要求，让 AI 填入故事数据。
 
 默认打开完整 App 测试预览：49 个 App 已安装，内页只有中性的测试文字，不含剧情或真实账号。桌面底部为四个 App。`/?preview=test` 也可进入相同测试版本；纯空白入口为 `/?template=blank`。
@@ -55,7 +58,7 @@ npm run preview
 
 ## 演示与截图
 
-[在线体验](https://keoyyo85.github.io/FoundPhone-Studio/) · [GitHub 仓库](https://github.com/keoyyo85/FoundPhone-Studio)
+[在线体验](https://addeaa0842bce9fe1.app.workbuddy.host/?sharecode=YYJMJI5ESH) · [GitHub 仓库](https://github.com/cjnncln11-alt/FoundPhone-Studio)
 
 | 桌面 | 设置 | 聊天 |
 | --- | --- | --- |
