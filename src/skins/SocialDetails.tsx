@@ -7,7 +7,6 @@ import {
 } from "react";
 import {
   ChevronLeft,
-  ChevronDown,
   MoreHorizontal,
   Heart,
   MessageCircle,
@@ -24,6 +23,7 @@ import {
   Search,
   Bell,
   Circle,
+  Star,
 } from "lucide-react";
 import { useSkinState } from "../skinState";
 import { RichText } from "../RichText";
@@ -146,6 +146,17 @@ export function SocialDetail(p: {
     : item.media
       ? [item.media]
       : [];
+  // 仅粉丝可见：详情页顶部的灰色提示条
+  const fansOnly = meta(item, "fansOnly") === "true";
+  // 大家都在搜：详情页正文下方的搜索胶囊
+  const searchTags: string[] = (() => {
+    try {
+      const v = JSON.parse(meta(item, "searchTags", "[]"));
+      return Array.isArray(v) ? v.map(String) : [];
+    } catch {
+      return [];
+    }
+  })();
   const nestedSep = "\u0001";
   const isNestedReply = (c: string) => c.startsWith(nestedSep);
   const parseNestedReply = (c: string) => {
@@ -583,37 +594,83 @@ export function SocialDetail(p: {
         </div>
       </header>
       <div className="post-detail-scroll" ref={scrollRef}>
+        {fansOnly && (
+          <div className="weibo-fansonly" aria-label="仅粉丝可见">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+              <rect
+                x="4.2"
+                y="9"
+                width="15.6"
+                height="11"
+                rx="3"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M12 17.6c-1.9-1.3-3-2.4-3-3.6 0-.9.7-1.6 1.6-1.6.6 0 1.1.3 1.4.8.3-.5.8-.8 1.4-.8.9 0 1.6.7 1.6 1.6 0 1.2-1.1 2.3-3 3.6Z"
+                fill="currentColor"
+              />
+            </svg>
+            仅粉丝可见
+          </div>
+        )}
         <div className="post-detail-author">
           <VAvatar
             name={item.sender || "用户"}
             src={item.avatar}
             gold={item.sender === p.owner}
+            crown={meta(item, "crown") === "true"}
             blue={
               item.sender !== p.owner && meta(item, "badge") === "blue"
             }
           />
           <div>
-            <strong>
+            <strong
+              className={
+                meta(item, "orangeName") === "true"
+                  ? "weibo-name-orange"
+                  : undefined
+              }
+            >
               {item.sender || "用户"}
               {item.sender === p.owner && <NameBadges />}
               {item.sender !== p.owner &&
-                meta(item, "badge") === "blue" && <StudioBadges />}
+                meta(item, "badge") === "blue" && (
+                  <StudioBadges
+                    withSuper={meta(item, "superTopic") !== "0"}
+                  />
+                )}
             </strong>
             {weibo ? (
-              <small className="weibo-author-sub">
+              <small className="weibo-author-sub weibo-author-sub-col">
                 {(() => {
-                  const date = weiboDate(item.time);
+                  const date = meta(item, "dateText") || weiboDate(item.time);
                   const source = meta(item, "source");
                   const loc = (meta(item, "location") || "")
                     .replace(/^发布于/, "")
                     .trim();
-                  const tail = [
-                    source ? `来自 ${source}` : "",
-                    loc ? `发布于 ${loc}` : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ");
-                  return tail ? `${date} ${tail}` : date;
+                  return (
+                    <>
+                      <span>
+                        {date}
+                        {source && (
+                          <>
+                            {" 来自 "}
+                            <span className="weibo-source-link">{source}</span>
+                          </>
+                        )}
+                      </span>
+                      {loc && <span>发布于 {loc}</span>}
+                    </>
+                  );
                 })()}
               </small>
             ) : (
@@ -623,8 +680,12 @@ export function SocialDetail(p: {
             )}
           </div>
           {weibo ? (
-            <button aria-label="收起博文" onClick={() => setFollowed(!followed)}>
-              <ChevronDown size={22} />
+            <button aria-label="收藏博文" onClick={() => setSaved(!saved)}>
+              <Star
+                size={23}
+                fill={saved ? "#ffb62e" : "none"}
+                color={saved ? "#ffb62e" : undefined}
+              />
             </button>
           ) : (
             <button
@@ -646,6 +707,22 @@ export function SocialDetail(p: {
             <span className="weibo-hot-pill">
               <b>热文</b>热文指数{meta(item, "hotIndex")}
             </span>
+          )}
+          {weibo && searchTags.length > 0 && (
+            <div className="weibo-search-tags">
+              <p className="weibo-search-label">大家都在搜</p>
+              <div className="weibo-search-chips">
+                {searchTags.map((t, i) => (
+                  <span key={i} className="weibo-search-chip">
+                    <span className="weibo-chip-ico">
+                      <Search size={15} />
+                      {i === 1 && <i className="weibo-chip-hot">热</i>}
+                    </span>
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
         {weibo ? (

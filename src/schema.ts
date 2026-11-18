@@ -220,7 +220,7 @@ export function safeMedia(value: string) {
     value,
   ) ||
     // 本地静态大文件（视频/封面）：不内嵌进作品数据，由 public/ 随站点发布
-    /^\/videos\/[\w.-]+\.(mp4|webm|jpg|jpeg|png)$/.test(value)
+    /^\/videos\/(?:[\w.-]+\/)*[\w.-]+\.(mp4|webm|m3u8|jpg|jpeg|png)$/.test(value)
     ? value
     : "";
 }

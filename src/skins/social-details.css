@@ -689,3 +689,91 @@
 .ios18 .weibo-post .social-body .wb-fold-btn {
   font-size: 14px;
 }
+
+/* ── 仅粉丝可见提示条：详情页顶部灰色提示（对照截图 1:1） ── */
+.weibo-fansonly {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #949494;
+}
+.weibo-fansonly svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+/* ── 详情页作者区：两行时间/来源（日期 来自xx / 发布于xx） ── */
+.weibo-author-sub-col {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  gap: 3px !important;
+}
+.weibo-source-link {
+  color: #5c6881;
+}
+/* 会员橙名（对照会员用户截图） */
+.weibo-name-orange {
+  color: #e1650f;
+}
+/* ── 大家都在搜：正文下方搜索胶囊 ── */
+.weibo-search-tags {
+  padding: 6px 0 4px;
+}
+.weibo-search-label {
+  margin: 0 0 9px;
+  font-size: 13px;
+  color: #949494;
+}
+.weibo-search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+}
+.weibo-search-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 33px;
+  padding: 0 14px;
+  background: #f8f8f8;
+  border-radius: 17px;
+  font-size: 13px;
+  color: #333;
+  white-space: nowrap;
+}
+.weibo-chip-ico {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: #666;
+}
+.weibo-chip-ico svg {
+  width: 14px;
+  height: 14px;
+}
+.weibo-chip-hot {
+  position: absolute;
+  top: -4px;
+  right: -7px;
+  font-style: normal;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 11px;
+  padding: 0 2px;
+  color: #fff;
+  background: linear-gradient(180deg, #ffb14e, #fe8c00);
+  border-radius: 6px 6px 6px 1px;
+}
+/* ── 会员皇冠挂件：压在头像左上角 ── */
+.avatar-crown {
+  position: absolute;
+  left: -7%;
+  top: -16%;
+  width: 58%;
+  height: auto;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}

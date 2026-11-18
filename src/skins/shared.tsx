@@ -115,17 +115,21 @@ export function VAvatar({
   src = "",
   gold = false,
   blue = false,
+  crown = false,
 }: {
   name: string;
   src?: string;
   gold?: boolean;
   blue?: boolean;
+  crown?: boolean;
 }) {
   const a = <Avatar name={name} src={src} />;
+  const pendant = crown ? <CrownPendant /> : null;
   if (blue)
     return (
       <span className="avatar-v-wrap">
         {a}
+        {pendant}
         <i className="v-badge-blue" aria-label="蓝V认证">
           V
         </i>
@@ -134,12 +138,30 @@ export function VAvatar({
   return gold ? (
     <span className="avatar-v-wrap">
       {a}
+      {pendant}
       <i className="v-badge-gold" aria-label="金V认证">
         V
       </i>
     </span>
   ) : (
     a
+  );
+}
+/** 会员皇冠挂件：压在头像左上角（对照会员昵称截图） */
+export function CrownPendant() {
+  return (
+    <svg className="avatar-crown" viewBox="0 0 32 26" aria-hidden="true">
+      <path
+        d="M3 20 L1.5 7 L9 12 L16 3 L23 12 L30.5 7 L29 20 Z"
+        fill="#ffb62e"
+        stroke="#e89a12"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="1.6" cy="6" r="2.1" fill="#ffc95c" stroke="#e89a12" strokeWidth="1" />
+      <circle cx="16" cy="2.6" r="2.1" fill="#ffc95c" stroke="#e89a12" strokeWidth="1" />
+      <circle cx="30.4" cy="6" r="2.1" fill="#ffc95c" stroke="#e89a12" strokeWidth="1" />
+    </svg>
   );
 }
 export function NameBadges() {
@@ -155,7 +177,7 @@ export function NameBadges() {
   );
 }
 /** 工作室博文头部的铁粉等级徽章 + 超话标识（对照真实截图 1:1） */
-export function StudioBadges() {
+export function StudioBadges({ withSuper = true }: { withSuper?: boolean }) {
   return (
     <span className="studio-badges">
       <svg
@@ -204,24 +226,28 @@ export function StudioBadges() {
           </linearGradient>
         </defs>
       </svg>
-      <span className="st-super-link">
-        <svg viewBox="0 0 14 14" aria-hidden="true">
-          <rect
-            x="3.2"
-            y="3.2"
-            width="7.6"
-            height="7.6"
-            fill="none"
-            stroke="#7b8ba1"
-            strokeWidth="1.4"
-            transform="rotate(45 7 7)"
-          />
-        </svg>
-        陈立农超话
-      </span>
-      <span className="st-super-sticker" aria-hidden="true">
-        超话
-      </span>
+      {withSuper && (
+        <>
+          <span className="st-super-link">
+            <svg viewBox="0 0 14 14" aria-hidden="true">
+              <rect
+                x="3.2"
+                y="3.2"
+                width="7.6"
+                height="7.6"
+                fill="none"
+                stroke="#7b8ba1"
+                strokeWidth="1.4"
+                transform="rotate(45 7 7)"
+              />
+            </svg>
+            陈立农超话
+          </span>
+          <span className="st-super-sticker" aria-hidden="true">
+            超话
+          </span>
+        </>
+      )}
     </span>
   );
 }

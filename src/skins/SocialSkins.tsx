@@ -72,16 +72,25 @@ function Actions({ p, item }: { p: Props; item: Item }) {
 function PostHeader({ item, p }: { item: Item; p: Props }) {
   const gold = item.sender === p.owner;
   const blue = !gold && meta(item, "badge") === "blue";
-  const date = weiboDate(item.time);
+  const orange = meta(item, "orangeName") === "true";
+  const crown = meta(item, "crown") === "true";
+  const withSuper = meta(item, "superTopic") !== "0";
+  const date = meta(item, "dateText") || weiboDate(item.time);
   const source = meta(item, "source");
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
-      <VAvatar name={item.sender} src={item.avatar} gold={gold} blue={blue} />
+      <VAvatar
+        name={item.sender}
+        src={item.avatar}
+        gold={gold}
+        blue={blue}
+        crown={crown}
+      />
       <span>
-        <strong>
+        <strong className={orange ? "weibo-name-orange" : undefined}>
           {item.sender}
           {gold && <NameBadges />}
-          {blue && <StudioBadges />}
+          {blue && <StudioBadges withSuper={withSuper} />}
         </strong>
         <small className="weibo-author-sub">
           {source ? `${date} 来自 ${source}` : date}
