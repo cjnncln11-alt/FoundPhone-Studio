@@ -25,7 +25,7 @@ import {
   Share2,
   ThumbsUp,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import type { Item } from "../schema";
 import {
   Avatar,
@@ -36,6 +36,7 @@ import {
   meta,
   NameBadges,
   StudioBadges,
+  StNameBadges,
   SearchBox,
   Tabs,
   useContent,
@@ -88,6 +89,11 @@ function PostHeader({
   const crown = meta(item, "crown") === "true";
   const withSuper = meta(item, "superTopic") !== "0";
   const plainBlue = meta(item, "plainBlue") === "true";
+  const stRole = meta(item, "stRole");
+  const stTag = meta(item, "stTag");
+  const stLevel = meta(item, "stLevel");
+  const stCrown = meta(item, "stCrown") === "true";
+  const edited = meta(item, "edited") === "true";
   const date = weiboDate(item.time);
   const source = meta(item, "source");
   return (
@@ -106,12 +112,19 @@ function PostHeader({
           {item.sender}
           {gold && <NameBadges />}
           {blue && !plainBlue && <StudioBadges withSuper={withSuper} />}
+          {(stCrown || stRole || stTag || stLevel) && (
+            <StNameBadges role={stRole} tag={stTag} level={stLevel} />
+          )}
         </strong>
         <small className="weibo-author-sub">
           {(() => {
             const hotTag = meta(item, "hotTag");
-            if (hotTag) return `${date} ${hotTag}`;
-            return source ? `${date} 来自 ${source}` : date;
+            const base = hotTag
+              ? `${date} ${hotTag}`
+              : source
+                ? `${date} 来自 ${source}`
+                : date;
+            return edited ? `${base} 已编辑` : base;
           })()}
         </small>
       </span>
@@ -340,7 +353,18 @@ function StPostsPage({
   onClose: () => void;
   setViewer: (v: ViewerState) => void;
 }) {
-  const list = [...items].sort((a, b) => (a.time < b.time ? 1 : -1));
+  const list = [...items].sort(
+    (a, b) => +(meta(a, "stOrder") || 99) - +(meta(b, "stOrder") || 99),
+  );
+  const barIcon = (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="9" fill="#4d7fd6" />
+      <path
+        d="M10 4.6 L11.6 8.1 L15.4 8.5 L12.6 11 L13.4 14.7 L10 12.8 L6.6 14.7 L7.4 11 L4.6 8.5 L8.4 8.1 Z"
+        fill="#fff"
+      />
+    </svg>
+  );
   return (
     <div className="st-posts-page">
       <header className="st-posts-bar">
@@ -351,8 +375,23 @@ function StPostsPage({
         <span className="st-posts-bar-spacer" />
       </header>
       <div className="catalog-scroll">
+        <div className="st-creator-bar">
+          {barIcon}
+          <span>创作官热门帖&gt;&gt;</span>
+          <ChevronDown size={16} className="st-creator-chev" />
+        </div>
         {list.map((i) => (
-          <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
+          <Fragment key={i.id}>
+            {meta(i, "stPrecious") === "true" && (
+              <div className="st-creator-bar precious">
+                {barIcon}
+                <span>精华|创作官热门帖&gt;&gt;</span>
+                <em className="st-gongyi">☀️人人公益</em>
+                <ChevronDown size={16} className="st-creator-chev" />
+              </div>
+            )}
+            <WeiboPostCard p={p} item={i} setViewer={setViewer} />
+          </Fragment>
         ))}
         <Empty items={list} />
       </div>
