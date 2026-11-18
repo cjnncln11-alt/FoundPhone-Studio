@@ -2376,6 +2376,10 @@
   justify-content: center;
   color: #fff;
 }
+.st-streak-ico.done {
+  background: linear-gradient(180deg, #ffb547, #f58a0f);
+  border-color: #ffc470;
+}
 .st-streak-wrap small {
   font-size: 10px;
   color: #e8ecf2;
@@ -2396,20 +2400,6 @@
   padding: 4px 9px;
   color: #eef1f6;
   white-space: nowrap;
-}
-.st-sign {
-  flex: none;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(180deg, #ffb340, #f58a0f);
-  border-radius: 16px 5px 5px 16px;
-  padding: 6px 13px;
-  white-space: nowrap;
-}
-.st-sign.done {
-  background: #3c4654;
-  color: #aab2bf;
 }
 .st-expand {
   display: flex;

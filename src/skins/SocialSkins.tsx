@@ -166,7 +166,7 @@ function SuperTopicPage({
         : tab === "名人动态"
           ? items.filter((i) => i.sender === p.owner)
           : [];
-  const cover = meta(items[0], "profileCover");
+  const cover = "images/st-cover.jpg";
   // 置顶博文：点击可查看详情（正文待补充）
   const pinnedItem: Item = {
     ...items[0],
@@ -216,22 +216,20 @@ function SuperTopicPage({
             </p>
           </div>
           <span className="st-streak-wrap">
-            <i className="st-streak-ico">
+            <button
+              className={"st-streak-ico" + (signed ? " done" : "")}
+              aria-pressed={signed}
+              aria-label="签到"
+              onClick={() => setSigned(!signed)}
+            >
               <CalendarCheck size={17} />
-            </i>
+            </button>
             <small>{signed ? "连签1天" : "连签0天"}</small>
           </span>
         </div>
         <div className="st-hero-chips">
           <span>明星超话</span>
-          <span>今日签到{signed ? "2.4" : "2.3"}万人</span>
-          <button
-            className={"st-sign" + (signed ? " done" : "")}
-            aria-pressed={signed}
-            onClick={() => setSigned(!signed)}
-          >
-            {signed ? "已签到" : "签到"}
-          </button>
+          <span>{signed ? "2.4" : "2.3"}万人</span>
         </div>
         <button className="st-expand">
           展开查看更多
@@ -470,7 +468,7 @@ export function WeiboSkin(p: Props) {
                       {items[0]?.avatar && (
                         <img
                           className="weibo-mini-thumb"
-                          src={items[0].avatar}
+                          src="images/st-avatar.jpg"
                           alt=""
                         />
                       )}
