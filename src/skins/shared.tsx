@@ -116,21 +116,36 @@ export function VAvatar({
   gold = false,
   blue = false,
   crown = false,
+  orange = false,
+  yellow = false,
 }: {
   name: string;
   src?: string;
   gold?: boolean;
   blue?: boolean;
   crown?: boolean;
+  /** 橙V（个人机构认证） */
+  orange?: boolean;
+  /** 黄V（个人认证） */
+  yellow?: boolean;
 }) {
   const a = <Avatar name={name} src={src} />;
   const pendant = crown ? <CrownPendant /> : null;
-  if (blue)
+  if (blue || orange || yellow)
     return (
       <span className="avatar-v-wrap">
         {a}
         {pendant}
-        <i className="v-badge-blue" aria-label="蓝V认证">
+        <i
+          className={
+            blue
+              ? "v-badge-blue"
+              : orange
+                ? "v-badge-orange"
+                : "v-badge-yellow"
+          }
+          aria-label={blue ? "蓝V认证" : orange ? "橙V认证" : "黄V认证"}
+        >
           V
         </i>
       </span>

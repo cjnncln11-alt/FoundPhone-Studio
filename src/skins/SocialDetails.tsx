@@ -351,7 +351,12 @@ export function SocialDetail(p: {
             <img src={commentPicSrc(hot.avatar)} alt="" />
           </span>
         ) : (
-          <FanAvatar name={name} photos={item.mediaList} />
+          <FanAvatar
+            name={name}
+            photos={
+              meta(item, "noPhotoAvatar") === "true" ? [] : item.mediaList
+            }
+          />
         )}
         <div>
           <strong>
@@ -605,6 +610,12 @@ export function SocialDetail(p: {
             blue={
               item.sender !== p.owner && meta(item, "badge") === "blue"
             }
+            orange={
+              item.sender !== p.owner && meta(item, "badge") === "orange"
+            }
+            yellow={
+              item.sender !== p.owner && meta(item, "badge") === "yellow"
+            }
           />
           <div>
             <strong
@@ -627,7 +638,14 @@ export function SocialDetail(p: {
             {weibo ? (
               <small className="weibo-author-sub weibo-author-sub-col">
                 {(() => {
-                  const date = meta(item, "dateText") || weiboDate(item.time);
+                  // 卡片用短日期 dateText（如 "11-14"），详情页显示完整日期时间
+                  const short = meta(item, "dateText");
+                  const date =
+                    short && short.length > 5
+                      ? short
+                      : item.time.length > 10
+                        ? `${weiboDate(item.time)} ${item.time.slice(11, 16)}`
+                        : weiboDate(item.time);
                   const source = meta(item, "source");
                   const loc = (meta(item, "location") || "")
                     .replace(/^发布于/, "")
@@ -762,7 +780,12 @@ export function SocialDetail(p: {
           <div className="post-detail-comments">
             {item.likedBy.map((name, index) => (
               <article key={index} className="post-detail-comment weibo-like-row">
-                <FanAvatar name={name} photos={item.mediaList} />
+                <FanAvatar
+            name={name}
+            photos={
+              meta(item, "noPhotoAvatar") === "true" ? [] : item.mediaList
+            }
+          />
                 <div>
                   <strong>{name}</strong>
                 </div>

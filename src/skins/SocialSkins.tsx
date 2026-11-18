@@ -80,7 +80,10 @@ function PostHeader({
   hideChevron?: boolean;
 }) {
   const gold = item.sender === p.owner;
-  const blue = !gold && meta(item, "badge") === "blue";
+  const badge = !gold ? meta(item, "badge") : "";
+  const blue = badge === "blue";
+  const oBadge = badge === "orange";
+  const yBadge = badge === "yellow";
   const orange = meta(item, "orangeName") === "true";
   const crown = meta(item, "crown") === "true";
   const withSuper = meta(item, "superTopic") !== "0";
@@ -94,6 +97,8 @@ function PostHeader({
         src={item.avatar}
         gold={gold}
         blue={blue}
+        orange={oBadge}
+        yellow={yBadge}
         crown={crown}
       />
       <span>
@@ -323,20 +328,53 @@ function DiscoverPage({
     </div>
   );
 }
+/** 超话「帖子」页：点击置顶后进入（对照图3） */
+function StPostsPage({
+  p,
+  items,
+  onClose,
+  setViewer,
+}: {
+  p: Props;
+  items: Item[];
+  onClose: () => void;
+  setViewer: (v: ViewerState) => void;
+}) {
+  const list = [...items].sort((a, b) => (a.time < b.time ? 1 : -1));
+  return (
+    <div className="st-posts-page">
+      <header className="st-posts-bar">
+        <button aria-label="返回" onClick={onClose}>
+          <ChevronLeft size={22} />
+        </button>
+        <span>帖子</span>
+        <span className="st-posts-bar-spacer" />
+      </header>
+      <div className="catalog-scroll">
+        {list.map((i) => (
+          <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
+        ))}
+        <Empty items={list} />
+      </div>
+    </div>
+  );
+}
 function SuperTopicPage({
   p,
   items,
-  pinnedBase,
+  postsItems,
   onClose,
 }: {
   p: Props;
   items: Item[];
-  pinnedBase: Item;
+  postsItems: Item[];
   onClose: () => void;
 }) {
   const [tab, setTab] = useState("热门");
   const [signed, setSigned] = useSkinState<boolean>(p, "st-signed2", false);
   const [viewer, setViewer] = useState<ViewerState>(null);
+  // 点击置顶进入「帖子」页（对照图3）
+  const [postsOpen, setPostsOpen] = useState(false);
   const list =
     tab === "热门"
       ? [...items].sort((a, b) => b.likes - a.likes)
@@ -346,24 +384,21 @@ function SuperTopicPage({
           ? items.filter((i) => i.sender === p.owner)
           : [];
   const cover = "images/st-cover.jpg";
-  // 置顶博文：点击可查看详情（正文待补充）
-  const pinnedItem: Item = {
-    ...pinnedBase,
-    id: "st-pinned",
-    title: "❤️#陈立农#",
-    body: "❤️#陈立农#",
-    time: "2026-11-17 10:20",
-    comments: [],
-    mediaList: [],
-    media: "",
-    meta: { ...pinnedBase.meta, source: "" },
-  };
   return (
     <>
-      <div
-        className="st-hero"
-        style={cover ? { backgroundImage: `url(${cover})` } : undefined}
-      >
+      {postsOpen ? (
+        <StPostsPage
+          p={p}
+          items={postsItems}
+          onClose={() => setPostsOpen(false)}
+          setViewer={setViewer}
+        />
+      ) : (
+        <>
+          <div
+            className="st-hero"
+            style={cover ? { backgroundImage: `url(${cover})` } : undefined}
+          >
         <div className="st-hero-bar">
           <button aria-label="返回" onClick={onClose}>
             <ChevronLeft size={22} />
@@ -426,56 +461,11 @@ function SuperTopicPage({
           </button>
         ))}
       </div>
-      <button className="st-pin" onClick={() => p.onItem(pinnedItem)}>
+      <button className="st-pin" onClick={() => setPostsOpen(true)}>
         <b>置顶</b>
         <span className="st-pin-text">❤️#陈立农# …</span>
       </button>
       <div className="catalog-scroll">
-        <article className="weibo-post st-studio-post">
-          <div className="st-studio-head">
-            <span className="st-studio-ava">
-              <img src={items[0]?.avatar} alt="" />
-              <i className="st-bluev">V</i>
-            </span>
-            <div className="st-studio-who">
-              <strong>
-                陈立农工作室
-                <span className="st-crown">👑</span>
-                <span className="st-daka">大咖</span>
-              </strong>
-              <small>1小时前&ensp;最后评论&ensp;已编辑</small>
-            </div>
-            <ChevronDown size={16} className="st-studio-chevron" />
-          </div>
-          <div className="st-studio-body">
-            <p className="st-studio-line1">
-              🎬 | <i>nong's vlog</i>
-            </p>
-            <p>追逐光影 演绎人间</p>
-            <p>
-              定格<span className="st-at">@陈立农</span> 的每一瞬
-            </p>
-            <p>继续向远前行</p>
-            <p className="st-topic">#陈立农金鸡百花电影节#</p>
-          </div>
-          <div className="st-studio-video">
-            <span>厦门 · 十一月五日 · 星期日</span>
-          </div>
-          <div className="social-actions weibo-actions st-studio-actions">
-            <button aria-label="转发">
-              <Share2 size={17} />
-              852
-            </button>
-            <button aria-label="评论">
-              <MessageCircle size={17} />
-              904
-            </button>
-            <button aria-label="点赞">
-              <ThumbsUp size={17} />
-              4081
-            </button>
-          </div>
-        </article>
         {list.map((i) => (
           <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
         ))}
@@ -494,6 +484,8 @@ function SuperTopicPage({
           </small>
         </span>
       </div>
+        </>
+      )}
       {viewer && (
         <ImageViewer
           images={
@@ -546,12 +538,23 @@ export function WeiboSkin(p: Props) {
   const years = [...new Set(ownerItems.map((i) => i.time.slice(0, 4)))]
     .sort()
     .reverse();
-  // 超话页：不展示工作室/NEWS合作社/本人的博文
+  // 超话页热门/最新：不展示工作室/NEWS合作社/本人的博文/发现专属/帖子页专属
   const stItems = items.filter(
-    (i) => i.sender !== p.owner && !FAN_SENDERS.includes(i.sender),
+    (i) =>
+      i.sender !== p.owner &&
+      !FAN_SENDERS.includes(i.sender) &&
+      meta(i, "discoverOnly") !== "true" &&
+      meta(i, "stPostsOnly") !== "true",
   );
+  // 超话「帖子」页（置顶点进去）：5 条粉丝站博文
+  const stPostItems = items.filter((i) => meta(i, "stPostsOnly") === "true");
   // 关注：只显示他人的博文（本人动态只在「我」页出现，发现页专属博文不进关注）
-  const fanBase = otherItems.filter((i) => meta(i, "discoverOnly") !== "true");
+  const fanBase = otherItems.filter(
+    (i) =>
+      meta(i, "discoverOnly") !== "true" &&
+      meta(i, "stPostsOnly") !== "true" &&
+      meta(i, "stHotOnly") !== "true",
+  );
   const base = feed === "全部" ? fanBase : fanBase.filter((i) => i.folder === feed);
   const matched = todayMode
     ? todayPosts
@@ -572,7 +575,7 @@ export function WeiboSkin(p: Props) {
         <SuperTopicPage
           p={p}
           items={stItems}
-          pinnedBase={items[0]}
+          postsItems={stPostItems}
           onClose={() => setStOpen(false)}
         />
       ) : (

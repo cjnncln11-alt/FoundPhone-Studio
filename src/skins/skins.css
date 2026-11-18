@@ -4995,3 +4995,71 @@
   object-fit: contain;
   border-radius: 10px;
 }
+
+/* 置顶行文字靠左（对照图2） */
+.st-pin {
+  justify-content: flex-start;
+  text-align: left;
+}
+/* 橙V / 黄V 认证标（粉丝站账号） */
+.v-badge-orange,
+.v-badge-yellow {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 30%;
+  height: 30%;
+  min-width: 13px;
+  min-height: 13px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 7px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px #0003;
+}
+.v-badge-orange {
+  background: linear-gradient(180deg, #ffa62b, #f58a12);
+}
+.v-badge-yellow {
+  background: linear-gradient(180deg, #ffc933, #f7ab0a);
+}
+/* 超话「帖子」页（对照图3） */
+.st-posts-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+}
+.st-posts-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111;
+}
+.st-posts-bar button {
+  color: #333;
+}
+.st-posts-bar span:first-of-type {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.st-posts-bar-spacer {
+  width: 22px;
+  margin-left: auto;
+}
+.st-posts-page .catalog-scroll {
+  flex: 1;
+  background: #fff;
+}
