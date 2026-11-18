@@ -84,6 +84,7 @@ function PostHeader({
   const orange = meta(item, "orangeName") === "true";
   const crown = meta(item, "crown") === "true";
   const withSuper = meta(item, "superTopic") !== "0";
+  const plainBlue = meta(item, "plainBlue") === "true";
   const date = weiboDate(item.time);
   const source = meta(item, "source");
   return (
@@ -99,10 +100,14 @@ function PostHeader({
         <strong className={orange ? "weibo-name-orange" : undefined}>
           {item.sender}
           {gold && <NameBadges />}
-          {blue && <StudioBadges withSuper={withSuper} />}
+          {blue && !plainBlue && <StudioBadges withSuper={withSuper} />}
         </strong>
         <small className="weibo-author-sub">
-          {source ? `${date} 来自 ${source}` : date}
+          {(() => {
+            const hotTag = meta(item, "hotTag");
+            if (hotTag) return `${date} ${hotTag}`;
+            return source ? `${date} 来自 ${source}` : date;
+          })()}
         </small>
       </span>
       {!hideChevron && (
@@ -181,13 +186,152 @@ function WeiboPostCard({
   );
 }
 const ST_TABS = ["热门", "最新", "名人动态", "超友趣", "星动纪念册"];
+/** 两个应援账号：博文只出现在关注流，不进发现/超话 */
+const FAN_SENDERS = ["陳立農工作室", "陈立农NEWS合作社"];
+/** 发现页热搜词条：高迪/虞书欣相关已替换为陈立农相关（对照截图 1:1，不可交互） */
+const DISCOVER_HOT: [string, string][] = [
+  ["深圳机场一眼望去...", ""],
+  ["腾讯三季度自由现金...", "新"],
+  ["日媒对比日韩领导人...", "新"],
+  ["特朗普抵达深圳...", "新"],
+  ["韩国网友科普中国...", ""],
+  ["被AI替掉的人怎么办", "荐"],
+  ["DeepSeek饭圈化遭吐槽", ""],
+  ["陈立农录制综艺路透", ""],
+  ["陈立农11月行程公开", ""],
+  ["内娱下星二代了", ""],
+  ["陈立农晒排练花絮", "娱"],
+];
+function DiscoverPage({
+  p,
+  items,
+  setViewer,
+}: {
+  p: Props;
+  items: Item[];
+  setViewer: (v: ViewerState) => void;
+}) {
+  const hotItems = items.filter((i) => meta(i, "discoverOnly") === "true");
+  return (
+    <div className="weibo-discover">
+      <div className="weibo-ds-search">
+        <span className="weibo-ds-search-txt">
+          猜你想搜：两岸民歌经典...
+        </span>
+        <Camera size={19} className="weibo-ds-cam" />
+        <span className="weibo-ds-btn">搜索</span>
+      </div>
+      <div className="weibo-ds-hot">
+        <div className="weibo-ds-hot-head">
+          <span className="weibo-ds-hot-logo">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle
+                cx="10.5"
+                cy="10.5"
+                r="6.2"
+                fill="none"
+                stroke="url(#dsHotG)"
+                strokeWidth="2.6"
+              />
+              <path
+                d="M15.4 15.4 L21 21"
+                stroke="url(#dsHotG)"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+              />
+              <path
+                d="M11.5 6.2 L8.6 11 h2.6 l-1.8 4.6 4.6 -5.6 h-2.8 Z"
+                fill="#ffb01f"
+              />
+              <defs>
+                <linearGradient id="dsHotG" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#ff4f6d" />
+                  <stop offset="1" stopColor="#ff7d1f" />
+                </linearGradient>
+              </defs>
+            </svg>
+            微博热搜
+          </span>
+          <span className="weibo-ds-ai">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="#ff7d1f" />
+              <circle cx="9" cy="10.4" r="1.5" fill="#fff" />
+              <circle cx="15" cy="10.4" r="1.5" fill="#fff" />
+              <path
+                d="M8.6 14.6 Q12 17.6 15.4 14.6"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
+            问智搜 ›
+          </span>
+        </div>
+        <div className="weibo-ds-hot-grid">
+          {DISCOVER_HOT.map(([t, badge], i) => (
+            <span className="weibo-ds-hot-item" key={i}>
+              <span className="weibo-ds-hot-txt">{t}</span>
+              {badge && (
+                <i className={"weibo-ds-hot-badge b-" + badge}>{badge}</i>
+              )}
+            </span>
+          ))}
+          <span className="weibo-ds-hot-item weibo-ds-hot-more">
+            更多热搜 ›
+          </span>
+        </div>
+      </div>
+      <div className="weibo-ds-banner">
+        <span className="weibo-ds-ad-tag">广告</span>
+        <div className="weibo-ds-ad-stage" aria-hidden="true">
+          <i /><i /><i /><i /><i /><i /><i /><i />
+        </div>
+        <div className="weibo-ds-ad-right">
+          <p className="weibo-ds-ad-year">2026 微博竞燃之夜</p>
+          <p className="weibo-ds-ad-title">竞燃盛典倒计时1天</p>
+          <p className="weibo-ds-ad-sub">✦ 立即预约直播 共赴荣誉之约 ✦</p>
+          <span className="weibo-ds-ad-btn">立即预约&gt;&gt;</span>
+        </div>
+        <span className="weibo-ds-dots">
+          <i className="on" />
+          <i />
+          <i />
+        </span>
+      </div>
+      <div className="weibo-ds-tabs">
+        <span className="on">热点</span>
+        <span>封面</span>
+        <span>星品</span>
+        <span className="weibo-ds-vtab">
+          <i>V</i>发布
+        </span>
+        <span>热转</span>
+        <svg className="weibo-ds-menu" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M4 7h16M4 12h16M4 17h16"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+      {hotItems.map((i) => (
+        <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
+      ))}
+      {!hotItems.length && <Empty items={hotItems} />}
+    </div>
+  );
+}
 function SuperTopicPage({
   p,
   items,
+  pinnedBase,
   onClose,
 }: {
   p: Props;
   items: Item[];
+  pinnedBase: Item;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState("热门");
@@ -204,7 +348,7 @@ function SuperTopicPage({
   const cover = "images/st-cover.jpg";
   // 置顶博文：点击可查看详情（正文待补充）
   const pinnedItem: Item = {
-    ...items[0],
+    ...pinnedBase,
     id: "st-pinned",
     title: "❤️#陈立农#",
     body: "❤️#陈立农#",
@@ -212,7 +356,7 @@ function SuperTopicPage({
     comments: [],
     mediaList: [],
     media: "",
-    meta: { ...items[0].meta, source: "" },
+    meta: { ...pinnedBase.meta, source: "" },
   };
   return (
     <>
@@ -377,8 +521,7 @@ function SuperTopicPage({
   );
 }
 export function WeiboSkin(p: Props) {
-  const { tab, setTab, q, setQ, items } = useContent(p, "关注");
-  const [feed, setFeed] = useState("全部");
+  const { tab, setTab, q, setQ, items } = useContent(p, "关注");  const [feed, setFeed] = useState("全部");
   const [viewer, setViewer] = useState<{ item: Item; index: number } | null>(
     null,
   );
@@ -403,8 +546,13 @@ export function WeiboSkin(p: Props) {
   const years = [...new Set(ownerItems.map((i) => i.time.slice(0, 4)))]
     .sort()
     .reverse();
-  // 关注/发现：只显示他人的博文（本人动态只在「我」页出现）
-  const base = feed === "全部" ? otherItems : otherItems.filter((i) => i.folder === feed);
+  // 超话页：不展示工作室/NEWS合作社/本人的博文
+  const stItems = items.filter(
+    (i) => i.sender !== p.owner && !FAN_SENDERS.includes(i.sender),
+  );
+  // 关注：只显示他人的博文（本人动态只在「我」页出现，发现页专属博文不进关注）
+  const fanBase = otherItems.filter((i) => meta(i, "discoverOnly") !== "true");
+  const base = feed === "全部" ? fanBase : fanBase.filter((i) => i.folder === feed);
   const matched = todayMode
     ? todayPosts
     : year === "全部"
@@ -423,7 +571,8 @@ export function WeiboSkin(p: Props) {
       {stOpen ? (
         <SuperTopicPage
           p={p}
-          items={items}
+          items={stItems}
+          pinnedBase={items[0]}
           onClose={() => setStOpen(false)}
         />
       ) : (
@@ -442,8 +591,7 @@ export function WeiboSkin(p: Props) {
           </div>
           <div className="catalog-scroll">
             {tab === "我" ? (
-              <div className="weibo-profile">
-                {meta(items[0], "profileCover") && (
+              <div className="weibo-profile">                {meta(items[0], "profileCover") && (
                   <div
                     className="weibo-profile-cover"
                     style={{
@@ -533,6 +681,8 @@ export function WeiboSkin(p: Props) {
                   </span>
                 </div>
               </div>
+            ) : tab === "发现" ? (
+              <DiscoverPage p={p} items={items} setViewer={setViewer} />
             ) : (
               <>
                 <SearchBox value={q} set={setQ} />
@@ -629,10 +779,11 @@ export function WeiboSkin(p: Props) {
             </div>
           </>
         )}
-        {(tab === "我" ? ownerList : list).map((i) => (
-          <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
-        ))}
-        <Empty items={tab === "我" ? ownerList : list} />
+        {tab !== "发现" &&
+          (tab === "我" ? ownerList : list).map((i) => (
+            <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
+          ))}
+        {tab !== "发现" && <Empty items={tab === "我" ? ownerList : list} />}
       </div>
           </>
         )}

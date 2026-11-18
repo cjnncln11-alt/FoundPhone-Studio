@@ -617,7 +617,8 @@ export function SocialDetail(p: {
               {item.sender || "用户"}
               {item.sender === p.owner && <NameBadges />}
               {item.sender !== p.owner &&
-                meta(item, "badge") === "blue" && (
+                meta(item, "badge") === "blue" &&
+                meta(item, "plainBlue") !== "true" && (
                   <StudioBadges
                     withSuper={meta(item, "superTopic") !== "0"}
                   />

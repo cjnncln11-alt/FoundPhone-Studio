@@ -791,3 +791,265 @@
   transform: rotate(-14deg);
   pointer-events: none;
 }
+
+/* ── 发现页（对照真实截图 1:1） ── */
+.weibo-discover {
+  padding-bottom: 8px;
+}
+/* 顶部搜索条：橙色圆角描边 + 搜索按钮 */
+.weibo-ds-search {
+  display: flex;
+  align-items: center;
+  margin: 10px 12px 6px;
+  padding: 3px 4px 3px 14px;
+  border: 2px solid #f80;
+  border-radius: 22px;
+  background: #fff;
+}
+.weibo-ds-search-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  color: #333;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.weibo-ds-cam {
+  color: #555;
+  margin: 0 8px;
+  flex: none;
+}
+.weibo-ds-btn {
+  flex: none;
+  background: linear-gradient(90deg, #ff9a0f, #ff7d00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 7px 20px;
+  border-radius: 18px;
+}
+/* 微博热搜卡片 */
+.weibo-ds-hot {
+  margin: 8px 12px 0;
+  background: linear-gradient(
+    115deg,
+    #fff8ef 0%,
+    #fffdf9 26%,
+    #fff 42%,
+    #fff 100%
+  );
+  border-radius: 14px 14px 0 0;
+  padding: 12px 14px 6px;
+  position: relative;
+}
+.weibo-ds-hot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.weibo-ds-hot-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #333;
+}
+.weibo-ds-hot-logo svg {
+  width: 21px;
+  height: 21px;
+}
+.weibo-ds-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #949494;
+}
+.weibo-ds-ai svg {
+  width: 18px;
+  height: 18px;
+}
+.weibo-ds-hot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 15px;
+  column-gap: 10px;
+  padding-bottom: 12px;
+}
+.weibo-ds-hot-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 15px;
+  color: #333;
+}
+.weibo-ds-hot-txt {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.weibo-ds-hot-badge {
+  flex: none;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+.weibo-ds-hot-badge.b-新 {
+  background: linear-gradient(180deg, #ff6c8b, #ff3e5f);
+}
+.weibo-ds-hot-badge.b-荐,
+.weibo-ds-hot-badge.b-娱 {
+  background: linear-gradient(180deg, #ffb01f, #ff8b08);
+}
+.weibo-ds-hot-more {
+  color: #ff7d00;
+  font-weight: 600;
+}
+/* 竞燃之夜广告 banner */
+.weibo-ds-banner {
+  position: relative;
+  margin: 0 12px 6px;
+  border-radius: 14px;
+  overflow: hidden;
+  height: 118px;
+  background:
+    radial-gradient(120px 90px at 18% 30%, rgba(90, 40, 30, 0.85), transparent 70%),
+    radial-gradient(90px 80px at 30% 80%, rgba(40, 60, 110, 0.6), transparent 70%),
+    radial-gradient(80px 70px at 8% 90%, rgba(140, 30, 40, 0.55), transparent 70%),
+    radial-gradient(140px 60px at 55% 20%, rgba(60, 45, 25, 0.8), transparent 70%),
+    linear-gradient(100deg, #17090b 0%, #241016 45%, #38221a 72%, #1c0d10 100%);
+}
+.weibo-ds-ad-stage {
+  position: absolute;
+  inset: 0;
+}
+.weibo-ds-ad-stage i {
+  position: absolute;
+  border-radius: 50% 50% 12px 12px;
+  filter: blur(14px);
+  opacity: 0.75;
+}
+.weibo-ds-ad-stage i:nth-child(1) { left: 4%; top: 12%; width: 34px; height: 46px; background: #4a5f8f; }
+.weibo-ds-ad-stage i:nth-child(2) { left: 17%; top: 8%; width: 30px; height: 44px; background: #20242c; }
+.weibo-ds-ad-stage i:nth-child(3) { left: 29%; top: 16%; width: 32px; height: 44px; background: #2b3140; }
+.weibo-ds-ad-stage i:nth-child(4) { left: 40%; top: 6%; width: 30px; height: 46px; background: #56627a; }
+.weibo-ds-ad-stage i:nth-child(5) { left: 7%; top: 52%; width: 34px; height: 46px; background: #b23a2e; }
+.weibo-ds-ad-stage i:nth-child(6) { left: 21%; top: 56%; width: 32px; height: 46px; background: #1b1d24; }
+.weibo-ds-ad-stage i:nth-child(7) { left: 35%; top: 52%; width: 32px; height: 48px; background: #23272f; }
+.weibo-ds-ad-stage i:nth-child(8) { left: 47%; top: 56%; width: 30px; height: 44px; background: #3a4d7d; }
+.weibo-ds-ad-tag {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 11px;
+  color: #ddd;
+  z-index: 2;
+}
+.weibo-ds-ad-right {
+  position: absolute;
+  right: 12px;
+  top: 14px;
+  width: 56%;
+  z-index: 2;
+  text-align: center;
+}
+.weibo-ds-ad-year {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #f3d08c;
+  letter-spacing: 1px;
+}
+.weibo-ds-ad-title {
+  margin: 3px 0 4px;
+  font-size: 19px;
+  font-weight: 800;
+  font-style: italic;
+  background: linear-gradient(180deg, #ffe9ad, #f7c53c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.weibo-ds-ad-sub {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: #f3e2c2;
+}
+.weibo-ds-ad-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, #ffc24d, #f0a12d);
+  color: #5a2d0a;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 14px;
+}
+.weibo-ds-dots {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: inline-flex;
+  gap: 5px;
+  z-index: 2;
+}
+.weibo-ds-dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+}
+.weibo-ds-dots i.on {
+  background: #fff;
+}
+/* 频道 tab 行 */
+.weibo-ds-tabs {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 14px 6px;
+  background: #fff;
+}
+.weibo-ds-tabs span {
+  position: relative;
+  font-size: 17px;
+  color: #666;
+}
+.weibo-ds-tabs span.on {
+  font-weight: 800;
+  color: #111;
+}
+.weibo-ds-tabs span.on::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -7px;
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: #ff7d00;
+}
+.weibo-ds-vtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.weibo-ds-vtab i {
+  font-style: italic;
+  font-weight: 900;
+  color: #111;
+}
+.weibo-ds-menu {
+  margin-left: auto;
+  width: 21px;
+  height: 21px;
+  color: #333;
+}
