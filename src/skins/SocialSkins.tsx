@@ -93,6 +93,12 @@ function PostHeader({
   const stTag = meta(item, "stTag");
   const stLevel = meta(item, "stLevel");
   const stCrown = meta(item, "stCrown") === "true";
+  const inSt =
+    stCrown ||
+    stRole !== "" ||
+    meta(item, "stPostsOnly") === "true" ||
+    meta(item, "stHotOnly") === "true";
+  const stBadges = stCrown || stRole !== "" || stLevel !== "";
   const edited = meta(item, "edited") === "true";
   const date = weiboDate(item.time);
   const source = meta(item, "source");
@@ -111,21 +117,27 @@ function PostHeader({
         <strong className={orange ? "weibo-name-orange" : undefined}>
           {item.sender}
           {gold && <NameBadges />}
-          {blue && !plainBlue && <StudioBadges withSuper={withSuper} />}
-          {(stCrown || stRole || stTag || stLevel) && (
-            <StNameBadges role={stRole} tag={stTag} level={stLevel} />
-          )}
+          {blue && !plainBlue && !stBadges && <StudioBadges withSuper={withSuper} />}
+          {stBadges && <StNameBadges role={stRole} level={stLevel} />}
         </strong>
-        <small className="weibo-author-sub">
+        <small
+          className={
+            "weibo-author-sub" + (inSt ? " weibo-author-sub-st" : "")
+          }
+        >
           {(() => {
             const hotTag = meta(item, "hotTag");
+            const dateText = meta(item, "dateText");
             const base = hotTag
               ? `${date} ${hotTag}`
-              : source
-                ? `${date} 来自 ${source}`
-                : date;
+              : inSt && dateText
+                ? dateText
+                : source
+                  ? `${date} 来自 ${source}`
+                  : date;
             return edited ? `${base} 已编辑` : base;
           })()}
+          {stTag && <span className="st-tag-pill">{stTag}</span>}
         </small>
       </span>
       {!hideChevron && (

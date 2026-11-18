@@ -162,34 +162,39 @@ export function VAvatar({
     a
   );
 }
-/** 超话作者行徽章：皇冠 + 超话等级紫钻 + 主持人 + 氛围标签（对照原帖截图） */
+/** 超话作者行徽章：铁粉皇冠(👑I) + 超话等级紫钻 + 主持人，全部与昵称同行（对照原帖截图） */
 export function StNameBadges({
   role,
-  tag,
   level,
+  crown = true,
 }: {
   role?: string;
-  tag?: string;
   level?: string;
+  crown?: boolean;
 }) {
   return (
     <span className="st-name-badges">
-      <svg className="st-crown-ico" viewBox="0 0 32 26" aria-hidden="true">
-        <path
-          d="M3 20 L1.5 7 L9 12 L16 3 L23 12 L30.5 7 L29 20 Z"
-          fill="#f7b500"
-          stroke="#d99a00"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
-        <circle cx="1.8" cy="6" r="2" fill="#ffd257" stroke="#d99a00" strokeWidth="1" />
-        <circle cx="16" cy="2.6" r="2" fill="#ffd257" stroke="#d99a00" strokeWidth="1" />
-        <circle cx="30.2" cy="6" r="2" fill="#ffd257" stroke="#d99a00" strokeWidth="1" />
-        <path
-          d="M16 9.6 L17.1 12.2 L19.9 12.4 L17.8 14.1 L18.5 16.8 L16 15.3 L13.5 16.8 L14.2 14.1 L12.1 12.4 L14.9 12.2 Z"
-          fill="#fff"
-        />
-      </svg>
+      {crown && (
+        <svg className="st-crown-ico" viewBox="0 0 34 19" aria-hidden="true">
+          <path
+            d="M3 15.5 L1.8 5.5 L8.8 10 L14.5 2.5 L20.2 10 L27 5.5 L25.8 15.5 Z"
+            fill="#f7b500"
+            stroke="#d99a00"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <circle cx="1.9" cy="4.8" r="1.9" fill="#ffd257" stroke="#d99a00" strokeWidth="1" />
+          <circle cx="14.5" cy="2.4" r="1.9" fill="#ffd257" stroke="#d99a00" strokeWidth="1" />
+          <circle cx="26.8" cy="4.8" r="1.9" fill="#ffd257" stroke="#d99a00" strokeWidth="1" />
+          <rect x="26.2" y="4.2" width="7.6" height="11.4" rx="2" fill="#fb7d2e" />
+          <path
+            d="M29.3 7.2 h2.2 M30.4 7.2 v5.4"
+            stroke="#fff"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
       {level && (
         <span className="st-level-diamond" aria-label={`超话等级${level}`}>
           <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -211,17 +216,9 @@ export function StNameBadges({
       )}
       {role && (
         <span className="st-role-pill" aria-label={role}>
-          <svg viewBox="0 0 14 14" aria-hidden="true">
-            <circle cx="7" cy="4.4" r="2.6" fill="#ff9a2e" />
-            <path
-              d="M1.8 12.4 Q1.8 7.8 7 7.8 Q12.2 7.8 12.2 12.4 Z"
-              fill="#ff9a2e"
-            />
-          </svg>
           <i>{role}</i>
         </span>
       )}
-      {tag && <span className="st-tag-pill">{tag}</span>}
     </span>
   );
 }

@@ -4899,6 +4899,14 @@
   color: #999;
   margin-top: 4px;
 }
+/* 超话内博主行次行：橙色日期（对照原帖截图），可容纳氛围标签 */
+.weibo-author-sub.weibo-author-sub-st {
+  color: #f86b4f;
+  gap: 7px;
+}
+.weibo-author-sub.weibo-author-sub-st .st-tag-pill {
+  color: #555;
+}
 .weibo-author-chevron {
   margin-left: auto;
   color: #b9b9b9;
@@ -5064,17 +5072,17 @@
   background: #fff;
 }
 
-/* 超话作者行徽章（对照原帖截图） */
+/* 超话作者行徽章（对照原帖截图：皇冠/紫钻/主持人与昵称同行） */
 .st-name-badges {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-left: 6px;
-  vertical-align: -3px;
+  gap: 4px;
+  margin-left: 5px;
+  vertical-align: -2.5px;
 }
 .st-crown-ico {
-  width: 21px;
-  height: 17px;
+  width: 26px;
+  height: 15px;
   flex: none;
 }
 .st-level-diamond {
@@ -5082,8 +5090,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 19px;
-  height: 19px;
+  width: 17px;
+  height: 17px;
   flex: none;
 }
 .st-level-diamond svg {
@@ -5094,36 +5102,31 @@
 }
 .st-level-diamond b {
   position: relative;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 800;
   color: #fff;
 }
 .st-role-pill {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-}
-.st-role-pill svg {
-  width: 14px;
-  height: 14px;
-  flex: none;
 }
 .st-role-pill i {
   font-style: normal;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(180deg, #52c264, #2fae48);
   border-radius: 4px;
-  padding: 1.5px 6px;
+  padding: 1.5px 5px;
   line-height: 1.4;
 }
 .st-tag-pill {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #444;
   background: #f2f3f5;
   border-radius: 8px;
-  padding: 2px 8px;
+  padding: 1.5px 6px;
+  flex: none;
   white-space: nowrap;
 }
 /* 创作官热门帖分隔条 */
