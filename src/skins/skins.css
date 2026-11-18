@@ -1998,12 +1998,14 @@
   color: #111;
 }
 .weibo-splash-logo svg {
-  width: 40px;
-  height: 34px;
+  width: 43px;
+  height: 36px;
 }
 .weibo-splash-logo b {
-  font-size: 25px;
-  letter-spacing: 2px;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  transform: skewX(-10deg);
 }
 .weibo-sections {
   display: flex;
