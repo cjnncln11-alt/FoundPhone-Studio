@@ -25,7 +25,7 @@ import {
   Share2,
   ThumbsUp,
 } from "lucide-react";
-import { useState, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import type { Item } from "../schema";
 import {
   Avatar,
@@ -494,7 +494,7 @@ function SuperTopicPage({
         </div>
         <div className="st-hero-chips">
           <span>明星超话</span>
-          <span>{signed ? "2.4" : "2.3"}万人</span>
+          <span>今日签到10.3万人</span>
         </div>
         <button className="st-expand">
           展开查看更多
@@ -563,8 +563,56 @@ function SuperTopicPage({
     </>
   );
 }
+/** 微博启动页：打开 App 先显示 1 秒（参照真实微博开屏） */
+function WeiboSplash() {
+  return (
+    <div className="weibo-splash" aria-hidden="true">
+      <div className="weibo-splash-slogan">
+        <span>随时随地</span>
+        <span>发现新鲜事！</span>
+      </div>
+      <div className="weibo-splash-logo">
+        <svg viewBox="0 0 48 40" aria-hidden="true">
+          <ellipse
+            cx="21"
+            cy="26"
+            rx="14.5"
+            ry="11"
+            fill="#e6162d"
+          />
+          <ellipse cx="21" cy="26" rx="9" ry="6.6" fill="#fff" />
+          <circle cx="24" cy="26.5" r="3.6" fill="#3c3c3c" />
+          <circle cx="25.3" cy="25.3" r="1.1" fill="#fff" />
+          <path
+            d="M33.5 12.2 Q39 6.8 44.5 8.6"
+            fill="none"
+            stroke="#f86400"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M31.8 5.4 Q39.5 -0.6 46.6 3.4"
+            fill="none"
+            stroke="#f86400"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+          />
+        </svg>
+        <b>微博</b>
+      </div>
+    </div>
+  );
+}
 export function WeiboSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "关注");  const [feed, setFeed] = useState("全部");
+  // 启动页：打开微博先显示 1 秒「随时随地 发现新鲜事！」
+  const [splash, setSplash] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setSplash(false), 1000);
+    return () => clearTimeout(t);
+  }, []);
+  // 切换关注/发现/我时列表回到最上方
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [viewer, setViewer] = useState<{ item: Item; index: number } | null>(
     null,
   );
@@ -622,6 +670,7 @@ export function WeiboSkin(p: Props) {
   const ownerList = asc ? [...ownerMatched].reverse() : ownerMatched;
   return (
     <div className="catalog-skin weibo-ui">
+      {splash && <WeiboSplash />}
       {stOpen ? (
         <SuperTopicPage
           p={p}
@@ -637,13 +686,16 @@ export function WeiboSkin(p: Props) {
               <button
                 key={t}
                 className={tab === t ? "selected" : ""}
-                onClick={() => setTab(t)}
+                onClick={() => {
+                  setTab(t);
+                  scrollRef.current?.scrollTo({ top: 0 });
+                }}
               >
                 {t}
               </button>
             ))}
           </div>
-          <div className="catalog-scroll">
+          <div className="catalog-scroll" ref={scrollRef}>
             {tab === "我" ? (
               // 「我」页资料卡元数据固定取本人博文（列表排序后 items[0] 不一定是本人）
               (() => {
@@ -736,10 +788,7 @@ export function WeiboSkin(p: Props) {
                       </div>
                     </div>
                   </div>
-                  <span className="weibo-profile-count">
-                    {items.length} 条微博
-                  </span>
-                    </div>
+                </div>
                   </div>
                 );
               })()
