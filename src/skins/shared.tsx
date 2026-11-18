@@ -114,12 +114,23 @@ export function VAvatar({
   name,
   src = "",
   gold = false,
+  blue = false,
 }: {
   name: string;
   src?: string;
   gold?: boolean;
+  blue?: boolean;
 }) {
   const a = <Avatar name={name} src={src} />;
+  if (blue)
+    return (
+      <span className="avatar-v-wrap">
+        {a}
+        <i className="v-badge-blue" aria-label="蓝V认证">
+          V
+        </i>
+      </span>
+    );
   return gold ? (
     <span className="avatar-v-wrap">
       {a}

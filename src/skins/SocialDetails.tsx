@@ -587,6 +587,9 @@ export function SocialDetail(p: {
             name={item.sender || "用户"}
             src={item.avatar}
             gold={item.sender === p.owner}
+            blue={
+              item.sender !== p.owner && meta(item, "badge") === "blue"
+            }
           />
           <div>
             <strong>

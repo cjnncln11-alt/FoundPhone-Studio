@@ -4788,6 +4788,28 @@
   justify-content: center;
   box-shadow: 0 1px 3px #0004;
 }
+/* 蓝 V 认证标（工作室账号）：1:1 还原真实微博蓝标（白描边圆 + 蓝底白 V） */
+.v-badge-blue {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 30%;
+  height: 30%;
+  min-width: 13px;
+  min-height: 13px;
+  background: rgb(25, 157, 231);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 7px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px #0003;
+}
 .name-badges {
   display: inline-flex;
   align-items: center;

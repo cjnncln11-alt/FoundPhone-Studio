@@ -70,11 +70,12 @@ function Actions({ p, item }: { p: Props; item: Item }) {
 }
 function PostHeader({ item, p }: { item: Item; p: Props }) {
   const gold = item.sender === p.owner;
+  const blue = !gold && meta(item, "badge") === "blue";
   const date = weiboDate(item.time);
   const source = meta(item, "source");
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
-      <VAvatar name={item.sender} src={item.avatar} gold={gold} />
+      <VAvatar name={item.sender} src={item.avatar} gold={gold} blue={blue} />
       <span>
         <strong>
           {item.sender}
@@ -355,24 +356,34 @@ export function WeiboSkin(p: Props) {
   const [todayMode, setTodayMode] = useState(false);
   // 超话页
   const [stOpen, setStOpen] = useState(false);
+  const ownerItems = items.filter((i) => i.sender === p.owner);
+  const otherItems = items.filter((i) => i.sender !== p.owner);
   const now = new Date();
   const todayMd = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(
     now.getDate(),
   ).padStart(2, "0")}`;
   const curYear = String(now.getFullYear());
-  const todayPosts = items.filter(
+  const todayPosts = ownerItems.filter(
     (i) => i.time.slice(5, 10) === todayMd && i.time.slice(0, 4) !== curYear,
   );
-  const years = [...new Set(items.map((i) => i.time.slice(0, 4)))]
+  const years = [...new Set(ownerItems.map((i) => i.time.slice(0, 4)))]
     .sort()
     .reverse();
-  const base = feed === "全部" ? items : items.filter((i) => i.folder === feed);
+  // 关注/发现：只显示他人的博文（本人动态只在「我」页出现）
+  const base = feed === "全部" ? otherItems : otherItems.filter((i) => i.folder === feed);
   const matched = todayMode
     ? todayPosts
     : year === "全部"
       ? base
       : base.filter((i) => i.time.startsWith(year));
   const list = asc ? [...matched].reverse() : matched;
+  // 「我」页的列表与计数只统计本人博文
+  const ownerMatched = todayMode
+    ? todayPosts
+    : year === "全部"
+      ? ownerItems
+      : ownerItems.filter((i) => i.time.startsWith(year));
+  const ownerList = asc ? [...ownerMatched].reverse() : ownerMatched;
   return (
     <div className="catalog-skin weibo-ui">
       {stOpen ? (
@@ -506,7 +517,9 @@ export function WeiboSkin(p: Props) {
           <div className="weibo-filter-sticky">
             <div className="weibo-count-bar">
               <span>
-                {todayMode ? `那年今天(${list.length})` : `全部微博(${list.length})`}
+                {todayMode
+                  ? `那年今天(${ownerList.length})`
+                  : `全部微博(${ownerList.length})`}
               </span>
               <button
                 className={filterOpen ? "selected" : ""}
@@ -582,10 +595,10 @@ export function WeiboSkin(p: Props) {
             </div>
           </>
         )}
-        {list.map((i) => (
+        {(tab === "我" ? ownerList : list).map((i) => (
           <WeiboPostCard key={i.id} p={p} item={i} setViewer={setViewer} />
         ))}
-        <Empty items={list} />
+        <Empty items={tab === "我" ? ownerList : list} />
       </div>
           </>
         )}
