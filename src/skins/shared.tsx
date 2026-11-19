@@ -527,7 +527,13 @@ export function PausingVideo({
         ref.current.addEventListener("seeking", onPlay);
         if (autoStart) {
           inst.startLoad();
-          void ref.current.play().catch(() => {});
+          const el = ref.current;
+          // 数据就绪仍未播（部分浏览器拦截首次 play）时自动补播
+          const tryPlay = () => {
+            if (el.paused) void el.play().catch(() => {});
+          };
+          el.addEventListener("canplay", tryPlay);
+          void el.play().catch(() => {});
         }
         // 挂载前用户已点过播放（此时没人监听 play 事件）：补一次起流
         if (!ref.current.paused && ref.current.readyState < 3) onPlay();

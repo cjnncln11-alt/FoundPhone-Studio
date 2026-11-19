@@ -394,6 +394,7 @@ function VerticalVideo({
           autoPlay
           autoStart
           playsInline
+          controls={false}
           preload="metadata"
           poster={vCover || undefined}
         />

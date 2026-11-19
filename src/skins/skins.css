@@ -3903,10 +3903,25 @@
   height: 100%;
   object-fit: cover;
 }
-/* 抖音竖屏流：视频完整显示（不裁切）+ 黑底衬边 */
-.douyin-ui .vertical-video > video {
+/* 抖音竖屏流：视频完整显示（contain 居中，不裁切）+ 黑底衬边
+   注意 PausingVideo 会包一层 span.fs-stage，必须穿透它设置尺寸 */
+.douyin-ui .vertical-video .fs-stage {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.douyin-ui .vertical-video .fs-stage video {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   background: #000;
+}
+/* 抖音 feed 不显示原生控件与全屏小按钮（对照真实抖音） */
+.douyin-ui .vertical-video .fs-stage video::-webkit-media-controls {
+  display: none !important;
+}
+.douyin-ui .vertical-video .fs-btn {
+  display: none;
 }
 .vertical-video > .catalog-art {
   background: #3b4240;
