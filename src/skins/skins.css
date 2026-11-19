@@ -4129,6 +4129,168 @@
   background: #101010;
   border-color: #303030;
 }
+/* ===== 抖音「我」页（个人主页） ===== */
+.dy-me {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #101010;
+  color: #fff;
+  text-align: left;
+  scrollbar-width: none;
+}
+.dy-me::-webkit-scrollbar {
+  display: none;
+}
+.dy-me-head {
+  padding: 18px 16px 8px;
+  background: linear-gradient(180deg, #2a2a2e 0%, #101010 100%);
+}
+.dy-me-id {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.dy-me-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 25%);
+  object-fit: cover;
+  background: #000;
+}
+.dy-me-names h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+.dy-me-names small {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgb(255 255 255 / 55%);
+}
+.dy-me-stats {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-top: 16px;
+}
+.dy-me-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.dy-me-stats b {
+  font-size: 16px;
+  font-weight: 700;
+}
+.dy-me-stats span {
+  font-size: 11px;
+  color: rgb(255 255 255 / 55%);
+}
+.dy-me-edit {
+  margin-left: auto;
+  padding: 7px 16px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  background: rgb(255 255 255 / 8%);
+}
+.dy-me-bio {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 85%);
+}
+.dy-me-tools {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-bottom: 4px;
+}
+.dy-me-tools > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: rgb(255 255 255 / 85%);
+}
+.dy-me-tools span {
+  font-size: 10px;
+  color: rgb(255 255 255 / 55%);
+}
+.dy-me-tabs {
+  display: flex;
+  border-bottom: 1px solid #262626;
+}
+.dy-me-tabs > button {
+  flex: 1;
+  padding: 12px 0;
+  color: rgb(255 255 255 / 55%);
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+}
+.dy-me-tabs > button.selected {
+  color: #fff;
+  font-weight: 600;
+  border-bottom-color: #fff;
+}
+.dy-me-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+}
+.dy-me-cell {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #1c1c1e;
+  padding: 0;
+}
+.dy-me-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dy-me-pin {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #fdde40;
+  color: #111;
+  font-size: 10px;
+  font-weight: 600;
+}
+.dy-me-plays {
+  position: absolute;
+  left: 7px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #fff;
+  font-size: 11px;
+  text-shadow: 0 1px 4px #000;
+}
+.dy-me-player {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #000;
+}
+.dy-me-back {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  z-index: 25;
+  color: #fff;
+  filter: drop-shadow(0 1px 4px #000);
+}
 /* 抖音评论区面板：上半视频 + 下半白色抽屉（对照真实抖音） */
 /* 抖音评论区：透明浮层 + 白色抽屉盖在下方，信息流视频在原位继续播放 */
 .dy-comments {

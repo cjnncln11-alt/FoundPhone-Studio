@@ -4,23 +4,29 @@ import {
   AtSign,
   Bookmark,
   Check,
+  ChevronLeft,
+  Clock,
   Compass,
   Heart,
   Home,
   Image as ImageIcon,
+  LayoutGrid,
   Maximize2,
   MessageCircle,
+  MonitorPlay,
   Music,
   Play,
   Plus,
   Search,
   Share2,
+  ShoppingBag,
   SkipForward,
   Smile,
   ThumbsDown,
   User,
   Users,
   Video,
+  Wallet,
   X,
 } from "lucide-react";
 import {
@@ -89,10 +95,13 @@ function PhotoBgm({
 }
 
 /** 信息流强制一次手势只翻一个作品（抖音式翻页：触摸 + 滚轮） */
-function useFeedPager(ref: RefObject<HTMLDivElement | null>) {
+function useFeedPager(
+  ref: RefObject<HTMLDivElement | null>,
+  active: boolean,
+) {
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !active) return;
     let startY = 0;
     let startX = 0;
     let startTop = 0;
@@ -168,7 +177,106 @@ function useFeedPager(ref: RefObject<HTMLDivElement | null>) {
       el.removeEventListener("wheel", onWheel);
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [ref]);
+  }, [ref, active]);
+}
+
+/** 互动数格式化：过万显示 x.x万 */
+const fmtCount = (n: number) =>
+  n >= 10000 ? `${(n / 10000).toFixed(1)}万` : `${n}`;
+
+/** 抖音「我」页：资料卡 + 作品九宫格（板块对照真实抖音个人主页） */
+function DouyinMe({
+  items,
+  onOpen,
+}: {
+  items: Item[];
+  onOpen: (item: Item) => void;
+}) {
+  const [sub, setSub] = useState("作品");
+  const pinned = items.filter((i) => meta(i, "pinned") === "1");
+  const rest = items.filter((i) => meta(i, "pinned") !== "1");
+  const shown = sub === "作品" ? [...pinned, ...rest] : [];
+  const tools = [
+    { icon: <MonitorPlay size={22} />, label: "主播中心" },
+    { icon: <ShoppingBag size={22} />, label: "我的订单" },
+    { icon: <Clock size={22} />, label: "观看历史" },
+    { icon: <Wallet size={22} />, label: "我的钱包" },
+    { icon: <LayoutGrid size={22} />, label: "全部功能" },
+  ];
+  return (
+    <div className="dy-me">
+      <div className="dy-me-head">
+        <div className="dy-me-id">
+          <img
+            className="dy-me-avatar"
+            src="/images/douyin/avatar-cln.jpg"
+            alt="陈立农"
+          />
+          <div className="dy-me-names">
+            <h2>陈立农</h2>
+            <small>抖音号：123822946</small>
+          </div>
+        </div>
+        <div className="dy-me-stats">
+          <div>
+            <b>8826.6万</b>
+            <span>获赞</span>
+          </div>
+          <div>
+            <b>5</b>
+            <span>关注</span>
+          </div>
+          <div>
+            <b>469.3万</b>
+            <span>粉丝</span>
+          </div>
+          <button className="dy-me-edit" type="button">
+            编辑主页
+          </button>
+        </div>
+        <p className="dy-me-bio">传奇星娱乐艺人 歌手演员</p>
+        <div className="dy-me-tools">
+          {tools.map((t) => (
+            <div key={t.label}>
+              {t.icon}
+              <span>{t.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="dy-me-tabs">
+        {["作品", "日常", "收藏", "喜欢"].map((t) => (
+          <button
+            key={t}
+            className={sub === t ? "selected" : ""}
+            onClick={() => setSub(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      <div className="dy-me-grid">
+        {shown.map((i) => (
+          <button
+            key={i.id}
+            className="dy-me-cell"
+            onClick={() => onOpen(i)}
+            aria-label={`播放${i.body || i.title}`}
+          >
+            <img src={meta(i, "videoCover")} alt="" loading="lazy" />
+            {meta(i, "pinned") === "1" && (
+              <span className="dy-me-pin">置顶</span>
+            )}
+            <span className="dy-me-plays">
+              <Play size={11} />
+              {fmtCount(Number(meta(i, "likes")))}
+            </span>
+          </button>
+        ))}
+        {sub !== "作品" && <Empty items={[]} />}
+      </div>
+    </div>
+  );
 }
 
 function TrackPlayer({  item,
@@ -673,34 +781,57 @@ function VerticalVideo({
 export function DouyinSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "推荐");
   const [cmItem, setCmItem] = useState<Item | null>(null);
+  const [openItem, setOpenItem] = useState<Item | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
-  useFeedPager(feedRef);
-  const list = tab === "推荐" ? items : items.filter((i) => i.folder === tab);
+  useFeedPager(feedRef, tab !== "我");
+  // 「我的作品」只在个人主页展示，不进推荐/关注信息流
+  const list = (
+    tab === "推荐" ? items : items.filter((i) => i.folder === tab)
+  ).filter((i) => i.folder !== "我的作品");
+  const myItems = items.filter((i) => i.folder === "我的作品");
   return (
     <div className="catalog-skin douyin-ui">
       <Header p={p} />
-      <div className="douyin-top">
-        {["同城", "关注", "推荐"].map((t) => (
+      {tab !== "我" && (
+        <div className="douyin-top">
+          {["同城", "关注", "推荐"].map((t) => (
+            <button
+              className={tab === t ? "selected" : ""}
+              key={t}
+              onClick={() => setTab(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+      {tab === "我" ? (
+        <DouyinMe items={myItems} onOpen={setOpenItem} />
+      ) : (
+        <div className="vertical-feed" ref={feedRef}>
+          {list.map((i) => (
+            <VerticalVideo
+              key={i.id}
+              p={p}
+              item={i}
+              onComments={setCmItem}
+            />
+          ))}
+          <Empty items={list} />
+        </div>
+      )}
+      {openItem && (
+        <div className="dy-me-player">
           <button
-            className={tab === t ? "selected" : ""}
-            key={t}
-            onClick={() => setTab(t)}
+            className="dy-me-back"
+            aria-label="返回主页"
+            onClick={() => setOpenItem(null)}
           >
-            {t}
+            <ChevronLeft size={26} />
           </button>
-        ))}
-      </div>
-      <div className="vertical-feed" ref={feedRef}>
-        {list.map((i) => (
-          <VerticalVideo
-            key={i.id}
-            p={p}
-            item={i}
-            onComments={setCmItem}
-          />
-        ))}
-        <Empty items={list} />
-      </div>
+          <VerticalVideo p={p} item={openItem} onComments={setCmItem} />
+        </div>
+      )}
       {cmItem && (
         <DouyinComments item={cmItem} onClose={() => setCmItem(null)} />
       )}
@@ -808,7 +939,7 @@ function DouyinComments({
 export function TikTokSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "For You");
   const feedRef = useRef<HTMLDivElement | null>(null);
-  useFeedPager(feedRef);
+  useFeedPager(feedRef, true);
   const list =
     tab === "For You"
       ? items
