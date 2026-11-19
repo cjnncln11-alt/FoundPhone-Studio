@@ -390,7 +390,6 @@ function VerticalVideo({
         <PausingVideo
           src={vSrc}
           loop
-          muted
           autoPlay
           autoStart
           playsInline

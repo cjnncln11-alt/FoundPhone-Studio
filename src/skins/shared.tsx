@@ -414,6 +414,15 @@ export const clockText = (t: number) => {
   return `${Math.floor(v / 60)}:${String(Math.floor(v % 60)).padStart(2, "0")}`;
 };
 
+/** 起播兜底：自动播放（带声）被浏览器拦截时退回静音起播 */
+function safePlay(el: HTMLVideoElement): Promise<void> {
+  return el.play().catch(() => {
+    if (el.muted) return;
+    el.muted = true;
+    return el.play().catch(() => {});
+  });
+}
+
 export function PausingVideo({
   className = "",
   src,
@@ -541,10 +550,10 @@ export function PausingVideo({
           const el = ref.current;
           // 数据就绪仍未播（部分浏览器拦截首次 play）时自动补播
           const tryPlay = () => {
-            if (el.paused) void el.play().catch(() => {});
+            if (el.paused) void safePlay(el);
           };
           el.addEventListener("canplay", tryPlay);
-          void el.play().catch(() => {});
+          void safePlay(el);
         }
         // 挂载前用户已点过播放（此时没人监听 play 事件）：补一次起流
         if (!ref.current.paused && ref.current.readyState < 3) onPlay();
@@ -591,8 +600,11 @@ export function PausingVideo({
           tapToggleTimer.current = null;
           const v = ref.current;
           if (!v) return;
-          if (v.paused) void v.play().catch(() => {});
-          else v.pause();
+          if (v.paused) {
+            // 用户手势起播：恢复声音（此前若因自动播放受限退化为静音）
+            v.muted = false;
+            void safePlay(v);
+          } else v.pause();
         }, 280);
       }
       return;
