@@ -190,12 +190,10 @@ function DouyinMe({
   onOpen,
 }: {
   items: Item[];
-  onOpen: (item: Item) => void;
+  onOpen: (index: number) => void;
 }) {
   const [sub, setSub] = useState("作品");
-  const pinned = items.filter((i) => meta(i, "pinned") === "1");
-  const rest = items.filter((i) => meta(i, "pinned") !== "1");
-  const shown = sub === "作品" ? [...pinned, ...rest] : [];
+  const shown = sub === "作品" ? items : [];
   const tools = [
     { icon: <MonitorPlay size={22} />, label: "主播中心" },
     { icon: <ShoppingBag size={22} />, label: "我的订单" },
@@ -256,11 +254,11 @@ function DouyinMe({
         ))}
       </div>
       <div className="dy-me-grid">
-        {shown.map((i) => (
+        {shown.map((i, n) => (
           <button
             key={i.id}
             className="dy-me-cell"
-            onClick={() => onOpen(i)}
+            onClick={() => onOpen(n)}
             aria-label={`播放${i.body || i.title}`}
           >
             <img src={meta(i, "videoCover")} alt="" loading="lazy" />
@@ -781,14 +779,33 @@ function VerticalVideo({
 export function DouyinSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "推荐");
   const [cmItem, setCmItem] = useState<Item | null>(null);
-  const [openItem, setOpenItem] = useState<Item | null>(null);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [curIdx, setCurIdx] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<HTMLDivElement | null>(null);
   useFeedPager(feedRef, tab !== "我");
+  useFeedPager(playerRef, openIdx !== null);
   // 「我的作品」只在个人主页展示，不进推荐/关注信息流
   const list = (
     tab === "推荐" ? items : items.filter((i) => i.folder === tab)
   ).filter((i) => i.folder !== "我的作品");
   const myItems = items.filter((i) => i.folder === "我的作品");
+  // 个人主页顺序：置顶在前
+  const ordered = [
+    ...myItems.filter((i) => meta(i, "pinned") === "1"),
+    ...myItems.filter((i) => meta(i, "pinned") !== "1"),
+  ];
+  // 点开作品后定位到对应位置，之后可上下滑连续刷
+  useEffect(() => {
+    if (openIdx === null) return;
+    const el = playerRef.current;
+    if (!el) return;
+    const t = window.setTimeout(() => {
+      el.scrollTop = openIdx * el.clientHeight;
+      setCurIdx(openIdx);
+    }, 30);
+    return () => window.clearTimeout(t);
+  }, [openIdx]);
   return (
     <div className="catalog-skin douyin-ui">
       <Header p={p} />
@@ -806,7 +823,7 @@ export function DouyinSkin(p: Props) {
         </div>
       )}
       {tab === "我" ? (
-        <DouyinMe items={myItems} onOpen={setOpenItem} />
+        <DouyinMe items={ordered} onOpen={setOpenIdx} />
       ) : (
         <div className="vertical-feed" ref={feedRef}>
           {list.map((i) => (
@@ -820,16 +837,31 @@ export function DouyinSkin(p: Props) {
           <Empty items={list} />
         </div>
       )}
-      {openItem && (
+      {openIdx !== null && (
         <div className="dy-me-player">
           <button
             className="dy-me-back"
             aria-label="返回主页"
-            onClick={() => setOpenItem(null)}
+            onClick={() => setOpenIdx(null)}
           >
             <ChevronLeft size={26} />
           </button>
-          <VerticalVideo p={p} item={openItem} onComments={setCmItem} />
+          <span className="dy-me-count">
+            {curIdx + 1} / {ordered.length}
+          </span>
+          <div
+            className="vertical-feed"
+            ref={playerRef}
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              const n = Math.round(el.scrollTop / Math.max(1, el.clientHeight));
+              if (n !== curIdx) setCurIdx(n);
+            }}
+          >
+            {ordered.map((i) => (
+              <VerticalVideo key={i.id} p={p} item={i} onComments={setCmItem} />
+            ))}
+          </div>
         </div>
       )}
       {cmItem && (

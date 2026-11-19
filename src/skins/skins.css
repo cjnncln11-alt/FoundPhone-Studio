@@ -4283,6 +4283,20 @@
   z-index: 20;
   background: #000;
 }
+.dy-me-player .vertical-feed {
+  height: 100%;
+}
+.dy-me-count {
+  position: absolute;
+  top: 50px;
+  right: 14px;
+  z-index: 25;
+  color: rgb(255 255 255 / 82%);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
+}
 .dy-me-back {
   position: absolute;
   top: 12px;
