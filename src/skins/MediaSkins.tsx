@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   LayoutGrid,
   Maximize2,
+  Menu,
   MessageCircle,
   MonitorPlay,
   Music,
@@ -24,6 +25,7 @@ import {
   Smile,
   ThumbsDown,
   User,
+  UserPlus,
   Users,
   Video,
   Wallet,
@@ -203,19 +205,34 @@ function DouyinMe({
   ];
   return (
     <div className="dy-me">
+      <div className="dy-me-top" aria-hidden="true">
+        <span className="dy-me-pill">
+          <UserPlus size={15} />
+          好友
+        </span>
+        <span className="dy-me-round">
+          <Users size={17} />
+        </span>
+        <span className="dy-me-round">
+          <Search size={17} />
+        </span>
+        <span className="dy-me-round">
+          <Menu size={17} />
+        </span>
+      </div>
       <div className="dy-me-bg" aria-hidden="true" />
-      <div className="dy-me-head">
-        <div className="dy-me-id">
-          <img
-            className="dy-me-avatar"
-            src="/images/douyin/avatar-cln.jpg"
-            alt="陈立农"
-          />
-          <div className="dy-me-names">
-            <h2>陈立农</h2>
-            <small>抖音号：123822946</small>
-          </div>
+      <div className="dy-me-hero">
+        <img
+          className="dy-me-avatar"
+          src="/images/douyin/avatar-cln.jpg"
+          alt="陈立农"
+        />
+        <div className="dy-me-names">
+          <h2>陈立农</h2>
+          <small>抖音号：123822946</small>
         </div>
+      </div>
+      <div className="dy-me-panel">
         <div className="dy-me-stats">
           <div>
             <b>8826.6万</b>
@@ -635,6 +652,9 @@ function VerticalVideo({
   const cCount = Number(meta(item, "commentsCount")) || item.comments.length;
   const sCount = Number(meta(item, "sharesCount"));
   const fCount = Number(meta(item, "collectCount"));
+  // 发布日期：存的是 yy-mm-dd HH:MM，显示成 20yy-mm-dd
+  const rawPub = meta(item, "publishedAt");
+  const pub = rawPub ? `20${rawPub.slice(0, 8)}` : "";
   // 竖屏流视频：HLS 循环自动播放，滑走即停（PausingVideo 的可视区检测）
   const vSrc = safeMedia(item.meta?.video ?? "");
   const vCover = safeMedia(item.meta?.videoCover ?? "");
@@ -774,6 +794,7 @@ function VerticalVideo({
       <div className="vertical-caption">
         <strong>@{item.sender}</strong>
         <p>{item.body}</p>
+        {pub && <em className="dy-pub-date">{pub}</em>}
         <small>
           <Music size={11} />
           {item.title}
@@ -938,7 +959,6 @@ function DouyinComments({
                     {author && <em className="dy-cm-author">作者</em>}
                   </span>
                   <p>{text}</p>
-                  {i === 0 && <span className="dy-cm-liked">作者赞过</span>}
                   <div className="dy-cm-meta">
                     <time>
                       {time} · {prov}
