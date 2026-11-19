@@ -4142,9 +4142,10 @@
 .dy-me::-webkit-scrollbar {
   display: none;
 }
-/* 主页背景横幅（CLN 黑水图） */
+/* 主页背景横幅（CLN 黑水图，完整显示不裁切） */
 .dy-me-bg {
-  height: 132px;
+  width: 100%;
+  aspect-ratio: 1126 / 634;
   background: url("/images/douyin/bg-cln.jpg") center / cover no-repeat #000;
 }
 .dy-me-head {
@@ -4304,16 +4305,16 @@
 }
 .dy-me-back {
   position: absolute;
-  top: 46px;
-  left: 10px;
+  top: 50px;
+  left: 18px;
   z-index: 50;
   color: #fff;
   filter: drop-shadow(0 1px 4px #000);
 }
 .dy-me-search {
   position: absolute;
-  top: 46px;
-  right: 12px;
+  top: 50px;
+  right: 18px;
   z-index: 50;
   color: #fff;
   padding: 0;
