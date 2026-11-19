@@ -28,6 +28,7 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type RefObject,
   type UIEvent as ReactUIEvent,
 } from "react";
 import { safeMedia, type Item } from "../schema";
@@ -44,8 +45,133 @@ import {
   useContent,
   type Props,
 } from "./shared";
-function TrackPlayer({
-  item,
+/** 图集原声 BGM：进场自动播，滑走自动停；被自动播放拦截时等任意手势恢复 */
+function PhotoBgm({
+  src,
+  stage,
+}: {
+  src: string;
+  stage: RefObject<HTMLDivElement | null>;
+}) {
+  const ref = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    const st = stage.current;
+    if (!el || !st || typeof IntersectionObserver === "undefined") return;
+    const tryPlay = () => {
+      void el.play().catch(() => {});
+    };
+    tryPlay();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) {
+          if (en.intersectionRatio < 0.2) el.pause();
+          else if (en.intersectionRatio >= 0.5 && el.paused) tryPlay();
+        }
+      },
+      { threshold: [0, 0.2, 0.5, 1] },
+    );
+    io.observe(st);
+    // 无手势时浏览器拦截带声自动播放：任意点击后恢复
+    const resume = () => {
+      if (el.paused) tryPlay();
+    };
+    document.addEventListener("pointerdown", resume, true);
+    document.addEventListener("touchstart", resume, true);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("pointerdown", resume, true);
+      document.removeEventListener("touchstart", resume, true);
+      el.pause();
+    };
+  }, [src, stage]);
+  return <audio ref={ref} src={src} loop preload="auto" />;
+}
+
+/** 信息流强制一次手势只翻一个作品（抖音式翻页：触摸 + 滚轮） */
+function useFeedPager(ref: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let startY = 0;
+    let startX = 0;
+    let startTop = 0;
+    let moved = false;
+    let locked = false;
+    let wheelLock = false;
+    let timer: number | null = null;
+    const finish = () => {
+      el.style.scrollSnapType = "";
+      locked = false;
+      if (timer !== null) window.clearTimeout(timer);
+      timer = null;
+      el.removeEventListener("scrollend", finish);
+    };
+    const flip = (target: number) => {
+      locked = true;
+      el.style.scrollSnapType = "none";
+      el.scrollTo({ top: target * el.clientHeight, behavior: "smooth" });
+      el.addEventListener("scrollend", finish);
+      // scrollend 兼容兜底
+      timer = window.setTimeout(finish, 700);
+    };
+    const pageIndex = () =>
+      Math.max(0, Math.round((el.scrollHeight - el.clientHeight) / el.clientHeight));
+    const onStart = (e: TouchEvent) => {
+      if (locked) return;
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+      startTop = el.scrollTop;
+      moved = false;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (locked) {
+        e.preventDefault();
+        return;
+      }
+      if (moved) return;
+      const y = e.touches[0].clientY;
+      const dy = startY - y;
+      const dx = e.touches[0].clientX - startX;
+      // 横向滑动（图集翻照片）交给原生横滑
+      if (Math.abs(dx) > Math.abs(dy)) return;
+      if (Math.abs(dy) > 45) {
+        moved = true;
+        e.preventDefault();
+        const idx = Math.round(startTop / el.clientHeight);
+        const target = Math.max(0, Math.min(pageIndex(), dy > 0 ? idx + 1 : idx - 1));
+        if (target !== idx) flip(target);
+        else finish();
+      }
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) < 4) return;
+      e.preventDefault();
+      if (locked || wheelLock) return;
+      wheelLock = true;
+      window.setTimeout(() => {
+        wheelLock = false;
+      }, 450);
+      const idx = Math.round(el.scrollTop / el.clientHeight);
+      const target = Math.max(
+        0,
+        Math.min(pageIndex(), e.deltaY > 0 ? idx + 1 : idx - 1),
+      );
+      if (target !== idx) flip(target);
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("wheel", onWheel);
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [ref]);
+}
+
+function TrackPlayer({  item,
   p,
   onNext,
 }: {
@@ -387,6 +513,7 @@ function VerticalVideo({
   const [burst, setBurst] = useState<{ x: number; y: number } | null>(null);
   const tapRef = useRef<{ t: number } | null>(null);
   const burstTimer = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   useEffect(
     () => () => {
       if (burstTimer.current) window.clearTimeout(burstTimer.current);
@@ -402,6 +529,7 @@ function VerticalVideo({
   const vSrc = safeMedia(item.meta?.video ?? "");
   const vCover = safeMedia(item.meta?.videoCover ?? "");
   const photos: string[] = vSrc ? [] : item.mediaList;
+  const musicSrc = safeMedia(item.meta?.audio ?? "");
   /** 图集双击点赞（与视频一致的 320ms 判定窗口） */
   const onPhotoTap = (e: ReactPointerEvent<HTMLDivElement>) => {
     const now = Date.now();
@@ -437,7 +565,8 @@ function VerticalVideo({
           onDoubleTap={() => setLiked(true)}
         />
       ) : photos.length ? (
-        <div className="dy-photo-stage" onPointerUp={onPhotoTap}>
+        <div className="dy-photo-stage" ref={stageRef} onPointerUp={onPhotoTap}>
+          {musicSrc && <PhotoBgm src={musicSrc} stage={stageRef} />}
           <div className="dy-photo-track" onScroll={onTrackScroll}>
             {photos.map((src, i) => (
               <img
@@ -544,6 +673,8 @@ function VerticalVideo({
 export function DouyinSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "推荐");
   const [cmItem, setCmItem] = useState<Item | null>(null);
+  const feedRef = useRef<HTMLDivElement | null>(null);
+  useFeedPager(feedRef);
   const list = tab === "推荐" ? items : items.filter((i) => i.folder === tab);
   return (
     <div className="catalog-skin douyin-ui">
@@ -559,7 +690,7 @@ export function DouyinSkin(p: Props) {
           </button>
         ))}
       </div>
-      <div className="vertical-feed">
+      <div className="vertical-feed" ref={feedRef}>
         {list.map((i) => (
           <VerticalVideo
             key={i.id}
@@ -676,6 +807,8 @@ function DouyinComments({
 }
 export function TikTokSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "For You");
+  const feedRef = useRef<HTMLDivElement | null>(null);
+  useFeedPager(feedRef);
   const list =
     tab === "For You"
       ? items
@@ -699,7 +832,7 @@ export function TikTokSkin(p: Props) {
           For You
         </button>
       </div>
-      <div className="vertical-feed">
+      <div className="vertical-feed" ref={feedRef}>
         {list.map((i) => (
           <VerticalVideo key={i.id} p={p} item={i} />
         ))}
