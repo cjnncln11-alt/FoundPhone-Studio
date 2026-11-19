@@ -487,7 +487,7 @@ export function DouyinSkin(p: Props) {
     </div>
   );
 }
-/** 抖音评论区面板（半屏视频 + 白色评论抽屉，对照真实抖音样式） */
+/** 抖音评论区面板（视频保持全宽 + 白色评论抽屉，对照真实抖音） */
 function DouyinComments({
   item,
   onClose,
@@ -518,17 +518,20 @@ function DouyinComments({
           />
         )}
         <button className="dy-cm-search-btn" aria-label="搜索">
-          <Search size={22} />
+          <Search size={24} />
         </button>
       </div>
       <div className="dy-comments-sheet">
         <div className="dy-cm-search">
-          <span>大家都在搜：{hotWord}</span>
+          <span>
+            大家都在搜：<b>{hotWord}</b>
+            <i>🔍</i>
+          </span>
           <button aria-label="展开搜索">
-            <Maximize2 size={15} />
+            <Maximize2 size={16} />
           </button>
-          <button aria-label="关闭评论" onClick={onClose}>
-            <X size={19} />
+          <button className="dy-cm-close" aria-label="关闭评论" onClick={onClose}>
+            <X size={17} />
           </button>
         </div>
         <div className="dy-cm-tabs">
@@ -543,22 +546,26 @@ function DouyinComments({
             const m = item.commentMeta[i];
             const time = m?.time || fallbackTimes[i % fallbackTimes.length];
             const prov = m?.province || "北京";
+            const author = name === item.sender;
+            const replies = ((m?.likes ?? (i + 2) * 7) % 190) + 1;
             return (
               <div className="dy-cm-item" key={i}>
-                <span className="dy-cm-avatar" />
+                <span className={`dy-cm-avatar${author ? " is-author" : ""}`} />
                 <div className="dy-cm-main">
-                  <span className="dy-cm-name">{name}</span>
+                  <span className="dy-cm-name">
+                    {name}
+                    {author && <em className="dy-cm-author">作者</em>}
+                  </span>
                   <p>{text}</p>
+                  {i === 0 && <span className="dy-cm-liked">作者赞过</span>}
                   <div className="dy-cm-meta">
                     <time>
                       {time} · {prov}
                     </time>
                     <i>回复</i>
-                    {i === 0 && (
-                      <button className="dy-cm-replies">
-                        —— 展开25条回复 <span>⌄</span>
-                      </button>
-                    )}
+                    <button className="dy-cm-replies">
+                      —— 展开{replies}条回复 <span>⌄</span>
+                    </button>
                   </div>
                 </div>
                 <div className="dy-cm-acts">
