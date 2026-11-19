@@ -786,7 +786,6 @@ export function DouyinSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "推荐");
   const [cmItem, setCmItem] = useState<Item | null>(null);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-  const [curIdx, setCurIdx] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<HTMLDivElement | null>(null);
   useFeedPager(feedRef, tab !== "我");
@@ -808,7 +807,6 @@ export function DouyinSkin(p: Props) {
     if (!el) return;
     const t = window.setTimeout(() => {
       el.scrollTop = openIdx * el.clientHeight;
-      setCurIdx(openIdx);
     }, 30);
     return () => window.clearTimeout(t);
   }, [openIdx]);
@@ -855,17 +853,9 @@ export function DouyinSkin(p: Props) {
           <button className="dy-me-search" aria-label="搜索" type="button">
             <Search size={24} />
           </button>
-          <span className="dy-me-count">
-            {curIdx + 1} / {ordered.length}
-          </span>
           <div
             className="vertical-feed"
             ref={playerRef}
-            onScroll={(e) => {
-              const el = e.currentTarget;
-              const n = Math.round(el.scrollTop / Math.max(1, el.clientHeight));
-              if (n !== curIdx) setCurIdx(n);
-            }}
           >
             {ordered.map((i) => (
               <VerticalVideo
