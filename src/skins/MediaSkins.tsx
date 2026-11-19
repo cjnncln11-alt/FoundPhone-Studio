@@ -409,11 +409,20 @@ function VerticalVideo({
         </svg>
       </span>
       <div className="vertical-actions">
-        <button
-          aria-label={`作者${item.sender}`}
-          onClick={() => p.onItem(item)}
-        >
+        {/* 头像无任何交互；下方红色加号为关注按钮样式（对照真实抖音） */}
+        <button aria-label={`作者${item.sender}`}>
           <Avatar name={item.sender} src={item.avatar} />
+          <span className="dy-follow-plus" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="13" height="13">
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="#fff"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </svg>
+          </span>
         </button>
         <button
           aria-label={`喜欢${item.title}`}

@@ -3996,7 +3996,24 @@
   flex-direction: column;
   gap: 5px;
   padding: 0;
+  position: relative;
   text-shadow: 0 1px 4px #000;
+}
+/* 头像下方的红色加号（关注按钮样式） */
+.dy-follow-plus {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  transform: translateX(-50%);
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #fe2c55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  text-shadow: none;
 }
 .vertical-actions small {
   font-size: 10px;
