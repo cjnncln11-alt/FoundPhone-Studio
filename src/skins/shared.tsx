@@ -462,6 +462,9 @@ export function PausingVideo({
           // 可视面积不足两成即视为滑过，自动停止
           if (!en.isIntersecting || en.intersectionRatio < 0.2) {
             if (!el.paused) el.pause();
+          } else if (autoStart && en.intersectionRatio >= 0.5) {
+            // 竖屏信息流（抖音）：滑回可视区自动续播
+            if (el.paused) void safePlay(el);
           }
         }
       },
