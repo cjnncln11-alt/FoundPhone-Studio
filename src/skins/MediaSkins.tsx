@@ -269,7 +269,7 @@ function DouyinMe({
             )}
             <span className="dy-me-plays">
               <Play size={11} />
-              {fmtCount(Number(meta(i, "likes")))}
+              {fmtCount(i.likes)}
             </span>
           </button>
         ))}
