@@ -3976,25 +3976,20 @@
   border-color: #303030;
 }
 /* 抖音评论区面板：上半视频 + 下半白色抽屉（对照真实抖音） */
+/* 抖音评论区：透明浮层 + 白色抽屉盖在下方，信息流视频在原位继续播放 */
 .dy-comments {
   position: absolute;
   inset: 0;
   z-index: 30;
   display: flex;
   flex-direction: column;
-  background: #161616;
+  background: transparent;
 }
 .dy-comments-stage {
   position: relative;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-}
-.dy-comments-stage video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #000;
+  pointer-events: none;
 }
 .dy-cm-search-btn {
   position: absolute;
@@ -4002,6 +3997,7 @@
   right: 16px;
   color: #fff;
   padding: 0;
+  pointer-events: auto;
 }
 .dy-comments-sheet {
   flex: none;

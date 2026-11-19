@@ -430,19 +430,19 @@ function VerticalVideo({
           <Bookmark size={27} fill={saved ? "#f8cc55" : "none"} />
           <small>{Number.isFinite(fCount) && fCount > 0 ? fmt(fCount) : ""}</small>
         </button>
-        <button aria-label={`分享${item.title}`} onClick={() => p.onItem(item)}>
+        <button aria-label={`分享${item.title}`}>
           <Share2 size={26} />
           <small>{Number.isFinite(sCount) && sCount > 0 ? fmt(sCount) : ""}</small>
         </button>
       </div>
-      <button className="vertical-caption" onClick={() => p.onItem(item)}>
+      <div className="vertical-caption">
         <strong>@{item.sender}</strong>
         <p>{item.body}</p>
         <small>
           <Music size={11} />
           {item.title}
         </small>
-      </button>
+      </div>
     </article>
   );
 }
@@ -487,7 +487,7 @@ export function DouyinSkin(p: Props) {
     </div>
   );
 }
-/** 抖音评论区面板（视频保持全宽 + 白色评论抽屉，对照真实抖音） */
+/** 抖音评论区：白色抽屉直接覆盖在仍在播放的信息流视频下方（视频不中断） */
 function DouyinComments({
   item,
   onClose,
@@ -495,8 +495,6 @@ function DouyinComments({
   item: Item;
   onClose: () => void;
 }) {
-  const src = safeMedia(item.meta?.video ?? "");
-  const cover = safeMedia(item.meta?.videoCover ?? "");
   const cCount = Number(meta(item, "commentsCount")) || item.comments.length;
   const hotWord =
     (item.body.match(/#([\u4e00-\u9fa5\w]+)/)?.[1] as string | undefined) ??
@@ -505,18 +503,6 @@ function DouyinComments({
   return (
     <div className="dy-comments">
       <div className="dy-comments-stage">
-        {src && (
-          <PausingVideo
-            src={src}
-            loop
-            muted
-            autoPlay
-            autoStart
-            playsInline
-            preload="metadata"
-            poster={cover || undefined}
-          />
-        )}
         <button className="dy-cm-search-btn" aria-label="搜索">
           <Search size={24} />
         </button>
