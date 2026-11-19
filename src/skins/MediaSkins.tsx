@@ -1,11 +1,14 @@
 import { AudioPlayer, useTrack } from "../audio";
 import { useSkinState } from "../skinState";
 import {
+  AtSign,
   Bookmark,
   Check,
   Compass,
   Heart,
   Home,
+  Image as ImageIcon,
+  Maximize2,
   MessageCircle,
   Music,
   Play,
@@ -13,12 +16,16 @@ import {
   Search,
   Share2,
   SkipForward,
+  Smile,
+  ThumbsDown,
   User,
   Users,
   Video,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { safeMedia, type Item } from "../schema";
+import { PausingVideo } from "./shared";
 import {
   Avatar,
   Empty,
@@ -358,7 +365,15 @@ export function BilibiliSkin(p: Props) {
     </div>
   );
 }
-function VerticalVideo({ p, item }: { p: Props; item: Item }) {
+function VerticalVideo({
+  p,
+  item,
+  onComments,
+}: {
+  p: Props;
+  item: Item;
+  onComments?: (item: Item) => void;
+}) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false),
     [saved, setSaved] = useSkinState<boolean>(p, `saved-${item.id}`, false);
   const fmt = (n: number) =>
@@ -366,9 +381,25 @@ function VerticalVideo({ p, item }: { p: Props; item: Item }) {
   const cCount = Number(meta(item, "commentsCount")) || item.comments.length;
   const sCount = Number(meta(item, "sharesCount"));
   const fCount = Number(meta(item, "collectCount"));
+  // 竖屏流视频：HLS 循环自动播放，滑走即停（PausingVideo 的可视区检测）
+  const vSrc = safeMedia(item.meta?.video ?? "");
+  const vCover = safeMedia(item.meta?.videoCover ?? "");
   return (
     <article className="vertical-video">
-      <Media item={item} />
+      {vSrc ? (
+        <PausingVideo
+          src={vSrc}
+          loop
+          muted
+          autoPlay
+          autoStart
+          playsInline
+          preload="metadata"
+          poster={vCover || undefined}
+        />
+      ) : (
+        <Media item={item} />
+      )}
       <div className="vertical-actions">
         <button
           aria-label={`作者${item.sender}`}
@@ -383,7 +414,12 @@ function VerticalVideo({ p, item }: { p: Props; item: Item }) {
           <Heart size={29} fill={liked ? "#f44368" : "white"} />
           <small>{fmt(item.likes + (liked ? 1 : 0))}</small>
         </button>
-        <button aria-label={`评论${item.title}`} onClick={() => p.onItem(item)}>
+        <button
+          aria-label={`评论${item.title}`}
+          onClick={() =>
+            onComments ? onComments(item) : p.onItem(item)
+          }
+        >
           <MessageCircle size={29} />
           <small>{fmt(cCount)}</small>
         </button>
@@ -412,6 +448,7 @@ function VerticalVideo({ p, item }: { p: Props; item: Item }) {
 }
 export function DouyinSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "推荐");
+  const [cmItem, setCmItem] = useState<Item | null>(null);
   const list = tab === "推荐" ? items : items.filter((i) => i.folder === tab);
   return (
     <div className="catalog-skin douyin-ui">
@@ -429,16 +466,122 @@ export function DouyinSkin(p: Props) {
       </div>
       <div className="vertical-feed">
         {list.map((i) => (
-          <VerticalVideo key={i.id} p={p} item={i} />
+          <VerticalVideo
+            key={i.id}
+            p={p}
+            item={i}
+            onComments={setCmItem}
+          />
         ))}
         <Empty items={list} />
       </div>
+      {cmItem && (
+        <DouyinComments item={cmItem} onClose={() => setCmItem(null)} />
+      )}
       <Tabs
         tabs={["推荐", "关注", "我"]}
         value={tab}
         set={setTab}
         icons={[<Home />, <Users />, <User />]}
       />
+    </div>
+  );
+}
+/** 抖音评论区面板（半屏视频 + 白色评论抽屉，对照真实抖音样式） */
+function DouyinComments({
+  item,
+  onClose,
+}: {
+  item: Item;
+  onClose: () => void;
+}) {
+  const src = safeMedia(item.meta?.video ?? "");
+  const cover = safeMedia(item.meta?.videoCover ?? "");
+  const cCount = Number(meta(item, "commentsCount")) || item.comments.length;
+  const hotWord =
+    (item.body.match(/#([\u4e00-\u9fa5\w]+)/)?.[1] as string | undefined) ??
+    item.sender;
+  const fallbackTimes = ["刚刚", "2分钟前", "15分钟前", "1小时前", "昨天", "2天前"];
+  return (
+    <div className="dy-comments">
+      <div className="dy-comments-stage">
+        {src && (
+          <PausingVideo
+            src={src}
+            loop
+            muted
+            autoPlay
+            autoStart
+            playsInline
+            preload="metadata"
+            poster={cover || undefined}
+          />
+        )}
+        <button className="dy-cm-search-btn" aria-label="搜索">
+          <Search size={22} />
+        </button>
+      </div>
+      <div className="dy-comments-sheet">
+        <div className="dy-cm-search">
+          <span>大家都在搜：{hotWord}</span>
+          <button aria-label="展开搜索">
+            <Maximize2 size={15} />
+          </button>
+          <button aria-label="关闭评论" onClick={onClose}>
+            <X size={19} />
+          </button>
+        </div>
+        <div className="dy-cm-tabs">
+          <b>评论 {cCount}</b>
+          <span>AI 解析</span>
+        </div>
+        <div className="dy-cm-list">
+          {item.comments.map((c, i) => {
+            const sep = c.indexOf("：");
+            const name = sep > 0 ? c.slice(0, sep) : `用户${i + 1}`;
+            const text = sep > 0 ? c.slice(sep + 1) : c;
+            const m = item.commentMeta[i];
+            const time = m?.time || fallbackTimes[i % fallbackTimes.length];
+            const prov = m?.province || "北京";
+            return (
+              <div className="dy-cm-item" key={i}>
+                <span className="dy-cm-avatar" />
+                <div className="dy-cm-main">
+                  <span className="dy-cm-name">{name}</span>
+                  <p>{text}</p>
+                  <div className="dy-cm-meta">
+                    <time>
+                      {time} · {prov}
+                    </time>
+                    <i>回复</i>
+                    {i === 0 && (
+                      <button className="dy-cm-replies">
+                        —— 展开25条回复 <span>⌄</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="dy-cm-acts">
+                  <button aria-label={`赞评论${i}`}>
+                    <Heart size={17} />
+                    <small>{m?.likes ?? (i + 1) * 3}</small>
+                  </button>
+                  <button aria-label={`踩评论${i}`}>
+                    <ThumbsDown size={15} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          <div className="dy-cm-end">- THE END -</div>
+        </div>
+        <div className="dy-cm-input">
+          <span>有什么想法，展开说说</span>
+          <ImageIcon size={18} />
+          <AtSign size={18} />
+          <Smile size={18} />
+        </div>
+      </div>
     </div>
   );
 }

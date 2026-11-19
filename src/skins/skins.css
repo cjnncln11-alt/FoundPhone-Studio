@@ -3903,6 +3903,11 @@
   height: 100%;
   object-fit: cover;
 }
+/* 抖音竖屏流：视频完整显示（不裁切）+ 黑底衬边 */
+.douyin-ui .vertical-video > video {
+  object-fit: contain;
+  background: #000;
+}
 .vertical-video > .catalog-art {
   background: #3b4240;
   color: #ddd;
@@ -3969,6 +3974,192 @@
 .tiktok-ui > .catalog-tabs {
   background: #101010;
   border-color: #303030;
+}
+/* 抖音评论区面板：上半视频 + 下半白色抽屉（对照真实抖音） */
+.dy-comments {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: #161616;
+}
+.dy-comments-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dy-comments-stage video {
+  height: 100%;
+  width: auto;
+  max-width: 88%;
+  object-fit: contain;
+  background: #000;
+}
+.dy-cm-search-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: #fff;
+  padding: 0;
+}
+.dy-comments-sheet {
+  flex: none;
+  height: 58%;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dy-cm-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 10px;
+  color: #222;
+  font-size: 14px;
+}
+.dy-cm-search > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.dy-cm-search > button {
+  color: #666;
+  padding: 0;
+}
+.dy-cm-search > button:last-child {
+  color: #222;
+}
+.dy-cm-tabs {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 4px 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.dy-cm-tabs b {
+  font-size: 16px;
+  color: #111;
+  padding-bottom: 8px;
+  border-bottom: 2.5px solid #111;
+}
+.dy-cm-tabs span {
+  font-size: 13.5px;
+  color: #888;
+  padding-bottom: 8px;
+}
+.dy-cm-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px 8px;
+  scrollbar-width: none;
+}
+.dy-cm-item {
+  display: flex;
+  gap: 11px;
+  margin-bottom: 20px;
+}
+.dy-cm-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ececec;
+}
+.dy-cm-main {
+  flex: 1;
+  min-width: 0;
+}
+.dy-cm-name {
+  font-size: 12.5px;
+  color: #a8a8a8;
+}
+.dy-cm-main p {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #1a1a1a;
+  margin-top: 3px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.dy-cm-main img {
+  width: 96px;
+  border-radius: 4px;
+  margin-top: 6px;
+  display: block;
+}
+.dy-cm-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  color: #a8a8a8;
+  margin-top: 7px;
+}
+.dy-cm-meta i {
+  font-style: normal;
+}
+.dy-cm-replies {
+  flex-basis: 100%;
+  text-align: left;
+  padding: 0;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: #a8a8a8;
+}
+.dy-cm-replies span {
+  font-size: 11px;
+}
+.dy-cm-acts {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  color: #b0b0b0;
+}
+.dy-cm-acts > button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  color: #b0b0b0;
+}
+.dy-cm-acts small {
+  font-size: 11px;
+}
+.dy-cm-end {
+  text-align: center;
+  font-size: 11px;
+  color: #c5c5c5;
+  letter-spacing: 1px;
+  padding: 6px 0 14px;
+}
+.dy-cm-input {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 16px;
+  padding: 9px 14px;
+  background: #f3f4f6;
+  border-radius: 20px;
+  color: #9ca3af;
+  font-size: 13.5px;
+}
+.dy-cm-input > span {
+  flex: 1;
 }
 .douyin-ui .catalog-tabs .selected,
 .tiktok-ui .catalog-tabs .selected {

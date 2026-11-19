@@ -417,8 +417,9 @@ export const clockText = (t: number) => {
 export function PausingVideo({
   className = "",
   src,
+  autoStart = false,
   ...rest
-}: ComponentProps<"video">) {
+}: ComponentProps<"video"> & { autoStart?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLSpanElement>(null);
   // HLS 分片播放：静态托管不带 Range 支持，整段 mp4 无法定位，改由 m3u8 + hls.js 按片加载
@@ -512,17 +513,22 @@ export function PausingVideo({
           nativeHls();
           return;
         }
-        // 不自动起播：点播放、拖进度时再按片拉流，信息流滚动不浪费流量
+        // 不自动起播：点播放、拖进度时再按片拉流，信息流滚动不浪费流量；
+        // autoStart（抖音竖屏流）则挂载后立即拉流并循环起播
         const inst = new Hls({
           maxBufferLength: 30,
           backBufferLength: 30,
-          autoStartLoad: false,
+          autoStartLoad: !autoStart,
         });
         hls = inst;
         inst.loadSource(src);
         inst.attachMedia(ref.current);
         ref.current.addEventListener("play", onPlay);
         ref.current.addEventListener("seeking", onPlay);
+        if (autoStart) {
+          inst.startLoad();
+          void ref.current.play().catch(() => {});
+        }
         // 挂载前用户已点过播放（此时没人监听 play 事件）：补一次起流
         if (!ref.current.paused && ref.current.readyState < 3) onPlay();
       })
@@ -533,7 +539,7 @@ export function PausingVideo({
       ref.current?.removeEventListener("seeking", onPlay);
       hls?.destroy();
     };
-  }, [src, isHls, near]);
+  }, [src, isHls, near, autoStart]);
   useEffect(
     () => () => {
       if (hintTimer.current) window.clearTimeout(hintTimer.current);
