@@ -203,6 +203,7 @@ function DouyinMe({
   ];
   return (
     <div className="dy-me">
+      <div className="dy-me-bg" aria-hidden="true" />
       <div className="dy-me-head">
         <div className="dy-me-id">
           <img
@@ -607,10 +608,13 @@ function VerticalVideo({
   p,
   item,
   onComments,
+  hideFollow = false,
 }: {
   p: Props;
   item: Item;
   onComments?: (item: Item) => void;
+  /** 自己主页的作品不显示关注加号 */
+  hideFollow?: boolean;
 }) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false),
     [saved, setSaved] = useSkinState<boolean>(p, `saved-${item.id}`, false);
@@ -725,17 +729,19 @@ function VerticalVideo({
         {/* 头像无任何交互；下方红色加号为关注按钮样式（对照真实抖音） */}
         <button aria-label={`作者${item.sender}`}>
           <Avatar name={item.sender} src={item.avatar} />
-          <span className="dy-follow-plus" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="13" height="13">
-              <path
-                d="M12 5v14M5 12h14"
-                stroke="#fff"
-                strokeWidth="3.2"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
-          </span>
+          {!hideFollow && (
+            <span className="dy-follow-plus" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="13" height="13">
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="#fff"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+            </span>
+          )}
         </button>
         <button
           aria-label={`喜欢${item.title}`}
@@ -844,7 +850,10 @@ export function DouyinSkin(p: Props) {
             aria-label="返回主页"
             onClick={() => setOpenIdx(null)}
           >
-            <ChevronLeft size={26} />
+            <ChevronLeft size={28} />
+          </button>
+          <button className="dy-me-search" aria-label="搜索" type="button">
+            <Search size={24} />
           </button>
           <span className="dy-me-count">
             {curIdx + 1} / {ordered.length}
@@ -859,7 +868,13 @@ export function DouyinSkin(p: Props) {
             }}
           >
             {ordered.map((i) => (
-              <VerticalVideo key={i.id} p={p} item={i} onComments={setCmItem} />
+              <VerticalVideo
+                key={i.id}
+                p={p}
+                item={i}
+                onComments={setCmItem}
+                hideFollow
+              />
             ))}
           </div>
         </div>

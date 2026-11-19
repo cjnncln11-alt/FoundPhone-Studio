@@ -4142,9 +4142,14 @@
 .dy-me::-webkit-scrollbar {
   display: none;
 }
+/* 主页背景横幅（CLN 黑水图） */
+.dy-me-bg {
+  height: 132px;
+  background: url("/images/douyin/bg-cln.jpg") center / cover no-repeat #000;
+}
 .dy-me-head {
-  padding: 18px 16px 8px;
-  background: linear-gradient(180deg, #2a2a2e 0%, #101010 100%);
+  padding: 14px 16px 8px;
+  background: #101010;
 }
 .dy-me-id {
   display: flex;
@@ -4288,7 +4293,7 @@
 }
 .dy-me-count {
   position: absolute;
-  top: 50px;
+  top: 84px;
   right: 14px;
   z-index: 25;
   color: rgb(255 255 255 / 82%);
@@ -4299,10 +4304,19 @@
 }
 .dy-me-back {
   position: absolute;
-  top: 12px;
+  top: 46px;
   left: 10px;
-  z-index: 25;
+  z-index: 50;
   color: #fff;
+  filter: drop-shadow(0 1px 4px #000);
+}
+.dy-me-search {
+  position: absolute;
+  top: 46px;
+  right: 12px;
+  z-index: 50;
+  color: #fff;
+  padding: 0;
   filter: drop-shadow(0 1px 4px #000);
 }
 /* 抖音评论区面板：上半视频 + 下半白色抽屉（对照真实抖音） */
