@@ -17195,12 +17195,84 @@
     ],
     "douyin": [
       {
-        "id": "test-item-douyin",
-        "title": "测试内容",
-        "body": "这是一条测试内容。",
-        "sender": "测试用户",
+        "id": "dy-cat-1116-0915",
+        "title": "@好运来创作的原声",
+        "body": "#可爱猫咪日常 #创作者中心 #创作灵感",
+        "sender": "好运来",
+        "avatar": "/images/douyin/avatar-haoyunlai.jpg",
         "kind": "text",
-        "meta": {}
+        "time": "2026-11-16 09:15",
+        "mediaList": [],
+        "meta": {
+          "video": "/videos/hls/dy-cat/index.m3u8",
+          "videoCover": "/images/douyin/cover-cat.jpg",
+          "commentsCount": "1809",
+          "sharesCount": "110498",
+          "collectCount": "6798",
+          "douyinId": "54661583434",
+          "publishedAt": "26-11-16 09:15"
+        },
+        "likes": 184185,
+        "comments": [
+          "一颗小圆子：它是不是知道自己很好看",
+          "咕噜咕噜电台：听 猫猫呼噜声 睡觉都有了底气",
+          "柠檬味的阿柴：这个视角也太治愈了",
+          "不想上班的k：点进创作者中心 结果看了十分钟猫",
+          "打瞌睡的柯基：蹲一个后续 更新快点",
+          "半颗糖jyy：转发给我妈看 让她也可爱一下",
+          "好运喷雾本雾：吸猫吸猫 猫猫保平安",
+          "屋顶上的猫：救命 这也太可爱了吧",
+          "路过的小鱼干：爪爪粉粉的 想rua",
+          "晚风慢递：又是被猫咪治愈的一天",
+          "起司块不甜：路人被萌到 顺手点了个关注",
+          "橘子汽水不加冰：每天蹲更新就为了看这只猫",
+          "云朵软糖u：眼睛好亮 像装了星星",
+          "喵呜日记本：尾巴一甩一甩的 心都要化了",
+          "奶糖味的风：猫咪：铲屎的快交出小鱼干",
+          "旧城以西st：建议每日更新 时刻表发一下"
+        ],
+        "commentMeta": [
+          {
+            "likes": 47,
+            "time": "26-11-18",
+            "province": "江苏"
+          },
+          {
+            "likes": 1024,
+            "time": "26-11-19",
+            "province": "北京"
+          },
+          {
+            "likes": 47,
+            "time": "26-11-16",
+            "province": "江苏"
+          },
+          {
+            "likes": 1024,
+            "time": "26-11-19",
+            "province": "四川"
+          },
+          {
+            "likes": 1024,
+            "time": "26-11-17",
+            "province": "北京"
+          },
+          {
+            "likes": 156,
+            "time": "26-11-18",
+            "province": "山东"
+          },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
       }
     ],
     "bilibili": [

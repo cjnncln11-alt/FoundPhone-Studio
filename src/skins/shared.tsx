@@ -100,10 +100,11 @@ export function Avatar({
   round?: boolean;
   src?: string;
 }) {
+  const img = safeMedia(src);
   return (
     <span className={`catalog-avatar ${round ? "round" : ""}`}>
-      {safeMedia(src)?.startsWith("data:image/") ? (
-        <img src={safeMedia(src)} alt="" />
+      {img?.startsWith("data:image/") || img?.startsWith("/images/") ? (
+        <img src={img} alt="" />
       ) : (
         name.slice(0, 1) || "人"
       )}

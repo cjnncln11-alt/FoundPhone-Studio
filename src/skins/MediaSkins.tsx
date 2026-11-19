@@ -11,6 +11,7 @@ import {
   Play,
   Plus,
   Search,
+  Share2,
   SkipForward,
   User,
   Users,
@@ -360,6 +361,11 @@ export function BilibiliSkin(p: Props) {
 function VerticalVideo({ p, item }: { p: Props; item: Item }) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false),
     [saved, setSaved] = useSkinState<boolean>(p, `saved-${item.id}`, false);
+  const fmt = (n: number) =>
+    n >= 10000 ? `${(n / 10000).toFixed(1)}万` : `${n}`;
+  const cCount = Number(meta(item, "commentsCount")) || item.comments.length;
+  const sCount = Number(meta(item, "sharesCount"));
+  const fCount = Number(meta(item, "collectCount"));
   return (
     <article className="vertical-video">
       <Media item={item} />
@@ -368,24 +374,29 @@ function VerticalVideo({ p, item }: { p: Props; item: Item }) {
           aria-label={`作者${item.sender}`}
           onClick={() => p.onItem(item)}
         >
-          <Avatar name={item.sender} />
+          <Avatar name={item.sender} src={item.avatar} />
         </button>
         <button
           aria-label={`喜欢${item.title}`}
           onClick={() => setLiked(!liked)}
         >
           <Heart size={29} fill={liked ? "#f44368" : "white"} />
-          <small>{item.likes + (liked ? 1 : 0)}</small>
+          <small>{fmt(item.likes + (liked ? 1 : 0))}</small>
         </button>
         <button aria-label={`评论${item.title}`} onClick={() => p.onItem(item)}>
           <MessageCircle size={29} />
-          <small>{item.comments.length}</small>
+          <small>{fmt(cCount)}</small>
         </button>
         <button
           aria-label={`收藏${item.title}`}
           onClick={() => setSaved(!saved)}
         >
           <Bookmark size={27} fill={saved ? "#f8cc55" : "none"} />
+          <small>{Number.isFinite(fCount) && fCount > 0 ? fmt(fCount) : ""}</small>
+        </button>
+        <button aria-label={`分享${item.title}`} onClick={() => p.onItem(item)}>
+          <Share2 size={26} />
+          <small>{Number.isFinite(sCount) && sCount > 0 ? fmt(sCount) : ""}</small>
         </button>
       </div>
       <button className="vertical-caption" onClick={() => p.onItem(item)}>

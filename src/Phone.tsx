@@ -963,7 +963,17 @@ function AppSearch({
 }
 function Media({ item }: { item: Item }) {
   const src = safeMedia(item.media);
-  return src ? (
+  // 帖子内嵌视频（HLS 存 public/videos/，封面作海报）
+  const postVideo = safeMedia(item.meta?.video ?? "");
+  return postVideo ? (
+    <video
+      controls
+      playsInline
+      preload="metadata"
+      poster={safeMedia(item.meta?.videoCover ?? "") || undefined}
+      src={postVideo}
+    />
+  ) : src ? (
     item.kind === "audio" ? (
       <audio controls src={src} />
     ) : item.kind === "video" ? (
