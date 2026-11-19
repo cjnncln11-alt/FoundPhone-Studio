@@ -23,7 +23,13 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type UIEvent as ReactUIEvent,
+} from "react";
 import { safeMedia, type Item } from "../schema";
 import { PausingVideo } from "./shared";
 import {
@@ -376,6 +382,17 @@ function VerticalVideo({
 }) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false),
     [saved, setSaved] = useSkinState<boolean>(p, `saved-${item.id}`, false);
+  // 图集（抖音图文帖）：全屏照片 + 左右滑动 + 圆点指示，双击同样可点赞
+  const [dot, setDot] = useState(0);
+  const [burst, setBurst] = useState<{ x: number; y: number } | null>(null);
+  const tapRef = useRef<{ t: number } | null>(null);
+  const burstTimer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (burstTimer.current) window.clearTimeout(burstTimer.current);
+    },
+    [],
+  );
   const fmt = (n: number) =>
     n >= 10000 ? `${(n / 10000).toFixed(1)}万` : `${n}`;
   const cCount = Number(meta(item, "commentsCount")) || item.comments.length;
@@ -384,6 +401,25 @@ function VerticalVideo({
   // 竖屏流视频：HLS 循环自动播放，滑走即停（PausingVideo 的可视区检测）
   const vSrc = safeMedia(item.meta?.video ?? "");
   const vCover = safeMedia(item.meta?.videoCover ?? "");
+  const photos: string[] = vSrc ? [] : item.mediaList;
+  /** 图集双击点赞（与视频一致的 320ms 判定窗口） */
+  const onPhotoTap = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const now = Date.now();
+    const prev = tapRef.current;
+    tapRef.current = { t: now };
+    if (!prev || now - prev.t > 320) return;
+    tapRef.current = null;
+    e.preventDefault();
+    setLiked(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setBurst({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    if (burstTimer.current) window.clearTimeout(burstTimer.current);
+    burstTimer.current = window.setTimeout(() => setBurst(null), 850);
+  };
+  const onTrackScroll = (e: ReactUIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    setDot(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
+  };
   return (
     <article className="vertical-video">
       {vSrc ? (
@@ -400,6 +436,48 @@ function VerticalVideo({
           tapToggle
           onDoubleTap={() => setLiked(true)}
         />
+      ) : photos.length ? (
+        <div className="dy-photo-stage" onPointerUp={onPhotoTap}>
+          <div className="dy-photo-track" onScroll={onTrackScroll}>
+            {photos.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`${item.title} ${i + 1}`}
+                draggable={false}
+              />
+            ))}
+          </div>
+          {photos.length > 1 && (
+            <>
+              <span className="dy-photo-hint" aria-hidden="true">
+                左右滑动查看照片
+              </span>
+              <div className="dy-photo-dots" aria-hidden="true">
+                {photos.map((_, i) => (
+                  <i key={i} className={i === dot ? "on" : ""} />
+                ))}
+              </div>
+            </>
+          )}
+          {burst && (
+            <span
+              className="dy-like-burst"
+              style={{ left: burst.x, top: burst.y }}
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" width="86" height="86" aria-hidden="true">
+                <path
+                  d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+                  fill="#fe2c55"
+                  stroke="#fe2c55"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          )}
+        </div>
       ) : (
         <Media item={item} />
       )}

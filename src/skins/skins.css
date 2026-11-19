@@ -3974,6 +3974,77 @@
 .vertical-video:has(video:paused) .dy-play-badge {
   display: flex;
 }
+/* 抖音图文帖：全屏照片左右滑动 + 圆点指示（保证每屏一个作品） */
+.dy-photo-stage {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  background: #000;
+}
+.dy-photo-track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.dy-photo-track::-webkit-scrollbar {
+  display: none;
+}
+.dy-photo-track img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  scroll-snap-align: center;
+  background: #000;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.dy-photo-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 96px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 3;
+  pointer-events: none;
+}
+.dy-photo-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 45%);
+}
+.dy-photo-dots i.on {
+  background: #fff;
+}
+.dy-photo-hint {
+  position: absolute;
+  left: 50%;
+  top: 108px;
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 45%);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: dy-photo-hint-fade 3.2s ease forwards;
+}
+@keyframes dy-photo-hint-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 .vertical-video > .catalog-art {
   background: #3b4240;
   color: #ddd;
