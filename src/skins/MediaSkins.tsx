@@ -73,11 +73,11 @@ function PhotoBgm({
     const io = new IntersectionObserver(
       (entries) => {
         for (const en of entries) {
-          if (en.intersectionRatio < 0.2) el.pause();
-          else if (en.intersectionRatio >= 0.5 && el.paused) tryPlay();
+          if (en.intersectionRatio < 0.5) el.pause();
+          else if (en.intersectionRatio >= 0.65 && el.paused) tryPlay();
         }
       },
-      { threshold: [0, 0.2, 0.5, 1] },
+      { threshold: [0, 0.2, 0.5, 0.65, 1] },
     );
     io.observe(st);
     // 无手势时浏览器拦截带声自动播放：任意点击后恢复

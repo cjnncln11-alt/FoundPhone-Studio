@@ -4170,6 +4170,7 @@
   color: #fff;
   font-size: 13px;
   backdrop-filter: blur(6px);
+  margin-right: auto;
 }
 .dy-me-round {
   display: flex;
@@ -4181,9 +4182,6 @@
   background: rgb(0 0 0 / 30%);
   color: #fff;
   backdrop-filter: blur(6px);
-}
-.dy-me-top .dy-me-round:first-of-type {
-  margin-left: auto;
 }
 /* 头像压背景图下沿，昵称在右 */
 .dy-me-hero {

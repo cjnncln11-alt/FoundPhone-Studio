@@ -459,16 +459,16 @@ export function PausingVideo({
       (entries) => {
         for (const en of entries) {
           if (en.isIntersecting) setNear(true);
-          // 可视面积不足两成即视为滑过，自动停止
-          if (!en.isIntersecting || en.intersectionRatio < 0.2) {
+          // 可视面积不足一半即立即停止，避免翻页动画中相邻两条同时出声
+          if (!en.isIntersecting || en.intersectionRatio < 0.5) {
             if (!el.paused) el.pause();
-          } else if (autoStart && en.intersectionRatio >= 0.5) {
-            // 竖屏信息流（抖音）：滑回可视区自动续播
+          } else if (autoStart && en.intersectionRatio >= 0.65) {
+            // 竖屏信息流（抖音）：落定到可视区才续播
             if (el.paused) void safePlay(el);
           }
         }
       },
-      { threshold: [0, 0.2, 0.5, 1], rootMargin: "300px" },
+      { threshold: [0, 0.2, 0.5, 0.65, 1], rootMargin: "300px" },
     );
     io.observe(el);
     return () => io.disconnect();
