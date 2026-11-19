@@ -397,10 +397,18 @@ function VerticalVideo({
           controls={false}
           preload="metadata"
           poster={vCover || undefined}
+          // 抖音交互：单击暂停/继续，双击点赞（红心）
+          tapToggle
+          onDoubleTap={() => setLiked(true)}
         />
       ) : (
         <Media item={item} />
       )}
+      <span className="dy-play-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30">
+          <path d="M8 5.5v13l11-6.5z" fill="#fff" />
+        </svg>
+      </span>
       <div className="vertical-actions">
         <button
           aria-label={`作者${item.sender}`}
@@ -503,7 +511,8 @@ function DouyinComments({
   const fallbackTimes = ["刚刚", "2分钟前", "15分钟前", "1小时前", "昨天", "2天前"];
   return (
     <div className="dy-comments">
-      <div className="dy-comments-stage">
+      {/* 评论以上区域：点击任意位置收起评论（视频不受影响） */}
+      <div className="dy-comments-stage" onClick={onClose}>
         <button className="dy-cm-search-btn" aria-label="搜索">
           <Search size={24} />
         </button>

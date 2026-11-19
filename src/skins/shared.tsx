@@ -418,18 +418,29 @@ export function PausingVideo({
   className = "",
   src,
   autoStart = false,
+  tapToggle = false,
+  onDoubleTap,
   ...rest
-}: ComponentProps<"video"> & { autoStart?: boolean }) {
+}: ComponentProps<"video"> & {
+  autoStart?: boolean;
+  /** 单击暂停/继续（双击则交给 onDoubleTap 处理，如抖音点赞） */
+  tapToggle?: boolean;
+  /** 双击回调（抖音：点赞）；提供后双击不再触发 ±10s 快进快退 */
+  onDoubleTap?: () => void;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLSpanElement>(null);
   // HLS 分片播放：静态托管不带 Range 支持，整段 mp4 无法定位，改由 m3u8 + hls.js 按片加载
   const isHls = typeof src === "string" && /\.m3u8(?:$|\?)/.test(src);
   const tapRef = useRef<{ t: number; paused: boolean } | null>(null);
   const hintTimer = useRef<number | null>(null);
+  const tapToggleTimer = useRef<number | null>(null);
+  const burstTimer = useRef<number | null>(null);
   const [hint, setHint] = useState<{
     side: "back" | "forward";
     text: string;
   } | null>(null);
+  const [burst, setBurst] = useState<{ x: number; y: number } | null>(null);
   // 临近视口才初始化 HLS，避免信息流里几十个实例同时拉清单和分片
   const [near, setNear] = useState(false);
   useEffect(() => {
@@ -549,6 +560,8 @@ export function PausingVideo({
   useEffect(
     () => () => {
       if (hintTimer.current) window.clearTimeout(hintTimer.current);
+      if (tapToggleTimer.current) window.clearTimeout(tapToggleTimer.current);
+      if (burstTimer.current) window.clearTimeout(burstTimer.current);
     },
     [],
   );
@@ -557,7 +570,7 @@ export function PausingVideo({
     if (hintTimer.current) window.clearTimeout(hintTimer.current);
     hintTimer.current = window.setTimeout(() => setHint(null), 900);
   };
-  /** 双击左右两侧 ±10 秒；原生单击的播放/暂停保持不动 */
+  /** 双击左右两侧 ±10 秒；抖音模式：单击暂停/继续，双击点赞 */
   const onSeekTap = (e: ReactPointerEvent<HTMLVideoElement>) => {
     const el = ref.current;
     if (!el) return;
@@ -570,12 +583,37 @@ export function PausingVideo({
     const now = Date.now();
     const prev = tapRef.current;
     tapRef.current = { t: now, paused: el.paused };
-    if (!prev || now - prev.t > 320) return;
-    const zone = seekZone(x / Math.max(1, rect.width));
+    if (!prev || now - prev.t > 320) {
+      // 单击暂停/继续：延迟片刻以区分双击点赞
+      if (tapToggle) {
+        if (tapToggleTimer.current) window.clearTimeout(tapToggleTimer.current);
+        tapToggleTimer.current = window.setTimeout(() => {
+          tapToggleTimer.current = null;
+          const v = ref.current;
+          if (!v) return;
+          if (v.paused) void v.play().catch(() => {});
+          else v.pause();
+        }, 280);
+      }
+      return;
+    }
     tapRef.current = null;
-    if (!zone) return;
+    if (tapToggleTimer.current) {
+      window.clearTimeout(tapToggleTimer.current);
+      tapToggleTimer.current = null;
+    }
     e.preventDefault();
     e.stopPropagation();
+    // 双击点赞：红心在指尖绽放，播放状态不变
+    if (onDoubleTap) {
+      setBurst({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      if (burstTimer.current) window.clearTimeout(burstTimer.current);
+      burstTimer.current = window.setTimeout(() => setBurst(null), 850);
+      onDoubleTap();
+      return;
+    }
+    const zone = seekZone(x / Math.max(1, rect.width));
+    if (!zone) return;
     const delta = zone === "forward" ? SEEK_STEP : -SEEK_STEP;
     const target = seekTarget(el.currentTime, el.duration, delta);
     try {
@@ -630,6 +668,23 @@ export function PausingVideo({
           aria-hidden="true"
         >
           {hint.text}
+        </span>
+      )}
+      {burst && (
+        <span
+          className="dy-like-burst"
+          style={{ left: burst.x, top: burst.y }}
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 24 24" width="86" height="86" aria-hidden="true">
+            <path
+              d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+              fill="#fe2c55"
+              stroke="#fe2c55"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
       )}
       <button

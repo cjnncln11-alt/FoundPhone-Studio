@@ -3923,6 +3923,57 @@
 .douyin-ui .vertical-video .fs-btn {
   display: none;
 }
+/* 双击点赞：红心在指尖绽放 */
+.dy-like-burst {
+  position: absolute;
+  z-index: 6;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 14px rgb(0 0 0 / 35%));
+  animation: dy-like-pop 0.82s ease-out forwards;
+}
+@keyframes dy-like-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3) rotate(-12deg);
+    opacity: 0;
+  }
+  22% {
+    transform: translate(-50%, -50%) scale(1.22) rotate(6deg);
+    opacity: 1;
+  }
+  42% {
+    transform: translate(-50%, -50%) scale(0.95) rotate(0deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.18);
+    opacity: 0;
+  }
+}
+/* 暂停时的白色播放按钮提示（对照真实抖音） */
+.dy-play-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 5;
+  width: 62px;
+  height: 62px;
+  margin: -31px 0 0 -31px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 32%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.vertical-video:has(video:paused) .dy-play-badge {
+  display: flex;
+}
 .vertical-video > .catalog-art {
   background: #3b4240;
   color: #ddd;
@@ -4004,6 +4055,11 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  /* 评论打开时点击上方任意位置收起评论 */
+  pointer-events: auto;
+  cursor: pointer;
+}
+.dy-cm-search-btn {
   pointer-events: none;
 }
 .dy-cm-search-btn {
