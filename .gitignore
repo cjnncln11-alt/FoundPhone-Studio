@@ -22,3 +22,6 @@ public/blank-work.json
 *.bundle
 
 .tmp-*.mjs
+
+# 视频源 mp4 不入库（走 HLS 分片）
+public/videos/*.mp4
